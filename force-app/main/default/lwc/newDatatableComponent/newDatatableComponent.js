@@ -1814,6 +1814,33 @@ export default class NewDatatableComponent extends LightningElement {
       event.preventDefault();
   }
 
+  /* 08-01-2024 */
+  // Get the first day of the any month
+  getFirstDayOfMonth(year, month) {
+    return new Date(year, month, 1);
+  }
+  
+  // Get the last day of month
+  getLastDayOfMonth(year, month) {
+    return new Date(year, month + 1, 0);
+  }
+
+  getMonthNumber(monthAbbr) {
+    return ((['January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'].indexOf(monthAbbr)))
+    
+  }
+  
   handlemonthchange(event){
     this.norecordMessagenew = '';
     this.dispatchEvent(
@@ -1843,7 +1870,7 @@ export default class NewDatatableComponent extends LightningElement {
       // this.showlimittoast();
     }else{
       // Get the month number (0-indexed)
-        const date = new Date(`${this.monthfilter} 1`);
+        /*const date = new Date(`${this.monthfilter} 1`);
         var monthNumber = date.getMonth() + 1;
         if(monthNumber < 9){
           monthNumber = '0'+monthNumber;
@@ -1853,9 +1880,17 @@ export default class NewDatatableComponent extends LightningElement {
         var year = new Date().toLocaleDateString('en', {year: '2-digit'})
         // 2023-07-06
         let convertFromDate = monthNumber +'/01/'+ year
-        let convertToDate = monthNumber +'/'+lastDate+'/'+ year
-        this.StartDate = excelFormatDate(convertFromDate);
-        this.EndDate = excelFormatDate(convertToDate);
+        let convertToDate = monthNumber +'/'+lastDate+'/'+ year*/
+        this.remmonth = this.monthfilter;
+        const month = this.getMonthNumber(this.monthfilter);
+        const date = new Date();
+        if(month !== -1){
+          let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), date.getMonth())
+          let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), date.getMonth())
+          this.StartDate = excelFormatDate(convertFromDate);
+          this.EndDate = excelFormatDate(convertToDate);
+        }
+       
         console.log("this.EndDate",this.EndDate)
     }
     if(this.advanceSearchdata == false){
@@ -1995,15 +2030,6 @@ export default class NewDatatableComponent extends LightningElement {
     }
     console.log("driver")
     var makeDate = new Date();
-    if(this.StartDate == null){
-      let monthNumber = makeDate.getMonth();
-      var year = new Date().toLocaleDateString('en', {year: '2-digit'})
-      var lastDate = this.getLastDateOfMonth(monthNumber)
-      let convertFromDate = monthNumber +'/01/'+ year
-      let convertToDate = monthNumber +'/'+lastDate+'/'+ year
-      this.StartDate = excelFormatDate(convertFromDate);
-      this.EndDate = excelFormatDate(convertToDate);
-    }
     
     makeDate.setMonth(makeDate.getMonth()-1);
     let lastmonth = makeDate.toLocaleString('default', { month: 	'long' });
@@ -2019,6 +2045,24 @@ export default class NewDatatableComponent extends LightningElement {
     }else{
       this.remmonth = lastmonth;
     }
+
+    if(this.StartDate == null){
+      /* let monthNumber = makeDate.getMonth();
+       var year = new Date().toLocaleDateString('en', {year: '2-digit'})
+       var lastDate = this.getLastDateOfMonth(monthNumber)
+       let convertFromDate = monthNumber +'/01/'+ year
+       let convertToDate = monthNumber +'/'+lastDate+'/'+ year
+       this.StartDate = excelFormatDate(convertFromDate);
+       this.EndDate = excelFormatDate(convertToDate);*/
+       const month = this.getMonthNumber(this.remmonth);
+       const date = new Date();
+       if(month !== -1){
+         let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), date.getMonth())
+         let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), date.getMonth())
+         this.StartDate = excelFormatDate(convertFromDate);
+         this.EndDate = excelFormatDate(convertToDate);
+       }
+     }
     console.log("driver",this.filterdriver+'---'+this.StartDate+'-----'+this.EndDate+'---'+this.remmonth)
     this.handlefilterbydropdown(this.filterdriver,this.StartDate,this.EndDate, this.OriginName,this.DestinationName,this.ActiveDriver,this.StartMileage,this.EndMileage,this.Status,this.TrackingMethod,this.Tag,this.remmonth,this.highrisk);
  }  
@@ -2056,16 +2100,6 @@ export default class NewDatatableComponent extends LightningElement {
       }
       console.log("this.StartDate",this.Status)
       var makeDate = new Date();
-      if(this.StartDate == null){
-        let monthNumber = makeDate.getMonth();
-        var year = new Date().toLocaleDateString('en', {year: '2-digit'})
-        var lastDate = this.getLastDateOfMonth(monthNumber)
-        let convertFromDate = monthNumber +'/01/'+ year
-        let convertToDate = monthNumber +'/'+lastDate+'/'+ year
-        this.StartDate = excelFormatDate(convertFromDate);
-        this.EndDate = excelFormatDate(convertToDate);
-      }
-     
       makeDate.setMonth(makeDate.getMonth()-1);
       let lastmonth = makeDate.toLocaleString('default', { month: 	'long' });
       console.log("this.monthfilter",this.monthfilter)
@@ -2080,6 +2114,24 @@ export default class NewDatatableComponent extends LightningElement {
       }else{
         this.remmonth = lastmonth;
       }
+
+      if(this.StartDate == null){
+        /* let monthNumber = makeDate.getMonth();
+         var year = new Date().toLocaleDateString('en', {year: '2-digit'})
+         var lastDate = this.getLastDateOfMonth(monthNumber)
+         let convertFromDate = monthNumber +'/01/'+ year
+         let convertToDate = monthNumber +'/'+lastDate+'/'+ year
+         this.StartDate = excelFormatDate(convertFromDate);
+         this.EndDate = excelFormatDate(convertToDate);*/
+         const month = this.getMonthNumber(this.remmonth);
+         const date = new Date();
+         if(month !== -1){
+           let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), date.getMonth())
+           let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), date.getMonth())
+           this.StartDate = excelFormatDate(convertFromDate);
+           this.EndDate = excelFormatDate(convertToDate);
+         }
+       }
       
       console.log("driver",this.filterdriver+'---'+this.StartDate+'-----'+this.EndDate+'---'+this.remmonth)
       this.handlefilterbydropdown(this.idOfDriver,this.StartDate,this.EndDate, this.OriginName,this.DestinationName,this.ActiveDriver,this.StartMileage,this.EndMileage,this.Status,this.TrackingMethod,this.Tag,this.remmonth,this.highrisk);

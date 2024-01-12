@@ -12,6 +12,9 @@ export default class MBurseWelcomeAccount extends LightningElement {
     renderBtnText = 'Go to step 1';
     @api customSetting;
     @api contactId;
+    @api getStatus(){
+        this.template.querySelector('c-m-burse-step').getPacketComplete();
+    }
     proxyToObject(e) {
         return JSON.parse(e)
     }

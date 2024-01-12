@@ -42,8 +42,12 @@ public class EmbeddedSigningController {
           //finding contact details \
           List<Contact> contactList = [Select id,email,Hello_Sign_Request_Id__c FROM contact WHERE Id =: mySourceId AND Role__c  in ('Driver','Driver/Manager','Driver/Admin') limit 1];
           System.debug('contact list -->'+contactList);
-          dfsle__EnvelopeStatus__c SentEnvelope =[Select id ,dfsle__Status__c , dfsle__Contact__r.Name,dfsle__EmailSubject__c From dfsle__EnvelopeStatus__c Where dfsle__DocuSignId__c =: contactList[0].Hello_Sign_Request_Id__c limit 1];
-                        // System.debug('contact list -->'+SentEnvelopeLst);
+          dfsle__EnvelopeStatus__c SentEnvelope= new dfsle__EnvelopeStatus__c() ;
+          if(contactList[0].Hello_Sign_Request_Id__c != null){
+          SentEnvelope =[Select id ,dfsle__Status__c , dfsle__Contact__r.Name,dfsle__EmailSubject__c From dfsle__EnvelopeStatus__c Where dfsle__DocuSignId__c =: contactList[0].Hello_Sign_Request_Id__c limit 1];
+                        
+          }
+          // System.debug('contact list -->'+SentEnvelopeLst);
           // System.debug('list of envelopes'+SentEnvelopeLst);
           if(contactList[0].Hello_Sign_Request_Id__c== null||SentEnvelope.dfsle__Status__c!='Sent'||SentEnvelope.dfsle__Status__c!='Delivered'){
           system.debug('inside null id condition and  the docusign envelope status is '+SentEnvelope.dfsle__Status__c);

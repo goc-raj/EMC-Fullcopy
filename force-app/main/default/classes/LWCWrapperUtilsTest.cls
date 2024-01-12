@@ -17,7 +17,7 @@ public class LWCWrapperUtilsTest {
         Gas_Prices__c gasprice = new Gas_Prices__c();
         gasprice.City__c = 'Atlanta';
         gasprice.Fuel_Price__c = 3;
-        gasprice.Month_Year__c = Date.today().adddays(-12);
+        gasprice.Month_Year__c = Date.today().adddays(-1);
         gasprice.State__c = 'AK';
         insert gasprice;
         

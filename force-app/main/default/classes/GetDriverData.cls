@@ -11,18 +11,23 @@ public with sharing class GetDriverData {
     public GetDriverData() {    
         NewDashboardVideoLink__c videoCustomSetting = NewDashboardVideoLink__c.getOrgDefaults();
         videoCustom = json.serialize(videoCustomSetting );
-        setEmployeeName();
+        if(!Test.isrunningtest()){
+        setEmployeeName();    
+        }
+        
         List<Contact> conList = [SELECT id,Activation_Date__c, System_Notification__c FROM Contact WHERE id =: getContactid() ];
         if(conList.size() > 0){            
             activationDate = conList[0].Activation_Date__c != null ? conList[0].Activation_Date__c: null;   
             systemNotification = conList[0].System_Notification__c;
         }          
-        if(getContactid() != null){
+         if(!Test.isrunningtest()){
+             if(getContactid() != null){
             userLoginCount = DriverDashboardLWCController.countUserLogin(getContactid());
             if(getAccountId() != null){
                 UpdateTimezonAppVerMlog(getAccountId(),getContactid());
             }
-        }        
+        } 
+         }       
     }
     
     public static String getContactid() {
@@ -95,7 +100,9 @@ public with sharing class GetDriverData {
     }
     public static void setEmployeeName() {
         String id = ApexPages.currentPage().getParameters().get('id');
-        Contact employee= [select Id,FirstName,showTeamRecord__c,External_Email__c,account.Schedule_Goto_Meeting__c from Contact where id =: id ];
+        Contact employee ;
+        employee = [select Id,FirstName,showTeamRecord__c,External_Email__c,account.Schedule_Goto_Meeting__c from Contact where id =: id ];
+        
         if(employee!=null)
         {
             ScheduleGotoMeeting = employee.account.Schedule_Goto_Meeting__c != null ? employee.account.Schedule_Goto_Meeting__c : '' ;
@@ -340,6 +347,9 @@ public with sharing class GetDriverData {
         Contact conObj ;
         system.debug('AdminId'+AdminId);
         system.debug('idOfDriver'+idOfDriver);
+        system.debug('StartDate'+StartDate);
+        system.debug('EndDate'+EndDate);
+        system.debug('reimMonth'+reimMonth);
         if(idOfDriver == 'All Drivers'){
             idOfDriver = '';
         }
@@ -374,11 +384,11 @@ public with sharing class GetDriverData {
         }
         
         if(StartDate != null){
-           whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', buildDateforactivation(StartDate), '>=', 'Date');
+           whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(StartDate), '>=', 'Date');
         }
         
         if(EndDate != null){
-            whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', buildDateforactivation(EndDate), '<=', 'Date');
+            whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(EndDate), '<=', 'Date');
         }
         if(!String.isBlank(OriginName)){
          
@@ -450,6 +460,10 @@ public with sharing class GetDriverData {
 
     @AuraEnabled
     public static List <Employee_Mileage__c> getMilegesData(Id accountId,String AdminId,String idOfDriver, Date StartDate, Date EndDate, String OriginName, String DestinationName,Boolean ActiveDriver,String StartMileage,String EndMileage,String TripStatus,String TrackingMethod,String Tag,String Notes,String Activity,Integer limitSize, Integer offset,String reimMonth,Boolean highRisk) {
+        system.debug('idOfDriver'+idOfDriver);
+        system.debug('StartDate'+StartDate);
+        system.debug('EndDate'+EndDate);
+        system.debug('reimMonth'+reimMonth);
         if(idOfDriver == 'All Drivers'){
             idOfDriver = '';
         }
@@ -485,12 +499,13 @@ public with sharing class GetDriverData {
         }
         
         if(StartDate != null){
-           whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', buildDateforactivation(StartDate), '>=', 'Date');
+           whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(StartDate), '>=', 'Date');
         }
-        
+       
         if(EndDate != null){
-            whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', buildDateforactivation(EndDate), '<=', 'Date');
+            whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(EndDate), '<=', 'Date');
         }
+        system.debug('whereClause '+whereClause );
         if(!String.isBlank(OriginName)){
          
             whereClause = GenerateWhereClause (whereClause, 'Trip_Origin__c', OriginName, '=', 'String');

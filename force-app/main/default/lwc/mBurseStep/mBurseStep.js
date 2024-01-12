@@ -24,12 +24,16 @@ export default class MBurseStep extends LightningElement {
      isRegister = false;
     @api account;
     @api cellphone;
+    @api getPacketComplete(){
+        this.isdriverPacketDone = true;
+    }
     getUrlParamValue(url, key) {
         return new URL(url).searchParams.get(key);
     }
     proxyToObject(e) {
         return JSON.parse(e)
     }
+   
     connectedCallback(){
         const idParamValue = this.getUrlParamValue(window.location.href, 'id');
         const aidParamValue = this.getUrlParamValue(window.location.href, 'accid');

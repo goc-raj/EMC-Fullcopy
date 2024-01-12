@@ -103,8 +103,7 @@ export default class MBurseDriverPacket extends LightningElement {
                             ))
                             .then((signingUrl) => {
                                 console.log("Url--", signingUrl);
-                                const packetEvent = new CustomEvent('status', {detail: 'Packet Signing'})
-                                this.dispatchEvent(packetEvent);
+                                sessionStorage.setItem("envelopeId", signingUrl);
                                 window.open(signingUrl, "_self");
                                 this.isSpinner = false;
                                 //window.location.href = signingUrl;

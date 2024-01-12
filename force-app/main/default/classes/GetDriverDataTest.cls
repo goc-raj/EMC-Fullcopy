@@ -78,6 +78,11 @@ public with sharing class GetDriverDataTest {
         
         //GetDriverData.MassSyncTrips(acc.Id,String.valueOf(System.today()-1),String.valueOf(System.today()),monthVal,'Pending','Business');
         GetDriverData.getDriverName(acc.Id,contact2[0].Id,'Manager');
+        GetDriverData.getAccountId();
+        GetDriverData.getContactid();
+        GetDriverData gdd= new  GetDriverData();
+       // GetDriverData.setEmployeeName();
+        
         //GetDriverData.getDriverName(acc.Id,contact3[0].Id,'Admin');
         //GetDriverData.accountMonthList(acc.Id);
         // GetDriverData.highRiskMileages(acc.Id,contact[0].Id,2,2);

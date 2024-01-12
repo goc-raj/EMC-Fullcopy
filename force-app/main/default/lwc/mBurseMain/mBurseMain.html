@@ -10,7 +10,7 @@
         onskip={skipToDriverPacket} day-left={leftDays} onback={backToInsurance}></c-m-burse-upload-declaration>
     <c-m-burse-driver-packet lwc:if={nextDriverPacket} onnavigate={navigateTomLog} contact-id={contactId} driver-meeting={meetingType}
         days={leftDays} email-of-driver={contactEmail} cell-type={cellphoneType}  account-type={accountType} contact-of-driver={contactName}
-        meeting={registerMeeting} schedule={scheduleMeeting} onstatus={trackStatus} onskip={skipTomLogPreview} onback={backToDeclaration}></c-m-burse-driver-packet>
+        meeting={registerMeeting} schedule={scheduleMeeting} onskip={skipTomLogPreview} onback={backToDeclaration}></c-m-burse-driver-packet>
     <c-m-burse-mlog lwc:if={nextmLogPreview} onnavigate={navigateTomLogDownload} onback={backToDriverPacket}
         contact-id={contactId} cell-type={cellphoneType} custom-setting={settings}></c-m-burse-mlog>
     <c-m-burse-download-mlog lwc:if={nextmLogDownload}  onback={backTomLog} first-name={contactFirstName}

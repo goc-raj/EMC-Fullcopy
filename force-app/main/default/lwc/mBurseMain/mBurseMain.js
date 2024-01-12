@@ -87,25 +87,34 @@ export default class MBurseMain extends LightningElement {
   }
 
   CheckStatusPacket(){
-    driverDetails({
-      contactId: this.contactId
-    })
-    .then((data) => {
-      var driverDetailList, object;
-      if (data) {
-        driverDetailList = this.proxyToObject(data);
-        object = driverDetailList[0];
-        //if(object.driverPacketStatus === 'Sent' || object.driverPacketStatus === 'Resent' || object.driverPacketStatus === 'Resent Again'){
-          if(object.driverPacketStatus !== 'Uploaded'){
-            console.log("driver", driverDetailList[0].driverPacketStatus)
-            this.CheckStatusPacket();
-          }
-        //}
-      }
-    })
-    .catch((error) => {
-      console.log('Error', error)
-    })
+    if(sessionStorage.getItem("envelopeId") !== null){
+      driverDetails({
+        contactId: this.contactId
+      })
+      .then((data) => {
+        var driverDetailList, object;
+        if (data) {
+          driverDetailList = this.proxyToObject(data);
+          object = driverDetailList[0];
+          //if(object.driverPacketStatus === 'Sent' || object.driverPacketStatus === 'Resent' || object.driverPacketStatus === 'Resent Again'){
+            if(object.driverPacketStatus !== 'Uploaded'){
+                  console.log("driver", driverDetailList[0].driverPacketStatus )
+                  this.CheckStatusPacket();
+                 // setTimeout(()=>{
+                    //sessionStorage.removeItem("envelopeId");
+                 // }, 100000)
+            }else{
+              sessionStorage.removeItem("envelopeId");
+              this.template.querySelector('c-m-burse-welcome-account').getStatus();
+            }
+          //}
+        }
+      })
+      .catch((error) => {
+        console.log('Error', error)
+      })
+    }
+  
   }
 
   callApex() {
@@ -150,6 +159,11 @@ export default class MBurseMain extends LightningElement {
     const aidParamValue = this.getUrlParamValue(window.location.href, 'accid');
     this.contactId = idParamValue;
     this.accountId = aidParamValue;
+    let embeddedStatus = sessionStorage.getItem("envelopeId")
+    if(embeddedStatus !== null && window.performance.getEntriesByType("navigation")[0].type === 'navigate'){
+      this.CheckStatusPacket();
+    }
+    console.log("envelopeId---", sessionStorage.getItem("envelopeId"));
    // this.callApex();
   }
 

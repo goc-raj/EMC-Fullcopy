@@ -20,6 +20,9 @@ public with sharing class LWCWrapperUtils {
                         reaimMonthList.add(String.valueOf(i)+'-'+year);
                     }          
                 }
+                if(month == 01){
+                    reaimMonthList.add('12-'+String.valueOf(System.today().Year()-1));
+                }
             } else {
                 for(Integer i=1;i<=month;i++) {
                     if(i < 10 ) {

@@ -134,6 +134,13 @@ export default class ReportDetail extends LightningElement {
         console.log("failure");
       });
   }
+
+  // @api
+  // get sdate() {
+  //   console.log('Getter Start Date : ' + this.from_Date);
+  //   return this.from_Date;
+  // }
+
   get lastmonth() {
     var makeDate = new Date();
     console.log("getdate", makeDate.getDate())
@@ -397,14 +404,16 @@ export default class ReportDetail extends LightningElement {
       new CustomEvent("show", { detail: '' })
     );
     console.log("this.reportId", this.reportId)
-    this._accid = this.getUrlParamValue(window.location.href, 'accid')
-    this._adminid = this.getUrlParamValue(window.location.href, 'id')
+    this._accid = this.getUrlParamValue(location.href, 'accid')
+    this._adminid = this.getUrlParamValue(location.href, 'id')
     if (NewEnglandGypsum.includes(this._accid) || SPBS_Account == this._accid) {
       this.concurbtn = true;
     }
     this.getBiweekLIst();
     if (this.reportId != 'TAX123') {
       this.getreport();
+      console.log('Callback Start Date : ' + this.from_Date);
+      console.log('Callback End Date : ' + this.to_Date);
     } else {
       this.anual_tax = true;
       this.dispatchEvent(
@@ -569,7 +578,6 @@ export default class ReportDetail extends LightningElement {
     if (this.template.querySelector('c-user-preview-table')) {
       this.template.querySelector('c-user-preview-table').searchByKey(this.searchkey);
     }
-    console.log("Filtered Search Data in handleChange : " + JSON.stringify(this.filterdataSearch));
     if (this.updatebtn == true) {
       if (event.key == 'Backspace') {
         if (this.searchkey == "") {
@@ -768,7 +776,7 @@ export default class ReportDetail extends LightningElement {
             }
           }
         }
-      })//.data('datepicker').selectDate(new Date(_self2.val()))
+      }).data('datepicker').selectDate(new Date(_self2.val()))
       $btn.on('click', function () {
         console.log('btnon');
         _self2.datepicker({ showEvent: 'none' }).data('datepicker').show();
@@ -1109,8 +1117,8 @@ export default class ReportDetail extends LightningElement {
     } else {
       const currentDate = new Date();
       months = this.monthToNumber(this.lastmonth) + '-' + currentDate.getFullYear();
+      console.log("this.lastmonth", months)
     }
-    console.log("this.lastmonth", months)
 
 
     let managerId;
@@ -1156,7 +1164,7 @@ export default class ReportDetail extends LightningElement {
       .then((result) => {
         this.searchdata = [];
         this.filterdata = JSON.parse(result);
-        console.log("length1", JSON.stringify(this.filterdata));
+        console.log("length1", this.filterdata)
         if (this.filterdata.length > 0) {
           if (this.reportName == 'Employee Roster Report') {
             this.filterdata.forEach(element => {
@@ -1228,8 +1236,8 @@ export default class ReportDetail extends LightningElement {
               }
             })
           }
-          this.keyArray = JSON.parse(JSON.stringify(this.keyArray));
-          console.log("this.keyArray", JSON.stringify(this.keyArray));
+          this.keyArray = JSON.parse(JSON.stringify(this.keyArray))
+          console.log("this.keyArray", this.keyArray)
 
           var temp1 = [];
 
@@ -1257,7 +1265,7 @@ export default class ReportDetail extends LightningElement {
           }, []);
           // Log or use the grouped data
           let objarr = JSON.parse(JSON.stringify(groupedData1));
-          console.log("objarr", JSON.stringify(objarr));
+          console.log("objarr", objarr)
           for (var h = 0; h < objarr.length; h++) {
 
             let finalObj1;
@@ -1269,9 +1277,8 @@ export default class ReportDetail extends LightningElement {
 
           this.searchdata = JSON.parse(JSON.stringify(objarr));
           this.exceldata = JSON.parse(JSON.stringify(objarr));
-          console.log("this.searchdata", JSON.stringify(this.searchdata));
-          this.dynamicBinding(this.searchdata, this.headerdata);
-          console.log("After Databinding this.searchdata", JSON.stringify(this.searchdata));
+          console.log("this.searchdata", this.searchdata)
+          this.dynamicBinding(this.searchdata, this.headerdata)
           // this.filterdatanew = this.searchdata;
           // this.filterdataSearch = this.searchdata;
           setTimeout(() => {
@@ -1394,15 +1401,17 @@ export default class ReportDetail extends LightningElement {
           let str1 = index.split('-')[1];
           let key = index.split('-')[0];
           if (row.hasOwnProperty(key)) {
-            this.keyName = key;
+            const value1 = parseFloat(row[key]) || 0; // Convert to float, default to 0 if not a valid number
+            const value2 = parseFloat(row['Variable Amount']) || 0;
+            console.log('value1 : ' + value1);
+            console.log('value2 : ' + value2);
+            this.totalsum = value1 + value2;
+            row['Total Reimbursement'] = this.totalsum.toLocaleString();
+						this.keyName = key;
             this.keyValue = row[key];
             let finalJson = [];
             finalJson.push({ Id: row.Id, [str1]: this.keyValue })
             this.updatedList.push(finalJson)
-            const value1 = parseFloat(row[key]) || 0; // Convert to float, default to 0 if not a valid number
-            const value2 = parseFloat(row['Variable Amount']) || 0;
-            this.totalsum = value1 + value2;
-            row['Total Reimbursement'] = this.totalsum.toLocaleString();
           }
         })
       }
@@ -1471,15 +1480,13 @@ export default class ReportDetail extends LightningElement {
         this.updatebtn = false;
         if (this.isSearch == true) {
           if (this.searchdata.length > 0) {
-            this.dynamicBinding(this.filterdataSearch, this.headerdata);
-            console.log("FilterDataSearch : " + JSON.stringify(this.filterdataSearch));
+            this.dynamicBinding(this.filterdataSearch, this.headerdata)
             // this.filterdataSearch = this.filterdataSearch.sort((a, b) => b - a);
             this.template.querySelector('c-user-preview-table').refreshTable(this.filterdataSearch);
             this.exceldata = this.filterdataSearch;
             this.filterdatanew = this.filterdataSearch;
           } else {
-            this.dynamicBinding(this.finaldataSearch, this.headerdata);
-            console.log("FinalDataSearch : " + JSON.stringify(this.finaldataSearch));
+            this.dynamicBinding(this.finaldataSearch, this.headerdata)
             // this.finaldataSearch = this.finaldataSearch.sort((a, b) => b - a);
             this.template.querySelector('c-user-preview-table').refreshTable(this.finaldataSearch);
             this.exceldata = this.finaldataSearch;
@@ -1527,7 +1534,6 @@ export default class ReportDetail extends LightningElement {
     let canceldata;
     if (this.isSearch == true) {
       if (this.searchdata.length > 0) {
-        console.log('In filterdatanew');
         this.filterdatanew.forEach((filterDataItem) => {
           filterDataItem.keyFields.forEach((tempKeyItem) => {
             console.log("keyFieldKey", tempKeyItem.key + '----' + this.keyName + '---' + tempKeyItem.value)
@@ -1537,7 +1543,6 @@ export default class ReportDetail extends LightningElement {
           });
         });
       } else {
-        console.log('In loaddata');
         this.loaddata.forEach((filterDataItem) => {
           filterDataItem.keyFields.forEach((tempKeyItem) => {
             console.log("keyFieldKey", tempKeyItem.key + '----' + this.keyName + '---' + tempKeyItem.value)
@@ -1615,37 +1620,57 @@ export default class ReportDetail extends LightningElement {
 
           } else if (showfilter == 'Dates') {
             var currentDate = new Date();
-            var getmonth = currentDate.getMonth()
+            var getmonth = currentDate.getMonth();
             let startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            let enddate = new Date(currentDate.getFullYear(), getmonth, 0)
+            console.log('startDate : ' + startDate);
+            let enddate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+            console.log('endDate : ' + enddate);
             let convertdate;
             let convertmonth;
-            if (startDate.getMonth() < 9) {
-              convertdate = '0' + startDate.getMonth();
-            } else {
-              convertdate = startDate.getMonth();
+            let convertYear;
+            console.log('startDateMonth : '+ startDate.getMonth());
+            console.log('startDateDate : '+ startDate.getDate());
+            console.log('endDateMonth : '+ enddate.getMonth());
+            console.log('endDateDate : '+ enddate.getDate());
+            if(startDate.getMonth() === 0) {
+              convertmonth = '12';
             }
+            else if (startDate.getMonth() < 9) {
+              convertmonth = '0' + startDate.getMonth();
+            } else {
+              convertmonth = startDate.getMonth();
+            }
+            console.log('ConvMonth : ' + convertmonth);
             if (startDate.getDate() < 9) {
-              convertmonth = '0' + startDate.getDate();
+              convertdate = '0' + startDate.getDate();
             } else {
-              convertmonth = startDate.getDate();
+              convertdate = startDate.getDate();
             }
+            console.log('ConvDate : ' + convertdate);
             let getyear = startDate.getYear();
             getyear = getyear.toString();
-            this.from_Date = convertdate + '/' + convertmonth + '/' + getyear.substring(1);
+            console.log('Year : ' + getyear.substring(1));
+            if(startDate.getMonth() === 0) {
+              convertYear = getyear.substring(1) - 1;
+            } else {
+              convertYear = getyear.substring(1);
+            }
+            this.from_Date = convertmonth + '/' + convertdate + '/' + convertYear;
+            console.log('Start Date : ' + this.from_Date);
             let endconvertdate;
             let endconvertmonth;
             if (enddate.getMonth() < 9) {
-              endconvertdate = '0' + (enddate.getMonth() + 1);
+              endconvertmonth = '0' + (enddate.getMonth() + 1);
             } else {
-              endconvertdate = enddate.getMonth() + 1;
+              endconvertmonth = enddate.getMonth() + 1;
             }
             if (enddate.getDate() < 9) {
-              endconvertmonth = '0' + enddate.getDate();
+              endconvertdate = '0' + enddate.getDate();
             } else {
-              endconvertmonth = enddate.getDate();
+              endconvertdate = enddate.getDate();
             }
-            this.to_Date = endconvertdate + '/' + endconvertmonth + '/' + getyear.substring(1);
+            this.to_Date = endconvertmonth + '/' + endconvertdate + '/' + convertYear;
+            console.log('End Date : ' + this.to_Date);
             this.dateRange = true;
             this.monthlyDropdown = false;
             this.weeklyDropdown = false;
@@ -1676,7 +1701,8 @@ export default class ReportDetail extends LightningElement {
         var headerstr = resultdata.Report_Header__c;
         var headerarry = new Array();
         headerarry = headerstr.split(",");
-        this.headerdata = JSON.parse(JSON.stringify(headerarry))
+        this.headerdata = JSON.parse(JSON.stringify(headerarry));
+        console.log('this.headerData : ' + this.headerdata);
 
         var detailstr = resultdata.Report_Soql__c;
         this.reportsoql = resultdata.Report_Soql__c;
@@ -1699,6 +1725,10 @@ export default class ReportDetail extends LightningElement {
                 coltype = 'Integer'
               }
             })
+          }
+
+          if(this.headerdata[i] === 'Deactivated Date') {
+            coltype = 'Date';
           }
 
           if (this.numberArray.length > 0) {
@@ -1873,7 +1903,7 @@ export default class ReportDetail extends LightningElement {
               this.finaldata = JSON.parse(JSON.stringify(objarray))
 
               this.exceldata = JSON.parse(JSON.stringify(objarray));
-              console.log("final data", this.finaldata)
+              console.log("final data : ", JSON.stringify(this.finaldata));
               this.finaldata = this.finaldata.sort((a, b) => b - a);
 
               this.dynamicBinding(this.finaldata, this.headerdata)
