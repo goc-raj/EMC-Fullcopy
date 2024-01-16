@@ -1482,6 +1482,15 @@ export default class ReportDetail extends LightningElement {
           if (this.searchdata.length > 0) {
             this.dynamicBinding(this.filterdataSearch, this.headerdata)
             // this.filterdataSearch = this.filterdataSearch.sort((a, b) => b - a);
+            /* Fixed decimal issue in Fixed Amount field */
+            for (let record of this.filterdataSearch) {
+              for (let keyField of record.keyFields) {
+                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
+                  keyField.value = keyField.value.slice(0, -1);
+                }
+              }
+            }
+            /* Added by Raj */
             this.template.querySelector('c-user-preview-table').refreshTable(this.filterdataSearch);
             this.exceldata = this.filterdataSearch;
             this.filterdatanew = this.filterdataSearch;
@@ -1499,6 +1508,16 @@ export default class ReportDetail extends LightningElement {
         } else {
           if (this.searchdata.length > 0) {
             this.dynamicBinding(this.searchdata, this.headerdata)
+            /* Fixed decimal issue in Fixed Amount field */
+            for (let record of this.searchdata) {
+              for (let keyField of record.keyFields) {
+                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
+                  keyField.value = keyField.value.slice(0, -1);
+                }
+              }
+            }
+            /* Added by Raj */
+            console.log('Search data before refresh table : ' + JSON.stringify(this.searchdata));
             this.template.querySelector('c-user-preview-table').refreshTable(this.searchdata);
             this.exceldata = this.searchdata;
             this.filterdatanew = this.searchdata;
@@ -1509,9 +1528,6 @@ export default class ReportDetail extends LightningElement {
             this.loaddata = this.finaldata;
           }
         }
-
-
-
       })
       .catch(error => {
         console.log("failure", error);
