@@ -1497,6 +1497,15 @@ export default class ReportDetail extends LightningElement {
           } else {
             this.dynamicBinding(this.finaldataSearch, this.headerdata)
             // this.finaldataSearch = this.finaldataSearch.sort((a, b) => b - a);
+            /* Fixed decimal issue in Fixed Amount field */
+            for (let record of this.finaldataSearch) {
+              for (let keyField of record.keyFields) {
+                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
+                  keyField.value = keyField.value.slice(0, -1);
+                }
+              }
+            }
+            /* Added by Raj */
             this.template.querySelector('c-user-preview-table').refreshTable(this.finaldataSearch);
             this.exceldata = this.finaldataSearch;
             this.loaddata = this.finaldataSearch;
@@ -1517,12 +1526,20 @@ export default class ReportDetail extends LightningElement {
               }
             }
             /* Added by Raj */
-            console.log('Search data before refresh table : ' + JSON.stringify(this.searchdata));
             this.template.querySelector('c-user-preview-table').refreshTable(this.searchdata);
             this.exceldata = this.searchdata;
             this.filterdatanew = this.searchdata;
           } else {
             this.dynamicBinding(this.finaldata, this.headerdata)
+            /* Fixed decimal issue in Fixed Amount field */
+            for (let record of this.finaldata) {
+              for (let keyField of record.keyFields) {
+                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
+                  keyField.value = keyField.value.slice(0, -1);
+                }
+              }
+            }
+            /* Added by Raj */
             this.template.querySelector('c-user-preview-table').refreshTable(this.finaldata);
             this.exceldata = this.finaldata;
             this.loaddata = this.finaldata;
