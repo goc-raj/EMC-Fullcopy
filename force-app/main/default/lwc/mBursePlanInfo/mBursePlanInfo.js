@@ -10,6 +10,9 @@ export default class MBursePlanInfo extends LightningElement {
             })
         );
     }
+    logout(){
+        sessionStorage.removeItem("envelopeId");
+    }
     emailSent(event){
         var emailOfContact
         console.log(event.detail.contactEmail, event.detail.accountId)

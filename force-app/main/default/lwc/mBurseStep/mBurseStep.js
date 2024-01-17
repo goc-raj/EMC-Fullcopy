@@ -1,4 +1,4 @@
-import { LightningElement,api } from 'lwc';
+import { LightningElement,api,track } from 'lwc';
 import  emcUrl from '@salesforce/resourceUrl/mBurseCss';
 import  svgFile from '@salesforce/resourceUrl/SvgFiles';
 import driverDetails from  '@salesforce/apex/NewAccountDriverController.getContactDetail';
@@ -22,10 +22,18 @@ export default class MBurseStep extends LightningElement {
     @api isDriverPacketDone;
      isSchedule = false;
      isRegister = false;
+    @track isPacketDone = false;
+    @track packetText = 'Complete';
     @api account;
     @api cellphone;
+    @api getPacketStatus(){
+        this.packetText = 'Pending';
+        this.isPacketDone = true;
+    }
     @api getPacketComplete(){
-        this.isdriverPacketDone = true;
+        this.isPacketDone = true;
+        this.packetText = 'Complete';
+        console.log("Packet called--", this.isPacketDone)
     }
     getUrlParamValue(url, key) {
         return new URL(url).searchParams.get(key);
@@ -50,7 +58,8 @@ export default class MBurseStep extends LightningElement {
                     this.isInsuranceDone = (driverDetailList[0].insuranceStatus === 'Uploaded') ? true  : false;
                     // eslint-disable-next-line @lwc/lwc/no-api-reassignments
                     this.isAppDone = driverDetailList[0].mlogApp;
-                    this.isdriverPacketDone = (driverDetailList[0].driverPacketStatus === 'Uploaded') ? true  : false;
+                    this.isDriverPacketDone = (driverDetailList[0].driverPacketStatus === 'Uploaded') ? true  : false;
+                    this.isPacketDone = this.isDriverPacketDone;
                     this.isSchedule = (driverDetailList[0].driverMeeting === 'Scheduled') ? true : false;
                     this.isRegister = (driverDetailList[0].watchMeetingOnBoarding) ? true : false;
                 }

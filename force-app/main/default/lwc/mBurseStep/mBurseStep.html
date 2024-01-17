@@ -82,12 +82,12 @@
             </template>
         </div>
         <div>
-            <template lwc:if={isdriverPacketDone}>
+            <template lwc:if={isPacketDone}>
                 <div class="step">
                     <div class="plan-info-top">
                         <h2 class="step-count opaque">3</h2>
                         <div class="step-complete">
-                            <div class="complete-text">Complete</div>
+                            <div class="complete-text">{packetText}</div>
                             <div>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="11" height="8"
                                     viewBox="0 0 11 8" fill="none">

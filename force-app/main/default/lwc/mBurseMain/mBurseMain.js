@@ -48,46 +48,28 @@ export default class MBurseMain extends LightningElement {
     listForInfo = array
     cList = this.proxyToObject(listForInfo);
     m = cList[0];
-   
+    const parameter = this.getUrlParamValue(window.location.href, 'event');
     //this.welcomePage = ((m.driverPacketStatus === null && m.insuranceStatus === null) || (m.driverPacketStatus === 'Skip' && m.insuranceStatus === 'Skip') || (m.driverPacketStatus === null  && m.insuranceStatus === 'Skip') || (m.driverPacketStatus === 'Uploaded' && m.insuranceStatus === 'Skip' )) ? true : false;
     this.nextInsurance = (m.watchMeetingOnBoarding) ? ((m.driverPacketStatus === null && m.insuranceStatus === null) || (m.driverPacketStatus !== 'Uploaded' && (m.insuranceStatus === null || m.insuranceStatus === 'Skip')) || (m.driverPacketStatus === null && (m.insuranceStatus === null || m.insuranceStatus === 'Skip')) || (m.driverPacketStatus === 'Uploaded' && (m.insuranceStatus === null || m.insuranceStatus === 'Skip'))) ? true : false : true;
     this.isInsurance = (!m.watchMeetingOnBoarding) ? true : false;
     this.isDeclaration = (!this.isInsurance) ? true : false;
-    this.nextDriverPacket = (m.watchMeetingOnBoarding && m.insuranceStatus === 'Uploaded' && m.driverPacketStatus !== 'Uploaded') ? true : false;
-    this.nextmLogPreview = (m.watchMeetingOnBoarding && m.insuranceStatus === 'Uploaded' && m.driverPacketStatus === 'Uploaded' && m.mlogApp === false) ? true : false;
+    if(sessionStorage.getItem("envelopeId") !== null && parameter !== 'cancel'){
+      this.nextDriverPacket = false
+      this.nextmLogPreview = (m.watchMeetingOnBoarding && m.insuranceStatus === 'Uploaded' && m.mlogApp === false) ? true : false;
+    }else{
+      this.nextDriverPacket = (m.watchMeetingOnBoarding && m.insuranceStatus === 'Uploaded' && m.driverPacketStatus !== 'Uploaded') ? true : false;
+      this.nextmLogPreview = (m.watchMeetingOnBoarding && m.insuranceStatus === 'Uploaded' && m.driverPacketStatus === 'Uploaded' && m.mlogApp === false) ? true : false;
+    }
     this.nextBurseMeeting = (m.insuranceStatus === 'Uploaded' && m.driverPacketStatus === 'Uploaded' && m.mlogApp === true) ? true : false;
     console.log("renderview", this.isInsurance, this.nextInsurance)
   }
 
-  CheckStatus(){
-    driverDetails({
-      contactId: this.contactId
-    })
-    .then((data) => {
-      var driverDetailList, object;
-      if (data) {
-        driverDetailList = this.proxyToObject(data);
-        object = driverDetailList[0];
-        //if(object.driverPacketStatus === 'Sent' || object.driverPacketStatus === 'Resent' || object.driverPacketStatus === 'Resent Again'){
-          if(object.driverPacketStatus !== 'Uploaded'){
-            console.log("driver", driverDetailList[0].driverPacketStatus)
-            this.CheckStatus();
-          }else{
-            console.log("driver", object.insuranceStatus, object.driverPacketStatus, object.mlogApp , object.watchMeetingOnBoarding)
-            if((object.insuranceStatus === 'Uploaded' && object.driverPacketStatus === 'Uploaded' && object.mlogApp === true && object.watchMeetingOnBoarding === true)){
-              location.href = "/app/secur/logout.jsp";
-            }
-          }
-        //}
-      }
-    })
-    .catch((error) => {
-      console.log('Error', error)
-    })
-  }
-
   CheckStatusPacket(){
     if(sessionStorage.getItem("envelopeId") !== null){
+      if(this.template.querySelector('c-m-burse-welcome-account')){
+        this.template.querySelector('c-m-burse-welcome-account').setStatus();
+      }
+     
       driverDetails({
         contactId: this.contactId
       })
@@ -100,9 +82,6 @@ export default class MBurseMain extends LightningElement {
             if(object.driverPacketStatus !== 'Uploaded'){
                   console.log("driver", driverDetailList[0].driverPacketStatus )
                   this.CheckStatusPacket();
-                 // setTimeout(()=>{
-                    //sessionStorage.removeItem("envelopeId");
-                 // }, 100000)
             }else{
               sessionStorage.removeItem("envelopeId");
               this.template.querySelector('c-m-burse-welcome-account').getStatus();
@@ -157,11 +136,16 @@ export default class MBurseMain extends LightningElement {
   connectedCallback() {
     const idParamValue = this.getUrlParamValue(window.location.href, 'id');
     const aidParamValue = this.getUrlParamValue(window.location.href, 'accid');
+    const parameter = this.getUrlParamValue(window.location.href, 'event');
     this.contactId = idParamValue;
     this.accountId = aidParamValue;
     let embeddedStatus = sessionStorage.getItem("envelopeId")
     if(embeddedStatus !== null && window.performance.getEntriesByType("navigation")[0].type === 'navigate'){
-      this.CheckStatusPacket();
+      if(parameter === 'cancel'){
+        return
+      }else{
+        this.CheckStatusPacket();
+      }
     }
     console.log("envelopeId---", sessionStorage.getItem("envelopeId"));
    // this.callApex();
@@ -417,16 +401,6 @@ export default class MBurseMain extends LightningElement {
             // If the promise rejects, we enter this code block
             console.log(error);
         })
-}
-
-trackStatus(event){
-  console.log('status');
-  if(event.detail){
-    if(event.detail === 'Packet Signing'){
-      this.CheckStatusPacket();
-    }
-  }
- // this.CheckStatus();
 }
 
   renderedCallback() {

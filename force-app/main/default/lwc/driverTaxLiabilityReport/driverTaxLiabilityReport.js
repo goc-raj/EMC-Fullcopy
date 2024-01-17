@@ -171,15 +171,44 @@ export default class DriverTaxLiabilityReport extends LightningElement {
                 }
                 return acc;
             });
-  
+
+            // To adjust numbers with comma
+            this.QuarterWiseDetail.forEach(acc => {
+                if(acc.Mileages >= 1000) {
+                    acc.Mileages = acc.Mileages.toLocaleString();
+                }
+                if(acc.Reimbursements >= 1000) {
+                    acc.Reimbursements = acc.Reimbursements.toLocaleString();
+                }
+                if(acc.MaxIRSrate >= 1000) {
+                    acc.MaxIRSrate = acc.MaxIRSrate.toLocaleString();
+                }
+            })
+            // Added by Raj
+
             this.AnualTaxLiability = true;
             //To get the Detail for Annual Tax Detail
             let totalrem = this.JsonToStringifyData(this.DriverTaxDetail[5]);
             this.totalrem = this.JsonToParseData(totalrem);
+            // To adjust numbers with comma
+            if (parseFloat(this.totalrem) >= 1000) {
+                this.totalrem = parseFloat(this.totalrem).toLocaleString();
+            }
+            // Added by Raj
             let maxallounce = this.JsonToStringifyData(this.DriverTaxDetail[6]);
             this.maxallounce = this.JsonToParseData(maxallounce);
+            // To adjust numbers with comma
+            if (parseFloat(this.maxallounce) >= 1000) {
+                this.maxallounce =  parseFloat(this.maxallounce).toLocaleString();
+            }
+            // Added by Raj
             let taxliablity = this.JsonToStringifyData(this.DriverTaxDetail[7]);
             this.taxliablity = this.JsonToParseData(taxliablity);
+            // To adjust numbers with comma
+            if (parseFloat(this.taxliablity) >= 1000) {
+                this.taxliablity =  parseFloat(this.taxliablity).toLocaleString();
+            }
+            // Added by Raj
 
             //To get the detail for create Detail File
             let DownloadExcel = this.JsonToStringifyData(this.DriverTaxDetail[3]);
@@ -220,7 +249,8 @@ export default class DriverTaxLiabilityReport extends LightningElement {
             //to get the header of Summary.xlsx
             this.summaryheader = [ "Driver Name","Email","Employee Id",
                             "Total Reimbursement","IRS allowable","Imputed Income"];
-            arrOfSummry.push({DriverName:this.value, Email:this.emailid,  
+            let dName = this.JsonToStringifyData(this.DriverTaxDetail[0]);
+            arrOfSummry.push({DriverName:this.JsonToParseData(dName), Email:this.emailid,  
                         EmployeeId:this.empid, 
                         TotalReimbursement:'$'+this.sumoftotalraim, IRSAllowable:'$'+this.sumofiRSallowable ,
                         ImputedIncome:'$'+this.sumofimputedincome});

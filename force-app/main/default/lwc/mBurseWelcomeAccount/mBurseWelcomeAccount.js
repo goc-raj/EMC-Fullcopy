@@ -12,8 +12,14 @@ export default class MBurseWelcomeAccount extends LightningElement {
     renderBtnText = 'Go to step 1';
     @api customSetting;
     @api contactId;
+    @api setStatus(){
+        this.template.querySelector('c-m-burse-step').getPacketStatus();
+        this.refreshView('Pending');
+    }
+
     @api getStatus(){
         this.template.querySelector('c-m-burse-step').getPacketComplete();
+        this.refreshView();
     }
     proxyToObject(e) {
         return JSON.parse(e)
@@ -39,6 +45,27 @@ export default class MBurseWelcomeAccount extends LightningElement {
                 }).then().catch(error=>{
                     console.log("error updateContactDetail", JSON.parse(JSON.stringify(error)))
                 })
+            }
+        }).catch((error) => {
+                console.log("error driverDetails", JSON.parse(JSON.stringify(error)))
+        })
+    }
+
+    refreshView(m){
+        driverDetails({
+            contactId: this.contactId
+        })
+        .then((data) => {
+            let dataList, view = m;
+            if (data) {
+                dataList = this.proxyToObject(data);
+                if(view){
+                    this.renderBtnText = (!dataList[0].watchMeetingOnBoarding) ? 'Go to step 1' : (dataList[0].insuranceStatus !== 'Uploaded') ? 'Go to step 2' : (!dataList[0].mlogApp) ? 'Go to step 4' : this.renderBtnText
+                }else{
+                    this.renderBtnText = (!dataList[0].watchMeetingOnBoarding) ? 'Go to step 1' : (dataList[0].insuranceStatus !== 'Uploaded') ? 'Go to step 2' : (dataList[0].driverPacketStatus !== 'Uploaded')
+                    ? 'Go to step 3' : (!dataList[0].mlogApp) ? 'Go to step 4' : this.renderBtnText
+                }
+            
             }
         }).catch((error) => {
                 console.log("error driverDetails", JSON.parse(JSON.stringify(error)))
