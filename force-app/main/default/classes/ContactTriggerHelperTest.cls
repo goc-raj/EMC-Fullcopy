@@ -8,8 +8,8 @@ public class ContactTriggerHelperTest {
         TrueDialog_Keys__c tdKeys = TestDataFactory.createTrueDialog(true);
         IRS_Mileage_Rate__c irsRateObj = TestDataFactory.createIRSRate(true,0);
         List<Address__c> objAddress = TestDataFactory.createAddress(true, 10,12345);
-        Vehicle_URL_Mapping__c vehicleType = TestDataFactory.createVehicleData(false, 3);
-        vehicleType.Name = '2020 Full-Size Sedan';
+        Vehicle_URL_Mapping__c vehicleType = TestDataFactory.createVehicleData(false, 0);
+        vehicleType.Name = String.valueof(System.today().year())+ ' Full-Size Sedan';
         vehicleType.vehicle__c = 'Full-Size Sedan';
         Insert vehicleType;
         
@@ -31,7 +31,7 @@ public class ContactTriggerHelperTest {
             Contact contactObj = TestDataFactory.createCICDContact(true,accountObj.Id);
             acc = TestDataFactory.createAccount(true,'Test',true);
             acc.Pay_Period_Start_Date__c = System.today().addDays(-100);
-            acc.Vehicle_Types__c = '2020 Full-Size Sedan';
+            acc.Vehicle_Types__c = String.valueof(System.today().year())+ ' Full-Size Sedan';
             update acc;
             accIdList.add(acc.Id);           
             vehValue = TestDataFactory.createVehicleValue(true, acc.Id, vehicleType.Id);
@@ -39,7 +39,7 @@ public class ContactTriggerHelperTest {
             con1List = TestDataFactory.createDriverContact(false, acc.Id, 'Driver', vehicleType.Name, 'paras.patel',  1);
             con1List[0].compliancestatus__c = 'No – Vehicle Age';
             con1List[0].Deactivated_Date__c = system.today();
-            con1List[0].Vehicle_Type__c = '2020 Full-Size Sedan';
+            con1List[0].Vehicle_Type__c = String.valueof(System.today().year())+ ' Full-Size Sedan';
             con1List[0].Vehicle_Value__c = vehValue[0].Value__c;
             con1List[0].Activation_Date__c = system.today();
             con1List[0].Email = 'Testn@mailinator.com';

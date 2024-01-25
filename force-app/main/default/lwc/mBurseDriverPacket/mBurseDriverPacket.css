@@ -357,6 +357,12 @@
   margin-right: 8.5rem;
 }
 
+.driverPacket {
+  color: #000000 !important;
+  font-family: 'Proxima Nova Bold' !important;
+  text-decoration: underline !important;
+}
+
 .mr-left{
   margin-left: 8.5rem;
 }

@@ -939,7 +939,7 @@ New Contact is created at that time we have to update plan parameter section's f
                                                AND Trip_Status__c = 'Not Approved Yet'
                                                AND Activity__c = 'Business'
                                                AND EmployeeReimbursement__r.Status__c = 'Pending' ]){
-                                                mil.EMP_Mileage__c = (mil.EMP_Mileage__c != null) ? mil.EMP_Mileage__c * 1.609 :mil.EMP_Mileage__c;
+                                                mil.EMP_Mileage__c = (mil.EMP_Mileage__c != null) ? mil.EMP_Mileage__c * 1.609129171 :mil.EMP_Mileage__c;
                                                    updateMilList.add(mil);
                                            }
             system.debug('conOldMap==' + conOldMap);

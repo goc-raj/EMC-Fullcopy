@@ -356,7 +356,7 @@ public with sharing class BiWeeklyWrapperUtils {
                 reimbursement.month = currentReimbursement.Month__c;
                 reimbursement.threshold = String.valueOf(currentReimbursement.Contact__r.Monthly_Mileage_Limit__c);
                 reimbursement.totalMileages = (currentReimbursement.Total_Pending__c!=null) ? String.valueOf(currentReimbursement.Total_Pending__c) : '0';
-                reimbursement.approvedMileages = String.valueOf(currentReimbursement.Total_Approved__c);             
+                reimbursement.TotalReimMileages = (currentReimbursement.Total_Mileage__c != null) ? String.valueOf(currentReimbursement.Total_Mileage__c) : '0';                reimbursement.approvedMileages = String.valueOf(currentReimbursement.Total_Approved__c);             
                 reimbursement.isSelected = false;
                 reimbursement.isSelectedEmailReminder = false;
                 List<String> reimbursementIdList = new List<String>();

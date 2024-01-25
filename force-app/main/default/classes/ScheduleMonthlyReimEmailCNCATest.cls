@@ -42,6 +42,7 @@ public with sharing class ScheduleMonthlyReimEmailCNCATest {
         con1.Role__c = 'Manager';
         con1.compliancestatus__c = 'Yes';
         con1.Vehicle_Type__c = '2019 Full-Size Sedan';
+        con1.Activation_Date__c=system.today();
         insert con1;  
 
         Contact conList = new Contact();
@@ -65,6 +66,7 @@ public with sharing class ScheduleMonthlyReimEmailCNCATest {
         conList.Vehicle_Type__c = '2019 Full-Size Sedan';
         conList.Role__c = 'Driver';
         conList.Monthly_Mileage_Limit__c = 100;
+        conList.Activation_Date__c=system.today();
         insert conList;
 
         Gas_Prices__c gasprice = new Gas_Prices__c();

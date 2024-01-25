@@ -34,6 +34,7 @@ export default class MBurseMain extends LightningElement {
   cellphoneType;
   _handler;
   @api settings;
+  @api dayLeft;
   getUrlParamValue(url, key) {
     return new URL(url).searchParams.get(key);
   }
@@ -362,6 +363,10 @@ export default class MBurseMain extends LightningElement {
     //this.skipUpload = true;
     this.uploadVal = false;
     this.packetSent = false;
+    let embeddedStatus = sessionStorage.getItem("envelopeId")
+    if(embeddedStatus === 'Packet send'){
+        this.CheckStatusPacket();
+    }
     driverDetails({
         contactId: this.contactId
       })
@@ -409,6 +414,14 @@ export default class MBurseMain extends LightningElement {
     // }
     // this.renderInitialized = true;
     this.callApex();
+  }
+
+  showToast(event) {
+    this.dispatchEvent(
+      new CustomEvent("toast", {
+        detail: event.detail
+      })
+    );
   }
 
   handleLink(event) {

@@ -1,3 +1,11 @@
+/**
+ * @Author: GetonCRM Solutions LLP
+ * @Description: this class represent methods related to dashboard in Mdash including the profile manger/driver, admin/driver ,Admin, Manager.
+ * @Modification logs
+ * ========================================================================================================================
+ * @Date:  4th june 2019 | Natavar Ghodasara
+ *
+ */
 public class ManagerDashboardController 
 {
     public static String totalmileages{get;set;}
@@ -15,10 +23,10 @@ public class ManagerDashboardController
     public static String getAccountid()
     {
         if(ApexPages.currentPage().getParameters().containsKey('accid') && String.isNotBlank(ApexPages.currentPage().getParameters().get('accid')))        {
-           return ApexPages.currentPage().getParameters().get('accid');
+            return ApexPages.currentPage().getParameters().get('accid');
         } else {
             return '';
-        } 
+        }
     }
     public static String getContactid()
     {
@@ -26,7 +34,7 @@ public class ManagerDashboardController
            return ApexPages.currentPage().getParameters().get('id');
         } else {
             return '';
-        } 
+        }
     }
      public static String getShowTeam() {
         if (ApexPages.currentPage().getParameters().containsKey('showteam') && String.isNotBlank(ApexPages.currentPage().getParameters().get('showteam'))) {
@@ -45,31 +53,30 @@ public class ManagerDashboardController
             return null;
         }
     }
-    
+
+
+  // This method is sending the details of user whoes id is passed in the argument
+
+
     @AuraEnabled(cacheable=true)
-    public static String getDriverDetails(String managerId) {            
+    public static String getDriverDetails(String managerId) {
         List<contact> driverDataList = new List<contact>();
-        driverDataList = [SELECT id,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s, 
-                            MailingCity, MailingState, MailingPostalCode,Map_Country__c,
-                            Name, FirstName,External_Email__c,Driver_Type__c,Driving_States__c,Expiration_Date__c,Compliance_Mileage__c, Vehicle_Value__c,Time_Attandance__c,
-                                        Fixed_Amount__c, compliancestatus__c, Car_Image__c,Notification_Message__c,Contact_Picture__c,Insurance_Plan__c,Plan_Years__c,Vehicle_Type__c,Insurance_Upload_Date__c,Insurance_Attachment_Id__c,
-                                        Total_Approved_Mileages__c,Total_Annual_Reimbursement__c,Total_reimbursment__c,Monthly_Reimbursement__c, Biweek_Reimbursement__c, Bi_Week_Fixed_Amount__c, Monthly_Mileage_Rate__c,Maintenance__c,Tires__c, Insurance_Rate__c, License_Ragistration__c, Taxes__c,
-                                        Depreciation__c, Total_Monthly_Costs__c, Business_Use__c,Fixed_Cost_Adjustment__c,Vehicle_Value_Check__c,Mileage_Meet__c,Vehicle_Age__c,Insurance__c, Notification_Date__c, Account.Bodily_Injury__c, Account.Uninsured_Motorist__c, 
-                                        Account.Property_Damage__c, Account.Comprehensive__c, Account.Collision__c,Account.Umbrella_Coverage__c,Triplog_UserID__c,Reimbursement_Type__c,Reimbursement_Frequency__c, Account.Reimbursement_Type__c,Account.Bi_Weekly_Pay_Period__c,MobilePhone,Activation_Date__c,Account.CreatedDate
-                             from Contact where Id =: managerId];
-      return JSON.serialize(driverDataList ).unescapeHtml4();
+        
+        driverDataList = [SELECT id,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,MailingCity, MailingState, MailingPostalCode,Map_Country__c,Name, FirstName,External_Email__c,Driver_Type__c,Driving_States__c,Expiration_Date__c,Compliance_Mileage__c, Vehicle_Value__c,Time_Attandance__c,Fixed_Amount__c, compliancestatus__c, Car_Image__c,Notification_Message__c,Contact_Picture__c,Insurance_Plan__c,Plan_Years__c,Vehicle_Type__c,Insurance_Upload_Date__c,Insurance_Attachment_Id__c,Total_Approved_Mileages__c,Total_Annual_Reimbursement__c,Total_reimbursment__c,Monthly_Reimbursement__c, Biweek_Reimbursement__c, Bi_Week_Fixed_Amount__c, Monthly_Mileage_Rate__c,Maintenance__c,Tires__c, Insurance_Rate__c, License_Ragistration__c, Taxes__c,Depreciation__c, Total_Monthly_Costs__c, Business_Use__c,Fixed_Cost_Adjustment__c,Vehicle_Value_Check__c,Mileage_Meet__c,Vehicle_Age__c,Insurance__c, Notification_Date__c, Account.Bodily_Injury__c, Account.Uninsured_Motorist__c, Account.Property_Damage__c, Account.Comprehensive__c, Account.Collision__c,Account.Umbrella_Coverage__c,Triplog_UserID__c,Reimbursement_Type__c,Reimbursement_Frequency__c, Account.Reimbursement_Type__c,Account.Bi_Weekly_Pay_Period__c,MobilePhone,Activation_Date__c,Account.CreatedDate from Contact where Id =: managerId];
+        
+        return JSON.serialize(driverDataList ).unescapeHtml4();
     }
-    
+    //This method is sending the value of vehicle from vehicle value object for the account whoes id is passed in the argument
     @AuraEnabled(cacheable=true)
-    public static String getVehicleValue(String accountId) { 
+    public static String getVehicleValue(String accountId) {
         List<Vehicle_Value__c> vehicleValueList = new List<Vehicle_Value__c>();
         vehicleValueList = [SELECT id,Vehicle_URL_Mapping__r.vehicle__c,Value__c, Plan_Years__c from Vehicle_Value__c where Account__c =: accountId];
         return JSON.serialize(vehicleValueList ).unescapeHtml4();
     }
     public static string getChartData(String did,Boolean showTeam,String accid,String role)
-    {       
+    {
         return WrapperUtils.getChartData(did,showTeam,accid,role);
-    }   
+    }
     public static void setEmployeeName() {
         Contact employee= [select Id,Name,showTeamRecord__c,External_Email__c from Contact where id =: getContactid()];
         if(employee!=null) {
@@ -79,12 +86,12 @@ public class ManagerDashboardController
         } else {
             nameofEmployee='';
             emailofEmployee ='';
-            showMyTeam = false;            
-        }       
+            showMyTeam = false;
+        }
     }
     @RemoteAction
     public static string getAllDriversLastMonthUpdatedReimbursements(String did,String accid,boolean showTeamRecord,String role)
-    {   
+    {
         if(BiWeeklyWrapperUtils.checkBiweekAccount(accid) == true){
             return String.escapeSingleQuotes(BiWeeklyWrapperUtils.getLastMonthReimbursements(did,accid,boolean.valueOf(showTeamRecord),role));
         } else {
@@ -94,7 +101,7 @@ public class ManagerDashboardController
     
     @AuraEnabled
     public static string getAllDriversLastMonthReimbursements(String accountId,String contactId,Boolean showTeam,String role)
-    {             
+    {
         if(BiWeeklyWrapperUtils.checkBiweekAccount(accountId) == true){
             return String.escapeSingleQuotes(BiWeeklyWrapperUtils.getLastMonthReimbursements(contactId,accountId,showTeam,role));
         } else {
@@ -102,12 +109,12 @@ public class ManagerDashboardController
         }
     }
     public static string getAllDriversLastMonthUpdatedUnapprovedReimburseclone(String did,String accid,boolean showTeamRecord,String role) 
-    {   
+    {
         if(BiWeeklyWrapperUtils.checkBiweekAccount(accid) == true){
             return String.escapeSingleQuotes(BiWeeklyWrapperUtils.getUnapprovedReimbursements(did,accid,showTeamRecord,role));
         } else {
             return String.escapeSingleQuotes(WrapperUtils.getUnapprovedReimbursements(did,accid,showTeamRecord,role));
-        } 
+        }
     }
     
     @RemoteAction
@@ -121,7 +128,7 @@ public class ManagerDashboardController
     }
     @AuraEnabled
     public static string getAllDriversLastMonthUnapprovedReimbursementsclone(String accountId,String contactId,Boolean showTeam,String role)
-    {   
+    {
         if(BiWeeklyWrapperUtils.checkBiweekAccount(accountId) == true){
             return String.escapeSingleQuotes(BiWeeklyWrapperUtils.getUnapprovedReimbursements(contactId,accountId,showTeam,role));
         } else {
@@ -133,15 +140,13 @@ public class ManagerDashboardController
     public static AsyncApexJob approveReimbursements(String reimbursements,String did,String accid,String showTeamRecord,String updateThreshold)
     {
         List<String> updatedlist = new List<String>();
-        if(updateThreshold!=null && String.isNotBlank(updateThreshold))
-        {            
+        if(updateThreshold!=null && String.isNotBlank(updateThreshold)){
             WrapperUtils.updateContactThresholdLimit(updateThreshold);
-        }       
+        }
         ApproveReimBatch tripBtc = new ApproveReimBatch(reimbursements,BiWeeklyWrapperUtils.checkBiweekAccount(accid));
         ID batchprocessid = Database.executeBatch(tripBtc,1);
-        AsyncApexJob aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors 
-                    FROM AsyncApexJob WHERE ID =: batchprocessid ];
-        return aaj;      
+        AsyncApexJob aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors FROM AsyncApexJob WHERE ID =: batchprocessid ];
+        return aaj;
     }
     @AuraEnabled
     public static List<String> UpdatedReimList(String did,String accid,String showTeamRecord,String role){
@@ -153,10 +158,9 @@ public class ManagerDashboardController
     
     @AuraEnabled
     public static String CheckBatchStatus(ID batchprocessid){
-        AsyncApexJob aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors 
-                    FROM AsyncApexJob WHERE ID =: batchprocessid ];        
+        AsyncApexJob aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors FROM AsyncApexJob WHERE ID =: batchprocessid ];
         if(aaj.Status == 'Failed'){
-            return aaj.Status+'='+aaj.ExtendedStatus; 
+            return aaj.Status+'='+aaj.ExtendedStatus;
         }
         return aaj.Status;
     }
@@ -167,18 +171,17 @@ public class ManagerDashboardController
         AsyncApexJob aaj;
         List<String> updatedlist = new List<String>();
         if(mileages!=null)
-        {            
+        {
             ApproveReimBatch tripBtc = new ApproveReimBatch(mileages,BiWeeklyWrapperUtils.checkBiweekAccount(accid));
-             ID batchprocessid = Database.executeBatch(tripBtc,1);
-             aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors 
-                                     FROM AsyncApexJob WHERE ID =: batchprocessid ];
+            ID batchprocessid = Database.executeBatch(tripBtc,1);
+            aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors FROM AsyncApexJob WHERE ID =: batchprocessid ];
         }
         return aaj;
- }       
+}
     
     @AuraEnabled
     public static String approveMileages(String checked,String selected,String unapprove,String name,String emailaddress)
-    {        
+    {
         return WrapperUtils.approveMileagesForAdminDash(checked,selected,unapprove,name,emailaddress);
     }
 
@@ -195,81 +198,70 @@ public class ManagerDashboardController
     @AuraEnabled(cacheable=true)
     public static object totalNoofDriverforManager(String managerId) {
         AggregateResult[] groupedResults = [select COUNT(id) totalDriver from contact where Deactivated_Date__c = null and Manager__c =:  managerId];
-        Object totalNoOfDriver = groupedResults[0].get('totalDriver');   
+        Object totalNoOfDriver = groupedResults[0].get('totalDriver');
         return totalNoOfDriver;
     }
-   
+    
     @AuraEnabled(cacheable=true)
     public static  string onboardingStatus(String managerId,String accountId,String role) {
-            map<String, Decimal>  onBoardingMap = new map<String, Decimal>();
-            List<Contact> conList = new List<Contact>();
-            Decimal packetCount = 0;
-            Decimal insuranceCount = 0;
-            Decimal packetandInsCount = 0;
-            Decimal osStatusCount = 0;
-            Decimal totalDriver = 0;
-            Decimal completedCompStatus = 0;
-            Decimal notCompletedCompStatus = 0;
+        map<String, Decimal>  onBoardingMap = new map<String, Decimal>();
+        List<Contact> conList = new List<Contact>();
+        Decimal packetCount = 0;
+        Decimal insuranceCount = 0;
+        Decimal packetandInsCount = 0;
+        Decimal osStatusCount = 0;
+        Decimal totalDriver = 0;
+        Decimal completedCompStatus = 0;
+        Decimal notCompletedCompStatus = 0;
 
-            if(role=='Admin'){
-                conList = [SELECT id,Packet__c,Insurance_Attachment_Id__c,compliancestatus__c 
-                           FROM contact
-                           WHERE Deactivated_Date__c = null
-                           AND (Role__c != 'Admin' AND  Role__c != 'Manager')
-                           AND Accountid =: accountId];
-            } else if(role=='Manager'){
-                conList = [select id,Packet__c,Insurance_Attachment_Id__c,compliancestatus__c from contact 
-                            where Deactivated_Date__c = null
-                            AND (Role__c != 'Admin' AND  Role__c != 'Manager') 
-                            AND(Manager__c =: managerId 
-                            OR (Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))];
+        if(role=='Admin'){
+            conList = [SELECT id,Packet__c,Insurance_Attachment_Id__c,compliancestatus__c  FROM contact WHERE Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager') AND Accountid =: accountId];
+        } else if(role=='Manager'){
+            conList = [select id,Packet__c,Insurance_Attachment_Id__c,compliancestatus__c FROM contact WHERE Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager') AND(Manager__c =: managerId OR (Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))];
+        }
+        
+        for(contact con : conList){
+            totalDriver++;
+            if(con.Packet__c != 'Completed' && con.Insurance_Attachment_Id__c != null){
+                packetCount++;
             }
-            
-            for(contact con : conList){
-                totalDriver++;
-                if(con.Packet__c != 'Completed' && con.Insurance_Attachment_Id__c != null){
-                    packetCount++;
-                }
-                Decimal onBordPercentage = ((packetCount*100)/totalDriver);
-                onBoardingMap.put('missingpacket', onBordPercentage);
+            Decimal onBordPercentage = ((packetCount*100)/totalDriver);
+            onBoardingMap.put('missingpacket', onBordPercentage);
                 
-                if(con.Packet__c == 'Completed' && con.Insurance_Attachment_Id__c == null){
-                    insuranceCount++;
-                }
-                Decimal insurancePercentage = (insuranceCount*100)/totalDriver;
-                onBoardingMap.put('missingInsurance', insurancePercentage);
+            if(con.Packet__c == 'Completed' && con.Insurance_Attachment_Id__c == null){
+                insuranceCount++;
+            }
+            Decimal insurancePercentage = (insuranceCount*100)/totalDriver;
+            onBoardingMap.put('missingInsurance', insurancePercentage);
                 
-                if(con.Packet__c != 'Completed' && con.Insurance_Attachment_Id__c == null){
-                    packetandInsCount++;
-                }
+            if(con.Packet__c != 'Completed' && con.Insurance_Attachment_Id__c == null){
+                packetandInsCount++;
+            }
                 
-                Decimal missingpacinsurancePercentage = (packetandInsCount*100)/totalDriver;
-                onBoardingMap.put('missingPacketandmissingInsurance', missingpacinsurancePercentage);
+            Decimal missingpacinsurancePercentage = (packetandInsCount*100)/totalDriver;
+            onBoardingMap.put('missingPacketandmissingInsurance', missingpacinsurancePercentage);
                 
-                if(con.Packet__c == 'Completed' && con.Insurance_Attachment_Id__c != null){
-                    osStatusCount++;
-                }
+            if(con.Packet__c == 'Completed' && con.Insurance_Attachment_Id__c != null){
+                osStatusCount++;
+            }
                 
-                Decimal completePercentage = (osStatusCount*100)/totalDriver;
-                onBoardingMap.put('Complete', completePercentage);
+            Decimal completePercentage = (osStatusCount*100)/totalDriver;
+            onBoardingMap.put('Complete', completePercentage);
 
-                if(con.compliancestatus__c == 'Yes'){
-                    completedCompStatus++;
-                }
+            if(con.compliancestatus__c == 'Yes'){
+                completedCompStatus++;
+            }
                 
-                Decimal completeCompPercentage = ((completedCompStatus*100)/totalDriver).setScale(1);
-                onBoardingMap.put('Compliant', completeCompPercentage);
+            Decimal completeCompPercentage = ((completedCompStatus*100)/totalDriver).setScale(1);
+            onBoardingMap.put('Compliant', completeCompPercentage);
     
-                if(con.compliancestatus__c != 'Yes'){
-                    notCompletedCompStatus++;
-                }
-                
-                Decimal notCompleteCompPercentage = ((notCompletedCompStatus*100)/totalDriver).setScale(1);
-                onBoardingMap.put('NonCompliant', notCompleteCompPercentage);
+            if(con.compliancestatus__c != 'Yes'){
+                notCompletedCompStatus++;
             }
+                
+            Decimal notCompleteCompPercentage = ((notCompletedCompStatus*100)/totalDriver).setScale(1);
+            onBoardingMap.put('NonCompliant', notCompleteCompPercentage);
+        }
         return json.serialize(onBoardingMap);
     }
     
@@ -277,60 +269,49 @@ public class ManagerDashboardController
     public Static String insuranceReport(String managerId,String accountId,String role){
         map<String , Integer>  InsuranceMap = new map<String, Integer>();
         List<Contact> conList = new List<Contact>();
-            Integer meetingMinimumCount = 0;
-            Integer insuranceCardCount = 0;
-            Integer underMinimumCount = 0;
-            Integer expiredInsCount = 0;
-         Integer yesCount = 0;
-         Integer noExpirationDateCount = 0;
-         
-         if(role=='Admin'){
-            conList = [SELECT id,Insurance__c,Packet__c  
-                       FROM contact 
-                       WHERE Deactivated_Date__c = null 
-                       AND (Role__c != 'Admin' AND  Role__c != 'Manager')
-                       AND Accountid =: accountId];
-         } else if(role=='Manager'){
-            conList = [select id,Insurance__c,Packet__c  from contact 
-                          where Deactivated_Date__c = null
-                            AND (Role__c != 'Admin' AND  Role__c != 'Manager')
-                            AND(Manager__c =: managerId 
-                            OR (Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))];
-         }
-            for(contact con : conList){
-                if(con.Insurance__c == 'Not Meeting Plan Minimum'){
-                    meetingMinimumCount++;
-                }
-                InsuranceMap.put('NotMeetingMinimum', meetingMinimumCount);
-                
-                if(con.Insurance__c == 'Insurance Card' ){
-                    insuranceCardCount++;
-                }
-                InsuranceMap.put('InsuranceCard', insuranceCardCount);
-                // Not Submitted value should be change as once client gives the confirmation of picklist field value change.
-                if(con.Insurance__c == 'Not Submitted'){
-                    underMinimumCount++;
-                }
-                InsuranceMap.put('NotSubmitted', underMinimumCount);
-                
-                if(con.Insurance__c == 'Expired'){
-                    expiredInsCount++;
-                }
-                InsuranceMap.put('ExpiredInsurance', expiredInsCount);
-                
-                 if(con.Insurance__c == 'Yes'){
-                    yesCount++;
-                }
-                InsuranceMap.put('Yes', yesCount);
-                
-                 if(con.Insurance__c == 'No Expiration Date'){
-                    noExpirationDateCount++;
-                }
-                InsuranceMap.put('noExpirationDate', noExpirationDateCount);
+        Integer meetingMinimumCount = 0;
+        Integer insuranceCardCount = 0;
+        Integer underMinimumCount = 0;
+        Integer expiredInsCount = 0;
+        Integer yesCount = 0;
+        Integer noExpirationDateCount = 0;
+        
+        if(role=='Admin'){
+            conList = [SELECT id,Insurance__c,Packet__c  FROM contact WHERE Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager')AND Accountid =: accountId];
+        } else if(role=='Manager'){
+            conList = [SELECT id,Insurance__c,Packet__c  FROM contact WHERE Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager') AND(Manager__c =: managerId OR (Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))];
+        }
+        for(contact con : conList){
+            if(con.Insurance__c == 'Not Meeting Plan Minimum'){
+                meetingMinimumCount++;
             }
+            InsuranceMap.put('NotMeetingMinimum', meetingMinimumCount);
+            
+            if(con.Insurance__c == 'Insurance Card' ){
+                insuranceCardCount++;
+            }
+            InsuranceMap.put('InsuranceCard', insuranceCardCount);
+            // Not Submitted value should be change as once client gives the confirmation of picklist field value change.
+            if(con.Insurance__c == 'Not Submitted'){
+                underMinimumCount++;
+            }
+            InsuranceMap.put('NotSubmitted', underMinimumCount);
+
+            if(con.Insurance__c == 'Expired'){
+                expiredInsCount++;
+            }
+            InsuranceMap.put('ExpiredInsurance', expiredInsCount);
+            
+            if(con.Insurance__c == 'Yes'){
+                yesCount++;
+            }
+            InsuranceMap.put('Yes', yesCount);
+            
+            if(con.Insurance__c == 'No Expiration Date'){
+                noExpirationDateCount++;
+            }
+            InsuranceMap.put('noExpirationDate', noExpirationDateCount);
+        }
         return json.serialize(InsuranceMap);
     }
 
@@ -340,42 +321,24 @@ public class ManagerDashboardController
         List<Contact> contactList = new List<Contact>();
         
         if(showTeam == true && role=='Manager' || showTeam == false && role=='Admin') {
-            contactList = [SELECT Id, Name,Fixed_Amount__c, Activation_Date__c, Half_Fixed_Amount__c,Email,Reimbursement_Frequency__c 
-                                FROM Contact 
-                                WHERE (Manager__c =: managerId 
-                                    OR (Manager__r.Manager__c =: managerId)
-                                    OR (Manager__r.Manager__r.Manager__c =: managerId)
-                                    OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId)
-                                    OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))
-                                    AND Role__c != 'Admin' AND Role__c != 'Manager' AND  Deactivated_Date__c = null Order by Name asc];
+            contactList = [SELECT Id, Name,Fixed_Amount__c, Activation_Date__c, Half_Fixed_Amount__c,Email,Reimbursement_Frequency__c FROM Contact WHERE (Manager__c =: managerId OR (Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId)) AND Role__c != 'Admin' AND Role__c != 'Manager' AND  Deactivated_Date__c = null Order by Name asc];
         } else if(showTeam == false && role=='Manager') {
-            contactList = [SELECT Id, Name,Fixed_Amount__c, Activation_Date__c, Half_Fixed_Amount__c,Email,Reimbursement_Frequency__c 
-                                FROM Contact 
-                                WHERE Manager__c =: managerId
-                                AND Role__c != 'Admin' AND Role__c != 'Manager' AND  Deactivated_Date__c = null Order by Name asc];
+            contactList = [SELECT Id, Name,Fixed_Amount__c, Activation_Date__c, Half_Fixed_Amount__c,Email,Reimbursement_Frequency__c  FROM Contact  WHERE Manager__c =: managerId AND Role__c != 'Admin' AND Role__c != 'Manager' AND  Deactivated_Date__c = null Order by Name asc];
         } else if(showTeam == true && role=='Admin'){
-            contactList = [SELECT Id, Name,Fixed_Amount__c, Activation_Date__c, Half_Fixed_Amount__c,Email,Reimbursement_Frequency__c 
-                                FROM Contact 
-                                WHERE Accountid =: accountId
-                                AND Role__c != 'Admin' AND Role__c != 'Manager' AND  Deactivated_Date__c = null Order by Name asc];
+            contactList = [SELECT Id, Name,Fixed_Amount__c, Activation_Date__c, Half_Fixed_Amount__c,Email,Reimbursement_Frequency__c FROM Contact WHERE Accountid =: accountId AND Role__c != 'Admin' AND Role__c != 'Manager' AND  Deactivated_Date__c = null Order by Name asc];
         }
 
         for(Contact conList : contactList){
-                ContactWrapper conWrap = new ContactWrapper(); 
-                conWrap.id = conList.Id;
-                conWrap.name = conList.Name;
-                conWrap.activationDate = conList.Activation_Date__c;
-               // if(conList.Reimbursement_Frequency__c == 'Monthly Reimbursement'){
-                    conWrap.fixedamount = conList.Fixed_Amount__c != null ? conList.Fixed_Amount__c : 0.00;
-                /*} else {
-                    conWrap.fixedamount = conList.Half_Fixed_Amount__c!= null ? conList.Half_Fixed_Amount__c : 0.00;
-                }*/
- 
-                conWrap.email = conList.Email;
-                conWrapList.add(conWrap);
-            }
-            String wrapjson = JSON.serialize(conWrapList);
-            return wrapjson;
+            ContactWrapper conWrap = new ContactWrapper();
+            conWrap.id = conList.Id;
+            conWrap.name = conList.Name;
+            conWrap.activationDate = conList.Activation_Date__c;
+            conWrap.fixedamount = conList.Fixed_Amount__c != null ? conList.Fixed_Amount__c : 0.00;
+            conWrap.email = conList.Email;
+            conWrapList.add(conWrap);
+        }
+        String wrapjson = JSON.serialize(conWrapList);
+        return wrapjson;
     }
 
     @AuraEnabled
@@ -401,19 +364,19 @@ public class ManagerDashboardController
         if(highMileage){
             query += ' AND Total_Mileage__c > 0 ';
             query += ' ORDER BY Total_Mileage__c desc ';
-        }else{   
+        }else{
             query += ' AND High_Risk_Total_Mileages__c > 0 ';
-            query += ' ORDER BY High_Risk_Total_Mileages__c desc';   
+            query += ' ORDER BY High_Risk_Total_Mileages__c desc';
         }
         List<Employee_Reimbursement__c> reimDetail = new List<Employee_Reimbursement__c>();
         try {
-            reimDetail = Database.query(query); 
+            reimDetail = Database.query(query);
         } catch(System.QueryException qe) {
             System.debug(qe.getMessage());
         }
 
         for(Employee_Reimbursement__c currentReimbursement : reimDetail) {
-            ContactWrapperForMileage conWrap = new ContactWrapperForMileage(); 
+            ContactWrapperForMileage conWrap = new ContactWrapperForMileage();
                 conWrap.id = currentReimbursement.Contact_Id__c;
                 conWrap.name = currentReimbursement.Contact_Id__r.Name;
                 conWrap.mileage = highMileage == true ? currentReimbursement.Total_Mileage__c : currentReimbursement.High_Risk_Total_Mileages__c;
@@ -422,46 +385,35 @@ public class ManagerDashboardController
         if(conWrapList.size() > 0){
             String wrapjson = JSON.serialize(conWrapList);
             return wrapjson;
-        }
-        else {
+        } else{
             return 'No Trips Found More than 250 miles for this contact';
         }
     }
 
-    @AuraEnabled    
-    public static String getNotificationMessageList(String conId,Integer year,String month){  
-        return LWCWrapperUtils.getNotificationMessageList(conId,year,month);       
-    }   
+    @AuraEnabled
+    public static String getNotificationMessageList(String conId,Integer year,String month){
+        return LWCWrapperUtils.getNotificationMessageList(conId,year,month);
+    }
     
-    @AuraEnabled    
-    public static string updateNotificationMessage(String msgId,Integer year,String month){         
-        return LWCWrapperUtils.updateNotificationMessage(msgId,year,month);        
-    }   
+    @AuraEnabled
+    public static string updateNotificationMessage(String msgId,Integer year,String month){
+        return LWCWrapperUtils.updateNotificationMessage(msgId,year,month);
+    }
 
-    @AuraEnabled    
-    public static string reimbursementForHighMileageOrRisk(String managerId,String accountId,String month,boolean showteam,boolean highMileage,String role){         
-        return LWCWrapperUtils.reimbursementForHighMileageOrRisk(managerId,accountId,month,showteam,highMileage,role);  
-    }   
+    @AuraEnabled
+    public static string reimbursementForHighMileageOrRisk(String managerId,String accountId,String month,boolean showteam,boolean highMileage,String role){
+        return LWCWrapperUtils.reimbursementForHighMileageOrRisk(managerId,accountId,month,showteam,highMileage,role);
+    }
 
     @AuraEnabled(cacheable=true)
     public static String managerContactData(String managerId,String accountId,String role){
         List<contact> driverDataList = new List<contact>();
         if(role=='Admin'){
-            driverDataList = [SELECT id,Name,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,Fixed_Amount__c, 
-                            MailingCity, MailingState,Map_Country__c, MailingPostalCode,Reimbursement_Frequency__c,Half_Fixed_Amount__c
-                            from Contact 
-                            WHERE Accountid =: accountId and Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager')];
+            driverDataList = [SELECT id,Name,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,Fixed_Amount__c,MailingCity, MailingState,Map_Country__c, MailingPostalCode,Reimbursement_Frequency__c,Half_Fixed_Amount__c FROM Contact WHERE Accountid =: accountId and Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager')];
         } else if(role=='Manager'){
-            driverDataList = [SELECT id,Name,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,Fixed_Amount__c, 
-                            MailingCity, MailingState,Map_Country__c, MailingPostalCode,Reimbursement_Frequency__c,Half_Fixed_Amount__c
-                            from Contact 
-                            WHERE (Manager__c =: managerId 
-                            OR (Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId)) AND Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager')];
-        }       
-         return JSON.serialize(driverDataList ).unescapeHtml4();
+            driverDataList = [SELECT id,Name,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,Fixed_Amount__c, MailingCity, MailingState,Map_Country__c, MailingPostalCode,Reimbursement_Frequency__c,Half_Fixed_Amount__c from Contact  WHERE (Manager__c =: managerId  OR (Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId)) AND Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager')];
+        }
+        return JSON.serialize(driverDataList ).unescapeHtml4();
     }
 
     @AuraEnabled
@@ -505,12 +457,12 @@ public class ManagerDashboardController
         List<String> reimIds = new List<String>();
         reimIds = (List<String>) System.JSON.deserialize(reimbursements, List<String>.class);
         try {
-            if(!reimIds.isempty()){            
+            if(!reimIds.isempty()){
                 delete [select id  from Employee_Mileage__c where EmployeeReimbursement__c IN :reimIds and Trip_Status__c = 'Not Approved Yet' and Trip_Id__c != null];
             }
-        } catch(DmlException e) { 
+        } catch(DmlException e) {
             return e.getMessage();
-        }        
+        }
         return 'Success';
     }
     
@@ -524,30 +476,6 @@ public class ManagerDashboardController
     
     @AuraEnabled
     public static String loginRedirection(String contactId){
-        Contact  contactObj = new Contact ();
-        contactObj = [SELECT id,Check_OnBoarding__c,
-                            Role__c,
-                            showTeamRecord__c, 
-                            AccountId, 
-                            Insurance_Attachment_Id__c, 
-                            Driver_Type__c, 
-                            Driver_Packet_Status__c, 
-                            Insurance_Declaration_Status__c,
-                            Plan_Preview__c,
-                            Mburse_Dashboard__c,  
-                            Watch_Meeting__c
-                        FROM Contact
-                        WHERE Id =: contactId];
-        if(contactObj != null ){
-            
-            String pageRef;
-            if(contactObj.Role__c == StaticValues.ROLE_DRIVERMANAGER){
-            
-            } else if(contactObj.Role__c == StaticValues.roleAdminDriver){
-            
-            }
-            
-        } 
         return 'success';
     }
     
@@ -557,14 +485,7 @@ public class ManagerDashboardController
         if(role=='Admin'){
             conList = [select id,Name,Email,compliancestatus__c,isActive__c from contact where Deactivated_Date__c = null and Accountid =: accountId and Role__c != 'Admin' and Role__c != 'Manager'];
         } else if(role=='Manager'){
-            conList = [select id,Name,Email,compliancestatus__c,isActive__c from contact 
-                       where Deactivated_Date__c = null
-                       AND (Role__c != 'Admin' AND  Role__c != 'Manager')
-                       AND(Manager__c =: managerId 
-                           OR (Manager__r.Manager__c =: managerId)
-                           OR (Manager__r.Manager__r.Manager__c =: managerId)
-                           OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId)
-                           OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))];
+            conList = [select id,Name,Email,compliancestatus__c,isActive__c from contact  where Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager') AND(Manager__c =: managerId  OR (Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))];
         }
         string conListJson = JSON.serialize(conList);
         return conListJson;
@@ -574,16 +495,9 @@ public class ManagerDashboardController
     Public Static String onboardRptDownloadtData (String managerId,String accountId,String role){
         List<Contact> conList = new List<Contact>();
         if(role == 'Admin'){
-            conList = [select Name,Expiration_Date__c,Email,Onboarding_Status__c,Insurance__c,Hello_Sign_Status__c,Hello_Sign_Admin_Status__c,Schedule_Driver_Meeting__c,Activation_Date__c,isActive__c from contact where Deactivated_Date__c = null and Accountid =: accountId and Role__c != 'Admin' and Role__c != 'Manager'];
+            conList = [SELECT Name,Expiration_Date__c,Email,Onboarding_Status__c,Insurance__c,Hello_Sign_Status__c,Hello_Sign_Admin_Status__c,Schedule_Driver_Meeting__c,Activation_Date__c,isActive__c FROM contact WHERE Deactivated_Date__c = null and Accountid =: accountId and Role__c != 'Admin' and Role__c != 'Manager'];
         } else if(role=='Manager'){
-            conList = [select Name,Expiration_Date__c,Email,Onboarding_Status__c,Insurance__c,Hello_Sign_Status__c,Hello_Sign_Admin_Status__c,Schedule_Driver_Meeting__c,Activation_Date__c,isActive__c from contact  
-                       where Deactivated_Date__c = null
-                       AND (Role__c != 'Admin' AND  Role__c != 'Manager')
-                       AND(Manager__c =: managerId 
-                           OR (Manager__r.Manager__c =: managerId)
-                           OR (Manager__r.Manager__r.Manager__c =: managerId)
-                           OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId)
-                           OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))];
+            conList = [SELECT Name,Expiration_Date__c,Email,Onboarding_Status__c,Insurance__c,Hello_Sign_Status__c,Hello_Sign_Admin_Status__c,Schedule_Driver_Meeting__c,Activation_Date__c,isActive__c FROM contact WHERE Deactivated_Date__c = null AND (Role__c != 'Admin' AND  Role__c != 'Manager') AND(Manager__c =: managerId OR (Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId))];
         }
         string conListJson = JSON.serialize(conList);
         return conListJson;
@@ -599,7 +513,6 @@ public class ManagerDashboardController
             Integer numberOfDays = Date.daysInMonth(Integer.Valueof(reim.Year__c), Integer.Valueof(reim.Reimbursement_Month__c));
             Date lastDayOfMonth = Date.newInstance(Integer.Valueof(reim.Year__c), Integer.Valueof(reim.Reimbursement_Month__c), numberOfDays);
             Date firstDayOfMonth = Date.newInstance(Integer.Valueof(reim.Year__c), Integer.Valueof(reim.Reimbursement_Month__c), 1);
-          
             string startDate1 = String.valueOf(firstDayOfMonth);
             string endDate1 = String.valueOf(lastDayOfMonth);
             ReimbursementWrapper reimWrap = new ReimbursementWrapper();
@@ -614,12 +527,11 @@ public class ManagerDashboardController
             reimWrap.accountapi = reim.Contact_Id__r.Account.Triplog_API__c;
             reimWrap.biWeekValue = biWeekVal;
             wrapList.add(reimWrap);
-            //GetTripCalloutforCommute.GetTripCalloutForCommuteMileage(reim.id, reim.Contact_Id__r.External_Email__c, reim.Contact_Id__c, startDate1, endDate1, String.valueOf(reim.Fuel_Price__c), String.valueOf(reim.MPG__c), String.valueOf(reim.Maintenance_and_Tires__c), reim.Contact_Id__r.Account.Triplog_API__c,'U',false, 'Business',biWeekVal,null);
-        }        
-        return Json.serialize(wrapList);        
+        }
+        return Json.serialize(wrapList);
     }
     
-    Public class ReimbursementWrapper{ 
+    Public class ReimbursementWrapper{
         public String reimbursementId;
         public String contactEmail;
         public String contactId;
@@ -648,5 +560,4 @@ public class ManagerDashboardController
         public String name {get;set;}
         public Decimal mileage{get;set;}
     }
-    
 }

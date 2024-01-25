@@ -216,6 +216,18 @@ export default class ManagerUserProfile extends LightningElement {
     super();
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
+
+  modifyView(data){
+    for(var i = 0; i < data.length; i++){
+      if(data[i].totalMileages > '0.00'){
+        data[i].isMileage = true
+      }else{
+        data[i].isMileage = false
+      }
+    }
+
+    return data
+  }
   
 
   connectedCallback() {
@@ -236,6 +248,7 @@ export default class ManagerUserProfile extends LightningElement {
           this.driverUnapproveList.length > 0 ? true : false;
         console.log("driver--", JSON.stringify(this.driverUnapproveList));
         if (this.driverUnapproveList) {
+          this.driverUnapproveList = this.modifyView(this.driverUnapproveList);
           this.driverVisibleList =
             this.driverUnapproveList.length > 7
               ? this.driverUnapproveList.slice(0, 7)

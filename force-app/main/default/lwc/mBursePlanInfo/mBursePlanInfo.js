@@ -10,6 +10,13 @@ export default class MBursePlanInfo extends LightningElement {
             })
         );
     }
+    showToast(event) {
+        this.dispatchEvent(
+        new CustomEvent("toast", {
+            detail: event.detail
+        })
+        );
+    }
     logout(){
         sessionStorage.removeItem("envelopeId");
     }

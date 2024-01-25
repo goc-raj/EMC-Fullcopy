@@ -225,6 +225,9 @@ public with sharing class NewAccountDriverController {
         // HelloSignIntegrationHandler.sendSignatureRequestForDriver(newUserEmailSet);
         // return getContactDetail(conId);
         DocuSignStatusTriggerHandler.handleOrderComplete(ConId);
+        List<Contact> employee= [select Id,Document_Sent_Date__c from Contact where id =: conId ];
+        employee[0].Document_Sent_Date__c=System.today();
+        update employee;
             return 'Success' ;
         }
         catch(Exception e){

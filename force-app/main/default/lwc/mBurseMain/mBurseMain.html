@@ -1,6 +1,6 @@
 <template>
     <c-m-burse-welcome-account lwc:if={welcomePage} onnavigate={navigateToInsurance} contact-id={contactId} account-type={accountType}
-        cellphone-type={cellphoneType} custom-setting={settings}></c-m-burse-welcome-account>
+        cellphone-type={cellphoneType} custom-setting={settings} ontoast={showToast} day-left={leftDays}></c-m-burse-welcome-account>
     <c-m-burse-welcome-insurance contact-id={contactId} welcome-insurance={isInsurance}
         insurance-declaration={isDeclaration} lwc:if={nextInsurance} onnextskip={renderView} onnavigate={navigateToDeclaration}
         day-left={leftDays} onnext={nextView} onskip={skipToDriverPacket} onback={backToWelcome} driver-meeting-url={scheduleMeeting} custom-setting={settings}></c-m-burse-welcome-insurance>

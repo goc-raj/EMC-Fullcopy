@@ -1796,7 +1796,7 @@ export default class ReportDetail extends LightningElement {
             console.log("data", result)
 
             let data = JSON.parse(result)
-            console.log("data", data)
+            console.log("data", JSON.stringify(data));
             if (this.DriverManager == 'Manager') {
               this.detaildata = JSON.parse(JSON.parse(data[1]));
               this.originalData = JSON.parse(JSON.parse(data[1]));

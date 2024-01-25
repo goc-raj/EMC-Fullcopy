@@ -16,10 +16,13 @@
                                             onclick={navigateToFlag}>{list.name}</a>-->
                                     </td>
                                     <td class="mileage">
-                                        <lightning-formatted-number value={list.totalMileages}
-                                            maximum-fraction-digits="2">
-                                        </lightning-formatted-number>
-                                        &nbsp; miles
+                                        <template lwc:if={list.isMileage}>
+                                            <lightning-formatted-number value={list.totalMileages} maximum-fraction-digits="2">
+                                            </lightning-formatted-number>
+                                            &nbsp; miles
+                                        </template>
+                                        <template lwc:else>
+                                        </template>
                                     </td>
                                 </tr>
                             </template>

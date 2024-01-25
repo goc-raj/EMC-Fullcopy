@@ -23,16 +23,16 @@ export default class MBurseStep extends LightningElement {
      isSchedule = false;
      isRegister = false;
     @track isPacketDone = false;
-    @track packetText = 'Complete';
+    @track completeProcess = true;
     @api account;
     @api cellphone;
     @api getPacketStatus(){
-        this.packetText = 'Pending';
+        this.completeProcess = false;
         this.isPacketDone = true;
     }
     @api getPacketComplete(){
         this.isPacketDone = true;
-        this.packetText = 'Complete';
+        this.completeProcess = true;
         console.log("Packet called--", this.isPacketDone)
     }
     getUrlParamValue(url, key) {
@@ -58,8 +58,9 @@ export default class MBurseStep extends LightningElement {
                     this.isInsuranceDone = (driverDetailList[0].insuranceStatus === 'Uploaded') ? true  : false;
                     // eslint-disable-next-line @lwc/lwc/no-api-reassignments
                     this.isAppDone = driverDetailList[0].mlogApp;
-                    this.isDriverPacketDone = (driverDetailList[0].driverPacketStatus === 'Uploaded') ? true  : false;
+                    this.isDriverPacketDone = (driverDetailList[0].driverPacketStatus === 'Uploaded' || driverDetailList[0].driverPacketStatus === 'Sent') ? true  :  false;
                     this.isPacketDone = this.isDriverPacketDone;
+                    this.completeProcess = (driverDetailList[0].driverPacketStatus === 'Uploaded') ? true : false;
                     this.isSchedule = (driverDetailList[0].driverMeeting === 'Scheduled') ? true : false;
                     this.isRegister = (driverDetailList[0].watchMeetingOnBoarding) ? true : false;
                 }

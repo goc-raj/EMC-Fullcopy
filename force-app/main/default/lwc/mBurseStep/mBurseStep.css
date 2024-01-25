@@ -128,6 +128,9 @@
     text-align: center;
 }
 
+.panel > div {
+    min-height: 290px;
+}
 .donut.multi{
     border-bottom-color: #979fd0;
 }
@@ -239,6 +242,20 @@
     gap: 3px;
     border-radius: 100px;
     background: #00AFE8;
+    position: absolute;
+    top: 17px;
+    right: 15px;
+}
+
+.step-complete-pending{
+    display: flex;
+    width: 79px;
+    padding: 1px 6px;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    border-radius: 100px;
+    background: rgb(235, 188, 54);
     position: absolute;
     top: 17px;
     right: 15px;

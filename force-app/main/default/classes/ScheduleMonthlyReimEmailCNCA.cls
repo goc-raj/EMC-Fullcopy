@@ -13,18 +13,17 @@ public class ScheduleMonthlyReimEmailCNCA implements schedulable {
     }
     public void sendexcelfile(){
         String lastMonth = Utils.fetchMonths(1, 0)[0];
-        reimbursementList = [SELECT Month__c,Contact_Id_Employee_ID__c,
-                                    Contact_Id_Name__c,Contact_Id_External_Email__c,
-                                    Monthly_Total_Reimbursement__c 
+        reimbursementList = [SELECT Month__c,Contact_Id_Employee_ID__c,Contact_Id_Name__c,Contact_Id_External_Email__c,
+                                    Monthly_Total_Reimbursement__c ,Fixed_Amount__c,Total_Monthly_Approved_Variable__c
                             FROM Employee_Reimbursement__c 
                             WHERE Contact_Id_Deactivated_Date__c = null 
                                 and Month__c =: lastMonth
                                 and Contact_Id__r.Account.Name =: System.label.CNCA_Account];
 
-        string header ='Month'+'\t'+'EmployeeID'+'\t'+ 'Name'+'\t'+'E-mail'+'\t'+'Total Monthly Reimbursement'+' \n';
+        string header ='Month'+'\t'+'EmployeeID'+'\t'+ 'Name'+'\t'+'E-mail'+'\t'+'Fixed Amount'+'\t'+'Variable Amount'+'\t'+'Total Monthly Reimbursement'+' \n';
         String finalstr = header;
         for(Employee_Reimbursement__c obj : reimbursementList){
-            String Recordstring = obj.Month__c+'\t'+obj.Contact_Id_Employee_ID__c+'\t'+obj.Contact_Id_Name__c+'\t'+obj.Contact_Id_External_Email__c+'\t'+obj.Monthly_Total_Reimbursement__c+'\n';
+            String Recordstring = obj.Month__c+'\t'+obj.Contact_Id_Employee_ID__c+'\t'+obj.Contact_Id_Name__c+'\t'+obj.Contact_Id_External_Email__c+'\t'+obj.Fixed_Amount__c+'\t'+obj.Total_Monthly_Approved_Variable__c+'\t'+obj.Monthly_Total_Reimbursement__c+'\n';
             finalstr = finalstr + Recordstring;
         }
         EmailTemplate templateId = [SELECT Id, Subject,HtmlValue, body FROM EmailTemplate WHERE developerName = 'Monthly_Reimbursement_Report' Limit 1];

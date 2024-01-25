@@ -689,7 +689,7 @@ export default class UserPreviewTable extends LightningElement {
     }
 
     @api defaultSort(column, type, sortDirect) {
-        console.log("default", column, type, sortDirect);
+        console.log("default", column, type, sortDirect, this.sortedColumn);
         let colName = column ? column : undefined;
         let colType = type ? type : undefined;
         // eslint-disable-next-line vars-on-top
@@ -725,6 +725,8 @@ export default class UserPreviewTable extends LightningElement {
             return a > b ? 1 * isReverse : -1 * isReverse;
 
         });
+        console.log("default direction", this.sortedDirection);
+
         //this.sortedData = this.pagedData
         if (!this.search) {
             this.previousIcon = this.sortedDirection
@@ -1043,6 +1045,7 @@ export default class UserPreviewTable extends LightningElement {
             }
 
             if (this.isDefaultSort) {
+                this.sortedColumn = this.colname
                 this.defaultSort(this.colname, this.coltype, this.sortorder)
             }
         }

@@ -16,6 +16,7 @@ public with sharing class EmployeeMileagesForCalculation {
     public String totalMileages {get;set;}
     public List<EmployeeMileages> mileagesList {get;set;}
     public String approvedMileages {get;set;}
+    public String TotalReimMileages {get;set;}
     public String status {get;set;}
 //  public String approvedDate {get;set;}   
     public Boolean isSelected {get;set;}
@@ -31,6 +32,7 @@ public with sharing class EmployeeMileagesForCalculation {
     public Double totalHighRiskMileages {get;set;}
     public Double highRiskTotalApproved {get;set;}
     public Double highRiskTotalRejected {get;set;}
+    public Double highRiskTotalPending {get;set;}
     public String originalReimbursementid {get;set;}
     public boolean highRiskMileage{get; set;}
     

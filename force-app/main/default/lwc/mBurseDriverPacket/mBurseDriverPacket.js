@@ -69,6 +69,7 @@ export default class MBurseDriverPacket extends LightningElement {
             })
             .then((result) => {
                 console.log("Packet received --", result);
+                sessionStorage.setItem("envelopeId", "Packet send");
                     this.dispatchEvent(new CustomEvent("status",{detail: 'Packet'}));
                     contactList[0].driverPacketStatus = (contactList[0].driverPacketStatus === null) ? "Sent" :
                         (contactList[0].driverPacketStatus === "Sent") ? "Resent" : (contactList[0].driverPacketStatus === "Resent") ? "Resent Again" : (contactList[0].driverPacketStatus === "Skip") ? "Sent" : "Resent Again"

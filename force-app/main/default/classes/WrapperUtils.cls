@@ -1838,7 +1838,7 @@ public Static String getAllReimbursements(String year,String did,String accid) {
         if(showteam!=null && showteam == true && (role=='Admin' || role == StaticValues.roleAdminDriver)) {
             employeeReimbursementList =[SELECT id, Name, Month__c, Total_Rejected__c, Approved_Date__c, Contact_Id__r.Accountid,
                                         Contact_Id__r.Manager__r.Name, Contact_Id__c, Contact_Id__r.name, Contact_Id__r.Monthly_Mileage_Limit__c, 
-                                        Total_Approved__c, Total_Mileage__c, Status__c, Total_Variable_Rate__c, Total_Pending__c,
+                                        Total_Approved__c, Total_Mileage__c, Status__c, Total_Variable_Rate__c, Total_Pending__c,High_Risk_Total_Pending__c,
                                         Total_Approved_Pending_Mileage__c, Reimbursement_Approval__c,Mileage_Approver__c,Contact_Id__r.Manager__r.External_Email__c,Mileage_Lock_Date__c,High_Risk_Total_Mileages__c,High_Risk_Total_Rejected__c,High_Risk_Total_Approved__c,
                                         Contact_Id__r.External_Email__c,Contact_Id__r.Account.Triplog_API__c,Contact_Email__c,Fuel_Price__c, MPG__c, Maintenance_and_Tires__c,Contact_Id__r.Reimbursement_Frequency__c
                                         FROM Employee_Reimbursement__c 
@@ -1850,7 +1850,7 @@ public Static String getAllReimbursements(String year,String did,String accid) {
         else if(showteam!=null && showteam == false && (role=='Admin' || role == StaticValues.roleAdminDriver)) { // || role == 'Admin/Driver' 
             employeeReimbursementList =[SELECT id, Name, Month__c, Total_Rejected__c, Approved_Date__c, Contact_Id__r.Accountid, Contact_Id__c,
                                         Contact_Id__r.Manager__r.Name, Contact_Id__r.name, Contact_Id__r.Monthly_Mileage_Limit__c, 
-                                        Total_Approved__c, Total_Mileage__c, Status__c, Total_Approved_Pending_Mileage__c, 
+                                        Total_Approved__c, Total_Mileage__c, Status__c, Total_Approved_Pending_Mileage__c,High_Risk_Total_Pending__c, 
                                         Total_Variable_Rate__c, Total_Pending__c, Reimbursement_Approval__c, Mileage_Approver__c, Contact_Id__r.Manager__r.External_Email__c,Mileage_Lock_Date__c,High_Risk_Total_Mileages__c,High_Risk_Total_Rejected__c,High_Risk_Total_Approved__c,
                                         Contact_Id__r.External_Email__c,Contact_Id__r.Account.Triplog_API__c,Contact_Email__c,Fuel_Price__c, MPG__c, Maintenance_and_Tires__c,Contact_Id__r.Reimbursement_Frequency__c
                                         FROM Employee_Reimbursement__c 
@@ -1869,7 +1869,7 @@ public Static String getAllReimbursements(String year,String did,String accid) {
         else if(showteam!=null && showteam == true && (role=='Manager' || role=='Driver/Manager')) {
             employeeReimbursementList =[SELECT id, Name, Month__c, Total_Rejected__c, Approved_Date__c, Contact_Id__r.Accountid, 
                                         Contact_Id__c, Contact_Id__r.name, Contact_Id__r.Manager__r.Name, Contact_Id__r.Monthly_Mileage_Limit__c, 
-                                        Total_Approved__c, Total_Mileage__c, Status__c,Total_Approved_Pending_Mileage__c, 
+                                        Total_Approved__c, Total_Mileage__c, Status__c,Total_Approved_Pending_Mileage__c,High_Risk_Total_Pending__c, 
                                         Total_Variable_Rate__c, Total_Pending__c, Reimbursement_Approval__c, Mileage_Approver__c, Contact_Id__r.Manager__r.External_Email__c,Mileage_Lock_Date__c,High_Risk_Total_Mileages__c,High_Risk_Total_Rejected__c,High_Risk_Total_Approved__c,
                                         Contact_Id__r.External_Email__c,Contact_Id__r.Account.Triplog_API__c,Contact_Email__c,Fuel_Price__c, MPG__c, Maintenance_and_Tires__c,Contact_Id__r.Reimbursement_Frequency__c
                                         FROM Employee_Reimbursement__c 
@@ -1889,7 +1889,7 @@ public Static String getAllReimbursements(String year,String did,String accid) {
             employeeReimbursementList = [SELECT id, Name, Month__c, Total_Rejected__c, Approved_Date__c, Contact_Id__r.Accountid, 
                                          Contact_Id__c, Contact_Id__r.name, Contact_Id__r.Manager__r.Name, Contact_Id__r.Manager__c,
                                          Contact_Id__r.Monthly_Mileage_Limit__c, Total_Approved__c, Total_Mileage__c, Status__c, 
-                                         Total_Variable_Rate__c, Total_Pending__c, Reimbursement_Approval__c, Mileage_Approver__c, 
+                                         Total_Variable_Rate__c, Total_Pending__c, Reimbursement_Approval__c, Mileage_Approver__c,High_Risk_Total_Pending__c, 
                                          Contact_Id__r.Manager__r.External_Email__c,Mileage_Lock_Date__c,High_Risk_Total_Mileages__c,High_Risk_Total_Rejected__c,High_Risk_Total_Approved__c,
                                          Contact_Id__r.External_Email__c,Contact_Id__r.Account.Triplog_API__c,Contact_Email__c,Fuel_Price__c, MPG__c, Maintenance_and_Tires__c,Contact_Id__r.Reimbursement_Frequency__c
                                          FROM Employee_Reimbursement__c 
@@ -1909,12 +1909,12 @@ public Static String getAllReimbursements(String year,String did,String accid) {
                 if(employeeReimbursementMap.get(currentReimbursement.Contact_Id__c).reimbursementIdList != null && employeeReimbursementMap.get(currentReimbursement.Contact_Id__c).reimbursementIdList.size() > 0) {                    
                     reimbursement = employeeReimbursementMap.get(currentReimbursement.Contact_Id__c);
                     reimbursement.totalMileages =(currentReimbursement.Total_Pending__c!=null) ? String.valueOf(double.valueOf((reimbursement.totalMileages!=null) ? reimbursement.totalMileages : '0')+double.valueOf(currentReimbursement.Total_Pending__c)):'0';  
-                    /*reimbursement.totalHighRiskMileages  = currentReimbursement.High_Risk_Total_Mileages__c != null ? double.valueOf(currentReimbursement.High_Risk_Total_Mileages__c) : 0.00; 
-                    reimbursement.highRiskTotalApproved  = currentReimbursement.High_Risk_Total_Approved__c != null ? double.valueOf(currentReimbursement.High_Risk_Total_Approved__c) : 0.00;             
-                    reimbursement.highRiskTotalRejected  = currentReimbursement.High_Risk_Total_Rejected__c != null ? double.valueOf(currentReimbursement.High_Risk_Total_Rejected__c) : 0.00;      */
+                    reimbursement.TotalReimMileages =(currentReimbursement.Total_Mileage__c !=null) ? String.valueOf(double.valueOf((reimbursement.TotalReimMileages != null) ? reimbursement.TotalReimMileages : '0')+double.valueOf(currentReimbursement.Total_Mileage__c)):'0';                      
                     reimbursement.totalHighRiskMileages =(currentReimbursement.High_Risk_Total_Mileages__c != null) ? double.valueOf((reimbursement.totalHighRiskMileages!=null) ? reimbursement.totalHighRiskMileages : 0.00)+double.valueOf(currentReimbursement.High_Risk_Total_Mileages__c):0.00;  
                     reimbursement.highRiskTotalApproved =(currentReimbursement.High_Risk_Total_Approved__c != null) ? double.valueOf((reimbursement.highRiskTotalApproved!=null) ? reimbursement.highRiskTotalApproved : 0.00)+double.valueOf(currentReimbursement.High_Risk_Total_Approved__c):0.00;  
                     reimbursement.highRiskTotalRejected =(currentReimbursement.High_Risk_Total_Rejected__c != null) ? double.valueOf((reimbursement.highRiskTotalRejected!=null) ? reimbursement.highRiskTotalRejected : 0.00)+double.valueOf(currentReimbursement.High_Risk_Total_Rejected__c):0.00;         
+                    reimbursement.highRiskTotalPending =(currentReimbursement.High_Risk_Total_Pending__c != null) ? double.valueOf((reimbursement.highRiskTotalPending !=null) ? reimbursement.highRiskTotalPending : 0.00)+double.valueOf(currentReimbursement.High_Risk_Total_Pending__c):0.00;         
+                    
                     if(reimbursement.reimbursementIdList != null && reimbursement.reimbursementIdList.size() >0) {                        
                         List<String> reimbursementIdList = new List<String>();
                         reimbursementIdList = reimbursement.reimbursementIdList;
@@ -1930,6 +1930,7 @@ public Static String getAllReimbursements(String year,String did,String accid) {
                 reimbursement.month = currentReimbursement.Month__c;
                 reimbursement.threshold = String.valueOf(currentReimbursement.Contact_Id__r.Monthly_Mileage_Limit__c);
                 reimbursement.totalMileages = (currentReimbursement.Total_Pending__c!=null) ? String.valueOf(currentReimbursement.Total_Pending__c) : '0';
+                reimbursement.TotalReimMileages = (currentReimbursement.Total_Mileage__c !=null) ? String.valueOf(currentReimbursement.Total_Mileage__c) : '0';
                 reimbursement.rejectedMileges = (currentReimbursement.Total_Rejected__c != null) ? String.valueOf(currentReimbursement.Total_Rejected__c) : '0';
                 reimbursement.approvedMileages = String.valueOf(currentReimbursement.Total_Approved__c);             
                 reimbursement.isSelected = false;
@@ -1944,7 +1945,8 @@ public Static String getAllReimbursements(String year,String did,String accid) {
                 reimbursement.status = currentReimbursement.Status__c;
                 reimbursement.totalHighRiskMileages  = currentReimbursement.High_Risk_Total_Mileages__c != null ? double.valueOf(currentReimbursement.High_Risk_Total_Mileages__c) : 0.00; 
                 reimbursement.highRiskTotalApproved  = currentReimbursement.High_Risk_Total_Approved__c != null ? double.valueOf(currentReimbursement.High_Risk_Total_Approved__c) : 0.00;             
-                reimbursement.highRiskTotalRejected  = currentReimbursement.High_Risk_Total_Rejected__c != null ? double.valueOf(currentReimbursement.High_Risk_Total_Rejected__c) : 0.00;             
+                reimbursement.highRiskTotalRejected  = currentReimbursement.High_Risk_Total_Rejected__c != null ? double.valueOf(currentReimbursement.High_Risk_Total_Rejected__c) : 0.00;  
+                reimbursement.highRiskTotalPending = currentReimbursement.High_Risk_Total_Pending__c != null ? double.valueOf(currentReimbursement.High_Risk_Total_Pending__c) : 0.00;                        
                 if(currentReimbursement.Mileage_Lock_Date__c != null) {
                 if(String.valueOf(currentReimbursement.Mileage_Lock_Date__c).contains('-')) {
                         List<String> approvedDateSplitted = new List<String>();

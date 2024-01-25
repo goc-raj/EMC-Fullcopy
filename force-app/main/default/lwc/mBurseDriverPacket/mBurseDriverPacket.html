@@ -53,13 +53,8 @@
                     </template>
                     <template lwc:else>
                         <div style="float: left;display:grid">
-                            <button 
-                                class="slds-btn slds-btn-primary slds-btn-sm waves-effect bc-blue waves-light"
-                                onclick={sendDriverPacket}>
-                                Resend driver packet
-                            </button>
-                            <button class="slds-btn bc-outline slds-btn-sm waves-effect bc-blue bc-font waves-light" onclick={signPacket}>
-                                Sign packet
+                            <button class="slds-btn slds-btn-primary slds-btn-sm waves-effect bc-blue waves-light" onclick={signPacket}>
+                                Sign Packet
                             </button>
                         </div>
                     </template>
@@ -94,11 +89,11 @@
     <div class="transition" lwc:if={packetIntial}>
         <div>
             <c-m-burse-header-text head-text="Step 3">
-                <div slot="subHeading" class="slds-text-heading_small slds-text-align_center font-style slds-p-bottom_small emc-font">Request and Sign Driver Packet</div>
+                <div slot="subHeading" class="slds-text-heading_small slds-text-align_center font-style slds-p-bottom_small emc-font">Sign Driver Packet</div>
             </c-m-burse-header-text>
         </div>
-        <div class="slds-text-heading_small slds-text-align_center font-style emcFont">Select <strong>Send to Review
-                &amp; Sign</strong></div>
+        <!--<div class="slds-text-heading_small slds-text-align_center font-style emcFont">Select <strong>Send to Review
+                &amp; Sign</strong></div>-->
         <div class="slds-p-top_large slds-align_absolute-center">
             <div class="box__img">
                 <img class="packet__img" src={packetCss} />
@@ -118,7 +113,10 @@
                         <div  class="slds-m-vertical_medium" style="border: 1px solid #7ABB4A; width: 180px;"></div>
                         <div class="font-style"><div class="font-size: 16px;"><strong>Keep in Mind You: </strong></div>
                             <ul class="slds-list_dotted slds-p-top_x-small font-style">
-                                <li>Do not have to sign now</li>
+                                <li>Do not have to sign now, you can sign it later  <a class="driverPacket" title="Send packet"
+                                    onclick={sendDriverPacket}  >
+                                    here
+                                    </a> </li>
                                 <li>Can review the packet and sign it later</li>
                                 <li>Could forfeit your car allowance until you sign</li>
                             </ul>
@@ -158,12 +156,12 @@
                     </template>
                     <template lwc:else>
                         <div style="float: left;display:grid">
-                            <button class="slds-btn slds-btn-primary slds-btn-sm waves-effect bc-blue waves-light" onclick={sendDriverPacket}>
-                                Send driver packet
+                            <button class="slds-btn slds-btn-primary slds-btn-sm waves-effect bc-blue waves-light" onclick={signPacket}>
+                                Sign Packet
                             </button>
-                            <button class="slds-btn bc-outline slds-btn-sm waves-effect bc-blue bc-font waves-light" onclick={signPacket}>
-                                Sign packet
-                            </button>
+                            <!--<button class="slds-btn bc-outline slds-btn-sm waves-effect bc-blue bc-font waves-light" onclick={signPacket}>
+                                Sign Packet
+                            </button>-->
                         </div>
                     </template>
                     <template lwc:if={isShow}>

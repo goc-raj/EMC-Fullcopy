@@ -130,14 +130,30 @@ export default class UserMileageGrid extends LightningElement {
     },
     {
       id: 2,
-      name: "Mileage",
+      name: "Unapproved",
       colName: "totalMileages",
+      colType: "Decimal",
+      arrUp: false,
+      arrDown: false
+    },
+    {
+      id: 3,
+      name: "Approved",
+      colName: "approvedMileages",
+      colType: "Decimal",
+      arrUp: false,
+      arrDown: false
+    },
+    {
+      id: 4,
+      name: "Total",
+      colName: "TotalReimMileages",
       colType: "Decimal",
       arrUp: false,
       arrDown: false
     }
   ];
-  tripKeyFields = ["name", "totalMileages"];
+  tripKeyFields = ["name", "totalMileages","approvedMileages","TotalReimMileages"];
   tripListColumn = [
     {
       id: 1,
@@ -149,7 +165,7 @@ export default class UserMileageGrid extends LightningElement {
     },
     {
       id: 2,
-      name: "Mileage",
+      name: "Unapproved",
       colName: "totalMileages",
       colType: "Decimal",
       arrUp: false,
@@ -157,14 +173,30 @@ export default class UserMileageGrid extends LightningElement {
     },
     {
       id: 3,
+      name: "Approved",
+      colName: "approvedMileages",
+      colType: "Decimal",
+      arrUp: false,
+      arrDown: false
+    },
+    {
+      id: 4,
       name: "Flagged",
       colName: "rejectedMileges",
       colType: "Decimal",
       arrUp: false,
       arrDown: false
+    },
+    {
+      id: 5,
+      name: "Total",
+      colName: "TotalReimMileages",
+      colType: "Decimal",
+      arrUp: false,
+      arrDown: false
     }
   ];
-  tripListKeyFields = ["name", "totalMileages", "rejectedMileges"];
+  tripListKeyFields = ["name", "totalMileages", "approvedMileages","rejectedMileges","TotalReimMileages"];
   searchIcon = resourceImage + "/mburse/assets/mBurse-Icons/Vector.png";
   checkMark = resourceImage + "/mburse/assets/mBurse-Icons/check.png";
 
@@ -224,7 +256,14 @@ export default class UserMileageGrid extends LightningElement {
           let singleValue = {};
           if (keyFields.includes(key) !== false) {
             singleValue.key = key;
-            singleValue.value = element[key];
+            singleValue.value = (key === "totalMileages" ||
+            key === "rejectedMileges" ||
+            key === "totalHighRiskMileages" ||
+            key === "highRiskTotalApproved" || 
+            key === "highRiskTotalPending" ||
+            key === "highRiskTotalRejected" ||
+            key === "TotalReimMileages" ||
+            key === "approvedMileages") ? (element[key] === '0.00' || element[key] === '0.0' || element[key] === 0) ? '' : element[key] : element[key];
             singleValue.uId = element.contactid;
             singleValue.onlyLink = false;
             singleValue.isProcess = this.endProcess ? true : false;
@@ -232,7 +271,12 @@ export default class UserMileageGrid extends LightningElement {
             singleValue.twoDecimal =
               key === "totalMileages" ||
               key === "rejectedMileges" ||
-              key === "totalHighRiskMileages"
+              key === "totalHighRiskMileages" ||
+              key === "highRiskTotalApproved" || 
+              key === "highRiskTotalPending" ||
+              key === "highRiskTotalRejected" ||
+              key === "TotalReimMileages" ||
+              key === "approvedMileages"
                 ? true
                 : false;
             model.push(singleValue);
@@ -264,12 +308,23 @@ export default class UserMileageGrid extends LightningElement {
       this.highRiskList = element.filter(function (b) {
         return b.totalHighRiskMileages !== 0;
       });
-      this.tripColumn[1].colName = "totalHighRiskMileages";
-      this.tripListColumn[1].colName = "totalHighRiskMileages";
-      this.tripListColumn[2].colName = "highRiskTotalRejected";
-      this.tripKeyFields[1] = "totalHighRiskMileages";
-      this.tripListKeyFields[1] = "totalHighRiskMileages";
-      this.tripListKeyFields[2] = "highRiskTotalRejected";
+      this.tripColumn[1].colName = "highRiskTotalPending";
+      this.tripColumn[2].colName = "highRiskTotalApproved";
+      this.tripColumn[3].colName = "totalHighRiskMileages";
+
+      this.tripListColumn[1].colName = "highRiskTotalPending";
+      this.tripListColumn[2].colName = "highRiskTotalApproved";
+      this.tripListColumn[3].colName = "highRiskTotalRejected";
+      this.tripListColumn[4].colName = "totalHighRiskMileages";
+
+      this.tripKeyFields[1] = "highRiskTotalPending";
+      this.tripKeyFields[2] = "highRiskTotalApproved";
+      this.tripKeyFields[3] = "totalHighRiskMileages";
+
+      this.tripListKeyFields[1] = "highRiskTotalPending";
+      this.tripListKeyFields[2] = "highRiskTotalApproved";
+      this.tripListKeyFields[3] = "highRiskTotalRejected";
+      this.tripListKeyFields[4] = "totalHighRiskMileages";
       this.highRiskList.forEach((el) => {
         if (el.highRiskTotalRejected > "0.00") {
           count++;
@@ -292,11 +347,22 @@ export default class UserMileageGrid extends LightningElement {
         .viewData(this.modelList);
     } else {
       this.tripColumn[1].colName = "totalMileages";
+      this.tripColumn[2].colName = "approvedMileages";
+      this.tripColumn[3].colName = "TotalReimMileages";
+
       this.tripListColumn[1].colName = "totalMileages";
-      this.tripListColumn[2].colName = "rejectedMileges";
+      this.tripListColumn[2].colName = "approvedMileages";
+      this.tripListColumn[3].colName = "rejectedMileges";
+      this.tripListColumn[4].colName = "TotalReimMileages";
+
       this.tripKeyFields[1] = "totalMileages";
+      this.tripKeyFields[2] = "approvedMileages";
+      this.tripKeyFields[3] = "TotalReimMileages";
+
       this.tripListKeyFields[1] = "totalMileages";
-      this.tripListKeyFields[2] = "rejectedMileges";
+      this.tripListKeyFields[2] = "approvedMileages";
+      this.tripListKeyFields[3] = "rejectedMileges";
+      this.tripListKeyFields[4] = "TotalReimMileages";
       this.modelList = this.originalModelList;
       this.modelList.forEach((el) => {
         if (el.rejectedMileges > "0.00") {
@@ -555,7 +621,7 @@ export default class UserMileageGrid extends LightningElement {
       .resetPageView(data, "contactid");
     this.template
       .querySelector("c-user-preview-table")
-      .defaultSort("name", "String", "desc");
+      .defaultSort('totalMileages', 'Decimal', 'asc');
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].isSelected) {
@@ -705,7 +771,7 @@ export default class UserMileageGrid extends LightningElement {
       .resetView(data, "contactid");
     this.template
       .querySelector("c-user-preview-table")
-      .defaultSort("name", "String", "desc");
+      .defaultSort('totalMileages', 'Decimal', 'asc');
 
     for (let i = 0; i < data.length; i++) {
       if (data[i].isSelected) {
@@ -765,7 +831,7 @@ export default class UserMileageGrid extends LightningElement {
       this.template
         .querySelector("c-user-preview-table")
         .refreshTable(this.modelList);
-      this.template.querySelector('c-user-preview-table').defaultSort('name', 'String', 'desc')
+      this.template.querySelector('c-user-preview-table').defaultSort('totalMileages', 'Decimal', 'asc')
     }
   }
 
@@ -787,12 +853,23 @@ export default class UserMileageGrid extends LightningElement {
       this.highRiskList = element.filter(function (m) {
         return (m.totalHighRiskMileages > "0.00" && m.totalHighRiskMileages != null)
       });
-      this.tripColumn[1].colName = "totalHighRiskMileages";
-      this.tripListColumn[1].colName = "totalHighRiskMileages";
-      this.tripListColumn[2].colName = "highRiskTotalRejected";
-      this.tripKeyFields[1] = "totalHighRiskMileages";
-      this.tripListKeyFields[1] = "totalHighRiskMileages";
-      this.tripListKeyFields[2] = "highRiskTotalRejected";
+      this.tripColumn[1].colName = "highRiskTotalPending";
+      this.tripColumn[2].colName = "highRiskTotalApproved";
+      this.tripColumn[3].colName = "totalHighRiskMileages";
+
+      this.tripListColumn[1].colName = "highRiskTotalPending";
+      this.tripListColumn[2].colName = "highRiskTotalApproved";
+      this.tripListColumn[3].colName = "highRiskTotalRejected";
+      this.tripListColumn[4].colName = "totalHighRiskMileages";
+
+      this.tripKeyFields[1] = "highRiskTotalPending";
+      this.tripKeyFields[2] = "highRiskTotalApproved";
+      this.tripKeyFields[3] = "totalHighRiskMileages";
+
+      this.tripListKeyFields[1] = "highRiskTotalPending";
+      this.tripListKeyFields[2] = "highRiskTotalApproved";
+      this.tripListKeyFields[3] = "highRiskTotalRejected";
+      this.tripListKeyFields[4] = "totalHighRiskMileages";
       this.highRiskList.forEach((el) => {
         if (el.highRiskTotalRejected > 0) {
           count++;
@@ -814,11 +891,22 @@ export default class UserMileageGrid extends LightningElement {
       //   .viewData(this.modelList);
     } else {
       this.tripColumn[1].colName = "totalMileages";
+      this.tripColumn[2].colName = "approvedMileages";
+      this.tripColumn[3].colName = "TotalReimMileages";
+
       this.tripListColumn[1].colName = "totalMileages";
-      this.tripListColumn[2].colName = "rejectedMileges";
+      this.tripListColumn[2].colName = "approvedMileages";
+      this.tripListColumn[3].colName = "rejectedMileges";
+      this.tripListColumn[4].colName = "TotalReimMileages";
+
       this.tripKeyFields[1] = "totalMileages";
+      this.tripKeyFields[2] = "approvedMileages";
+      this.tripKeyFields[3] = "TotalReimMileages";
+
       this.tripListKeyFields[1] = "totalMileages";
-      this.tripListKeyFields[2] = "rejectedMileges";
+      this.tripListKeyFields[2] = "approvedMileages";
+      this.tripListKeyFields[3] = "rejectedMileges";
+      this.tripListKeyFields[4] = "TotalReimMileages";
       this.modelList = b;
       this.modelList.forEach((el) => {
         if (el.rejectedMileges > "0.00") {
@@ -1431,12 +1519,23 @@ export default class UserMileageGrid extends LightningElement {
         this.highRiskList = element.filter(function (b) {
           return b.totalHighRiskMileages !== 0;
         });
-        this.tripColumn[1].colName = "totalHighRiskMileages";
-        this.tripListColumn[1].colName = "totalHighRiskMileages";
-        this.tripListColumn[2].colName = "highRiskTotalRejected";
-        this.tripKeyFields[1] = "totalHighRiskMileages";
-        this.tripListKeyFields[1] = "totalHighRiskMileages";
-        this.tripListKeyFields[2] = "highRiskTotalRejected";
+        this.tripColumn[1].colName = "highRiskTotalPending";
+        this.tripColumn[2].colName = "highRiskTotalApproved";
+        this.tripColumn[3].colName = "totalHighRiskMileages";
+  
+        this.tripListColumn[1].colName = "highRiskTotalPending";
+        this.tripListColumn[2].colName = "highRiskTotalApproved";
+        this.tripListColumn[3].colName = "highRiskTotalRejected";
+        this.tripListColumn[4].colName = "totalHighRiskMileages";
+  
+        this.tripKeyFields[1] = "highRiskTotalPending";
+        this.tripKeyFields[2] = "highRiskTotalApproved";
+        this.tripKeyFields[3] = "totalHighRiskMileages";
+  
+        this.tripListKeyFields[1] = "highRiskTotalPending";
+        this.tripListKeyFields[2] = "highRiskTotalApproved";
+        this.tripListKeyFields[3] = "highRiskTotalRejected";
+        this.tripListKeyFields[4] = "totalHighRiskMileages";
         this.highRiskList.forEach((el) => {
           if (el.highRiskTotalRejected > "0.00") {
             count++;
@@ -1455,11 +1554,22 @@ export default class UserMileageGrid extends LightningElement {
         this.dynamicBinding(this.modelList, this.modalKeyFields);
       } else {
         this.tripColumn[1].colName = "totalMileages";
+        this.tripColumn[2].colName = "approvedMileages";
+        this.tripColumn[3].colName = "TotalReimMileages";
+
         this.tripListColumn[1].colName = "totalMileages";
-        this.tripListColumn[2].colName = "rejectedMileges";
+        this.tripListColumn[2].colName = "approvedMileages";
+        this.tripListColumn[3].colName = "rejectedMileges";
+        this.tripListColumn[4].colName = "TotalReimMileages";
+
         this.tripKeyFields[1] = "totalMileages";
+        this.tripKeyFields[2] = "approvedMileages";
+        this.tripKeyFields[3] = "TotalReimMileages";
+
         this.tripListKeyFields[1] = "totalMileages";
-        this.tripListKeyFields[2] = "rejectedMileges";
+        this.tripListKeyFields[2] = "approvedMileages";
+        this.tripListKeyFields[3] = "rejectedMileges";
+        this.tripListKeyFields[4] = "TotalReimMileages";
         this.modelList = this.originalModelList;
         this.modelList.forEach((el) => {
           if (el.rejectedMileges > "0.00") {

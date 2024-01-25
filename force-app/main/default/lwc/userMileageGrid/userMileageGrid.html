@@ -6,7 +6,7 @@
                     head-th="header-title--v1" sort-th="sort-container p-top-v1" main-class={classToTable} norecord-message={noMessage}
                     scrollable={isScrollable} is-paginate={paginatedModal} model-data={modelList} columns={modalListColumn}
                     options={modalKeyFields} is-sortable={sortable} inline-checkbox={isCheckbox} onrowselection={rowHandler}
-                    is-default-sort={isSort} colname="name" coltype="String" sortorder="desc" onapprovalprocess={showModal}
+                    is-default-sort={isSort} colname="totalMileages" coltype="Decimal" sortorder="asc" onapprovalprocess={showModal}
                     onsearch={handleSearchEvent} onaccess={redirectModal} onpagecount={renderList}>
                     <div slot="filter" class="slds-p-left_small row">
                         <template lwc:if={singleUser}>
