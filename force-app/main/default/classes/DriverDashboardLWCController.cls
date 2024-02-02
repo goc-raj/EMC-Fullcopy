@@ -16,7 +16,7 @@ global class DriverDashboardLWCController {
     public static String systemNotification {get;set;}
     global static String last2Month {get;set;}
 
-    
+    // Constructor to initialize properties
     global DriverDashboardLWCController(){
         NewDashboardVideoLink__c videoCustomSetting = NewDashboardVideoLink__c.getOrgDefaults();
         videoCustom = json.serialize(videoCustomSetting );
@@ -33,7 +33,7 @@ global class DriverDashboardLWCController {
     last2Month = String.escapeSingleQuotes(WrapperUtils.getpastYearReimbursement(getContactid()));
     }
     
-    
+    // Method to get the contact ID from the current page parameters
     public static String getContactid() {
         if(ApexPages.currentPage().getParameters().containsKey('id') && String.isNotBlank(ApexPages.currentPage().getParameters().get('id'))) {
             return ApexPages.currentPage().getParameters().get('id');
@@ -42,7 +42,7 @@ global class DriverDashboardLWCController {
         }
     }
     
-    
+    // Method to count user logins based on contact ID
     public static Integer countUserLogin(String contactId){
         integer countLogin = 0;
         User userObj = [SELECT id from User where ContactId =: contactId];
@@ -57,7 +57,11 @@ global class DriverDashboardLWCController {
     }
     
     
-    // This Method is used to return Driver's details.
+       /**
+     * @Description: AuraEnabled method to get Driver's details
+     * @param contactId: The ID of the contact for which driver details are requested
+     * @return JSON-serialized driver details
+     */
     @AuraEnabled(cacheable=true)
     public static String getDriverDetails(String contactId) {
         List<contact> driverDataList = new List<contact>();
@@ -66,7 +70,7 @@ global class DriverDashboardLWCController {
         return JSON.serialize(driverDataList ).unescapeHtml4();
     }
     
-
+    //AuraEnabled method to get Driver's details
     @AuraEnabled
     public static String getDriverDetailsClone(String contactId) {
         List<contact> driverDataList = new List<contact>();
@@ -75,7 +79,6 @@ global class DriverDashboardLWCController {
     }
     
     // This Method is used to get Driver's Driving State.
-    
     @AuraEnabled
     public static String getDrivingState(String contactId) {
         List<contact> driverDataList = new List<contact>();
@@ -102,6 +105,7 @@ global class DriverDashboardLWCController {
         return WrapperUtils.getMileages1(clickedMonth,year,contactId);
     }
 
+    //method to get the mileage data for the given contact for the given year
     @AuraEnabled
     public static String getMileagesData(Integer year,String contactId) {
         List<mileageValueWrapper> mileageData = new List<mileageValueWrapper>();
@@ -158,7 +162,7 @@ global class DriverDashboardLWCController {
         }
         return JSON.serialize(mileageData).unescapeHtml4();
     }
-
+    //wrapper class to manage the data to send in frontend
     public class mileageValueWrapper {
         public string reimMonth {get;set;}
         public string id {get;set;}
@@ -182,7 +186,8 @@ global class DriverDashboardLWCController {
         public string maintTyre {get;set;}
         public string submitteddate {get;set;}
     }
-    
+
+    //method to access the charts in the dashboard
     @RemoteAction
     public static String getChartData(String contactId) {
         return NewdriverdashboardController.getChartData(contactid);
@@ -254,7 +259,7 @@ global class DriverDashboardLWCController {
         lstOfReim.add(Json.serialize(employeeReimbursement));
         return lstOfReim;
     }
-
+    //reimbursement wrapper for sending the data in frontend LWC component js class
     public class reaimValueWrapperNew{
         public String mileageCalc {get;set;}
         public String varibleAmountCalc {get;set;}
@@ -266,7 +271,8 @@ global class DriverDashboardLWCController {
         public String totalAVGCalc {get;set;}
         public String totalReim {get;set;}
     }
-    
+
+     // AuraEnabled method to get gas price and rate
     @AuraEnabled(cacheable = true)
     public static String getGasPriceandRate(String contactId) {
         List<reaimValueWrapper> reimValue = new List<reaimValueWrapper>();
@@ -284,47 +290,49 @@ global class DriverDashboardLWCController {
         }
         return Json.serialize(reimValue);
     }
+
+    //gives last 2 years reimbursment details
     @AuraEnabled
     public static String getLast2Years(String contactId) {
         return String.escapeSingleQuotes(WrapperUtils.getpastYearReimbursement(contactId));
     }
-    
+    //gives user activation time in whole year
     @AuraEnabled
     public static string TimeAttendance(String conId,String year){
         return Json.serialize(BiweeklyPayPeriod.getTimeAndAttendance(conId,year));
     }
-
+    //gives mileage based on the attendence 
     @AuraEnabled
     public static String getMileagesBasedTandAtt(String startdate,String enddate,String contactId) {
         return String.escapeSingleQuotes(WrapperUtils.getMileagesBasedTA(startdate,enddate,contactId));
     }
-
+    //bi-week mileage of whole year
     @AuraEnabled
     public static string biweeklyMileage(String conId,Integer year){
         return Json.serialize(BiweeklyPayPeriod.getBiweeklyReimbursement(conId,year)); 
     }
-
+    //gets the biweek mileage
     @AuraEnabled
     public static List<String> getBiweekMileages(string biweekId) {
         return BiweeklyPayPeriod.getBiweekMileages1(biweekId);
     }
-
+    //aprroved mileage retreival
     @AuraEnabled
     public static string ApproveBiweekMileages(string biweekId) {
         BiweeklyPayPeriod.ApproveBiWeekTrips(biweekId);
         return 'sucess';
     }
-    
+    //all the mileage retirieved
     @AuraEnabled
     public static List<String> getAllMileages(String startdate,String enddate,String contactId) {
         return BiweeklyPayPeriod.getAllBiweekMileages1(date.valueof(startdate),date.valueof(enddate),contactId);
     }
-    
+    //compliance mileages
     @AuraEnabled
     public static List<String> getCompliance(String contactId) {
         return WrapperUtils.getComplianceCalculation(contactId,String.valueOf(System.today().year()));
     }
-    
+    //fuel and variable rates
     @AuraEnabled
     public static String getFuelVariableRate(String contactId) {
         return WrapperUtils.getDriverFuelVariableRate(contactId);
@@ -334,22 +342,22 @@ global class DriverDashboardLWCController {
         public string fuelPrice {get;set;}
         public string VariableRate {get;set;}
     }
-    
+    //get reimbursement data
     @AuraEnabled(cacheable=true)
     public static String getReimbursementData(String contactId) {
         return LWCWrapperUtils.getReimbursementData(contactId);
     }
-    
+    //packet and meetings
     @AuraEnabled(cacheable=true)
     public static List<String> getPacketandMeeting(String contactId) {
         return WrapperUtils.getPacketandMeetingDetails(contactId);
     }
-    
+    //custom settings
     @AuraEnabled
     public static NewDashboardVideoLink__c getCustomSettings(){
         return NewDashboardVideoLink__c.getOrgDefaults();
     }
-    
+    //get planned parameter
     @AuraEnabled
     public static String getPlanParameter (String contactId) {
         planParameterWrap wrapObj = new planParameterWrap ();

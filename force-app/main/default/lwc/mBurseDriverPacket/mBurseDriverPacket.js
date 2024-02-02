@@ -140,7 +140,7 @@ export default class MBurseDriverPacket extends LightningElement {
         return JSON.parse(e)
     }
     toggleHide() {
-        var list, packetStatus;
+        var list, packetStatus, mlogApp;
         contactInfo({
                 contactId: this.contactId
             })
@@ -153,15 +153,25 @@ export default class MBurseDriverPacket extends LightningElement {
                     this.packetHeaderText = list[0].documentDate;
                     this.packetSignDate = list[0].addedActivationDate;
                     packetStatus = list[0].driverPacketStatus; // list[0].driverPacketStatus;
+                    mlogApp = list[0].mlogApp;
                    // status = list[0].insuranceStatus;
-                    this.packetIntial =  (packetStatus === 'Sent' || packetStatus  === 'Resent' || packetStatus  === 'Resent Again') ? false : true;
-                    this.packetAlreadySent = this.packetSent === false && (packetStatus === 'Sent' || packetStatus === 'Resent' || packetStatus === 'Resent Again') ? true : false;
-                    this.isShowUpload =  true; // (status === 'Uploaded') ? false : true;
-                    if (this.days === true) {
-                        this.isShow = (packetStatus === 'Uploaded') ? true : false;
-                    } else {
-                        this.isShow = true;
+                    if(packetStatus !== 'Uploaded'){
+                        this.packetIntial =  (packetStatus === 'Sent' || packetStatus  === 'Resent' || packetStatus  === 'Resent Again') ? false : true;
+                        this.packetAlreadySent = this.packetSent === false && (packetStatus === 'Sent' || packetStatus === 'Resent' || packetStatus === 'Resent Again') ? true : false;
+                        this.isShowUpload =  true; // (status === 'Uploaded') ? false : true;
+                        if (this.days === true) {
+                            this.isShow = (packetStatus === 'Uploaded') ? true : false;
+                        } else {
+                            this.isShow = true;
+                        }
+                    }else{
+                        if (mlogApp === true) {
+                            backEvents(this, 'Next Declaration Upload');
+                        }else{
+                            this.nextmLogPreview();
+                        }
                     }
+                  
                     //this.isPacket = (packetStatus === 'Uploaded') ? true : false;
                 }
             })

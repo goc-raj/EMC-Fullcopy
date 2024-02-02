@@ -6,55 +6,56 @@ public with sharing class GetDriverData {
     public static Integer userLoginCount {get;set;}
     public static String ScheduleGotoMeeting {get;set;}
     public static Date activationDate {get;set;}
-    public static String systemNotification {get;set;}    
+    public static String systemNotification {get;set;} 
+    public static String profileID {get;set;}   
 
-    public GetDriverData() {    
+    public GetDriverData() {
         NewDashboardVideoLink__c videoCustomSetting = NewDashboardVideoLink__c.getOrgDefaults();
         videoCustom = json.serialize(videoCustomSetting );
         if(!Test.isrunningtest()){
-        setEmployeeName();    
+        setEmployeeName();
         }
-        
-        List<Contact> conList = [SELECT id,Activation_Date__c, System_Notification__c FROM Contact WHERE id =: getContactid() ];
-        if(conList.size() > 0){            
-            activationDate = conList[0].Activation_Date__c != null ? conList[0].Activation_Date__c: null;   
+             
+       
+        List<Contact> conList = [SELECT id,Activation_Date__c, Role__c, System_Notification__c FROM Contact WHERE id =: getContactid() ];
+        if(conList.size() > 0){
+            activationDate = conList[0].Activation_Date__c != null ? conList[0].Activation_Date__c: null;
             systemNotification = conList[0].System_Notification__c;
-        }          
-         if(!Test.isrunningtest()){
-             if(getContactid() != null){
+            profileID = conList[0].Role__c;
+        }
+        if(!Test.isrunningtest()){
+            if(getContactid() != null){
             userLoginCount = DriverDashboardLWCController.countUserLogin(getContactid());
             if(getAccountId() != null){
                 UpdateTimezonAppVerMlog(getAccountId(),getContactid());
             }
-        } 
-         }       
+        }
+        }
     }
     
     public static String getContactid() {
         if(ApexPages.currentPage().getParameters().containsKey('id') && String.isNotBlank(ApexPages.currentPage().getParameters().get('id'))) {
-           return ApexPages.currentPage().getParameters().get('id');
+            return ApexPages.currentPage().getParameters().get('id');
         } else {
             return '';
-        } 
+        }
     }
     
     public static String getAccountId() {
         if(ApexPages.currentPage().getParameters().containsKey('accid') && String.isNotBlank(ApexPages.currentPage().getParameters().get('accid'))) {
-           return ApexPages.currentPage().getParameters().get('accid');
+            return ApexPages.currentPage().getParameters().get('accid');
         } else {
             return '';
-        } 
-    }   
+        }
+    }
     
     Public static void UpdateTimezonAppVerMlog(String accountId,String contactId) {
-        System.debug('UpdateTimezonAppVerMlog');
         Contact employee = [select Id,Role__c from Contact where id =: contactId];
         if(employee != null && (employee.Role__c == 'Admin' || employee.Role__c == 'Driver/Admin')){
-            System.debug('inside UpdateTimezonAppVerMlog');
             UpdateUserIdandAppVertionBatch bcn = new UpdateUserIdandAppVertionBatch(accountId);
             ID batchprocessid = Database.executeBatch(bcn,200);
-        }        
-    }    
+        }
+    }
     
     @AuraEnabled(cacheable=true)
     public static List < sObject > fetchLookUpValues(String accId,String adminId,String accField,String idOfDriver,String whereField, String searchKey,String fieldName, String ObjectName,String keyField,Boolean isActive) {
@@ -69,7 +70,6 @@ public with sharing class GetDriverData {
         }
         
         if((String.isBlank(idOfDriver) || String.isEmpty(idOfDriver)) && ((String.isBlank(adminId) || String.isEmpty(adminId)))){
-            //sQuery =  'select '+fieldName+','+keyField+ ' from ' +ObjectName+' where '+accField+'='+'\''+accId+'\''+' LIMIT 9999' ;
             sQuery =  'select '+fieldName+','+keyField+ ' from ' +ObjectName+' where '+accField+'='+'\''+accId+'\''+' AND '+searchKey+ ' != null LIMIT 49999' ;
         }
         else if((!String.isBlank(adminId) || !String.isEmpty(adminId)) && ObjectName == 'Contact' && (conObj != null && (conObj.Role__c == StaticValues.ROLE_ADMIN || conObj.Role__c == StaticValues.roleAdminDriver))){
@@ -102,17 +102,13 @@ public with sharing class GetDriverData {
         String id = ApexPages.currentPage().getParameters().get('id');
         Contact employee ;
         employee = [select Id,FirstName,showTeamRecord__c,External_Email__c,account.Schedule_Goto_Meeting__c from Contact where id =: id ];
-        
-        if(employee!=null)
-        {
+        if(employee!=null){
             ScheduleGotoMeeting = employee.account.Schedule_Goto_Meeting__c != null ? employee.account.Schedule_Goto_Meeting__c : '' ;
             showMyTeam = employee.showTeamRecord__c;
             contactName = employee.FirstName != null ? employee.FirstName : '';
+        }else{
+            showMyTeam = false;
         }
-        else
-        {
-            showMyTeam = false;            
-        }       
     }
     
     @AuraEnabled
@@ -130,15 +126,12 @@ public with sharing class GetDriverData {
         }
         
         if(body != null){
-            for(Employee_Mileage__c mileage : [SELECT id,Trip_Id__c,Way_Points__c 
-                                                FROM Employee_Mileage__c 
-                                                WHERE Trip_Id__c =: tripId LIMIT 10]){
+            for(Employee_Mileage__c mileage : [SELECT id,Trip_Id__c,Way_Points__c  FROM Employee_Mileage__c  WHERE Trip_Id__c =: tripId LIMIT 10]){
                 mileage.Way_Points__c = body;
                 mileageList.add(mileage);
             }
         }
         if(!mileageList.isEmpty()){
-            System.debug('mileageList'+mileageList);
             update mileageList;
         }
         return body;
@@ -153,54 +146,10 @@ public with sharing class GetDriverData {
             conObj = [SELECT id,Role__c FROM Contact WHERE id =: adminId LIMIT 1];
         }
         if(conObj != null && (conObj.Role__c == StaticValues.ROLE_ADMIN || conObj.Role__c == StaticValues.roleAdminDriver)){
-            mileageList = [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                        Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                        Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                        Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                        ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                        Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                        From_Location__Latitude__s, From_Location__Longitude__s,
-                        To_Location__Latitude__s, To_Location__Longitude__s,
-                        Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,
-                        TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,
-                        StartTime__c, EndTime__c,EMP_Mileage__c,Trip_Destination_State__c 
-                    FROM Employee_Mileage__c
-                    WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                    AND EmployeeReimbursement__r.Month__c =: lastMonth
-                    AND EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null
-                    order by ConvertedStartTime__c asc 
-                    limit 9999
-                    ];
+            mileageList = [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c, StartTime__c, EndTime__c,EMP_Mileage__c,Trip_Destination_State__c  FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND EmployeeReimbursement__r.Month__c =: lastMonth AND EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null ORDER BY ConvertedStartTime__c ASC  LIMIT 9999 ];
+        }else {
+            mileageList = [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c, StartTime__c, EndTime__c,EMP_Mileage__c,Trip_Destination_State__c  FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND EmployeeReimbursement__r.Month__c =: lastMonth AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId)  ) AND EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null order by ConvertedStartTime__c asc LIMIT 1999];
         }
-        else {
-            mileageList = [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                        Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                        Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                        Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                        ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                        Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                        From_Location__Latitude__s, From_Location__Longitude__s,
-                        To_Location__Latitude__s, To_Location__Longitude__s,
-                        Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,
-                        TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,
-                        StartTime__c, EndTime__c,EMP_Mileage__c,Trip_Destination_State__c 
-                    FROM Employee_Mileage__c
-                    WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                        AND EmployeeReimbursement__r.Month__c =: lastMonth
-                        AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                        )
-                        AND EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null
-                        order by ConvertedStartTime__c asc
-                        LIMIT 1999];
-        }
-       
         return String.valueOf(mileageList.size());
     }
 
@@ -210,146 +159,37 @@ public with sharing class GetDriverData {
     public Integer offset {get; set;}
 
     @AuraEnabled(cacheable=true)
-   @RemoteAction 
+    @RemoteAction 
     public static List<Employee_Mileage__c> fetchMileages(String accID,String AdminId,Integer limitSize, Integer offset){
-    
-        System.debug('accID'+accID);
-        System.debug('AdminId'+AdminId);
-        System.debug('limitSize'+limitSize);
-        System.debug('offset'+offset);
         String lastMonth = Utils.fetchMonths(1, 0)[0];
         Contact conObj ;
         if(!String.isBlank(AdminId) || !String.isEmpty(AdminId)){
             conObj = [SELECT id,Role__c FROM Contact WHERE id =: AdminId LIMIT 1];
         }
         if(conObj != null && (conObj.Role__c == StaticValues.ROLE_ADMIN || conObj.Role__c == StaticValues.roleAdminDriver)){
-            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                        Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                        Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                        Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                        ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                        Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                        From_Location__Latitude__s, From_Location__Longitude__s,
-                        To_Location__Latitude__s, To_Location__Longitude__s,
-                        Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,
-                        TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c,
-                        StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c,Trip_Destination_State__c 
-                    FROM Employee_Mileage__c
-                    WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                      AND EmployeeReimbursement__r.Month__c =: lastMonth 
-                      AND   EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null
-                         order by ConvertedStartTime__c desc
-                    LIMIT :limitSize
-                     OFFSET :offset];
-                       
+            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c, StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c,Trip_Destination_State__c  FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND EmployeeReimbursement__r.Month__c =: lastMonth  AND   EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null order by ConvertedStartTime__c desc LIMIT :limitSize OFFSET :offset];
         }
         else {
-            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                        Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                        Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                        Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                        ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                        Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                        From_Location__Latitude__s, From_Location__Longitude__s,
-                        To_Location__Latitude__s, To_Location__Longitude__s,
-                        Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,
-                        TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c,
-                        StartTime__c,EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c,Trip_Destination_State__c  
-                    FROM Employee_Mileage__c
-                    
-                    WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                         AND EmployeeReimbursement__r.Month__c =: lastMonth
-                         AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId) 
-                         OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                         OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                         ) AND 
-                         EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null
-                         order by ConvertedStartTime__c desc
-                        LIMIT : limitSize
-                         OFFSET :offset];
-                       
+            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c, StartTime__c,EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c,Trip_Destination_State__c   FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND EmployeeReimbursement__r.Month__c =: lastMonth AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId)  ) AND EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null ORDER BY ConvertedStartTime__c DESC LIMIT : limitSize OFFSET :offset];
         }
     }
     @AuraEnabled(cacheable=true)
-   //@RemoteAction
-   public static List<Employee_Mileage__c> fetchMileageslwc(String accID,String AdminId,Integer limitSize, Integer offset){
-   
-       System.debug('accID'+accID);
-       System.debug('AdminId'+AdminId);
-       System.debug('limitSize'+limitSize);
-       System.debug('offset'+offset);
-       String lastMonth = Utils.fetchMonths(1, 0)[0];
-       Contact conObj ;
-       if(!String.isBlank(AdminId) || !String.isEmpty(AdminId)){
-           conObj = [SELECT id,Role__c FROM Contact WHERE id =: AdminId LIMIT 1];
-       }
-       if(conObj != null && (conObj.Role__c == StaticValues.ROLE_ADMIN || conObj.Role__c == StaticValues.roleAdminDriver)){
-           return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                       Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                       EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                       Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                       Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                       ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                       Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                       From_Location__Latitude__s, From_Location__Longitude__s,
-                       To_Location__Latitude__s, To_Location__Longitude__s,
-                       Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                       EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,Trip_Destination_State__c,
-                       TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c,
-                       StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c 
-                   FROM Employee_Mileage__c
-                    WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                       AND EmployeeReimbursement__r.Month__c =: lastMonth 
-                       AND EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null
-                       order by ConvertedStartTime__c desc
-                   LIMIT :limitSize
-                       OFFSET :offset];
-                      
-       }
-       else {
-           return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                       Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                       EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                       Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                       Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                       ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                       Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                       From_Location__Latitude__s, From_Location__Longitude__s,
-                       To_Location__Latitude__s, To_Location__Longitude__s,
-                       Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,Trip_Destination_State__c,
-                       EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,
-                       TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c,
-                       StartTime__c,EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c  
-                   FROM Employee_Mileage__c
-                   
-                   WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                        AND EmployeeReimbursement__r.Month__c =: lastMonth
-                        AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                        ) AND 
-                       EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null
-                       order by ConvertedStartTime__c desc
-                       LIMIT : limitSize
-                        OFFSET :offset];
-                      
-       }
-   }
+    public static List<Employee_Mileage__c> fetchMileageslwc(String accID,String AdminId,Integer limitSize, Integer offset){
+        String lastMonth = Utils.fetchMonths(1, 0)[0];
+        Contact conObj ;
+        if(!String.isBlank(AdminId) || !String.isEmpty(AdminId)){
+            conObj = [SELECT id,Role__c FROM Contact WHERE id =: AdminId LIMIT 1];
+        }
+        if(conObj != null && (conObj.Role__c == StaticValues.ROLE_ADMIN || conObj.Role__c == StaticValues.roleAdminDriver)){
+            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,Trip_Destination_State__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c, StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c  FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND EmployeeReimbursement__r.Month__c =: lastMonth  AND EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null ORDER BY ConvertedStartTime__c desc LIMIT :limitSize OFFSET :offset];
+        }else {
+            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,Trip_Destination_State__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c, StartTime__c,EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c   FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND EmployeeReimbursement__r.Month__c =: lastMonth AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId)  ) AND EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null ORDER BY ConvertedStartTime__c DESC LIMIT : limitSize OFFSET :offset];
+        }
+    }
     
     @AuraEnabled
     public static String getMilegesDataSize(Id accountId,String AdminId,String idOfDriver, Date StartDate, Date EndDate, String OriginName, String DestinationName,Boolean ActiveDriver,String StartMileage,String EndMileage,String TripStatus,String TrackingMethod,String Tag,String Notes,String Activity,String reimMonth,Boolean highRisk) {
         Contact conObj ;
-        system.debug('AdminId'+AdminId);
-        system.debug('idOfDriver'+idOfDriver);
-        system.debug('StartDate'+StartDate);
-        system.debug('EndDate'+EndDate);
-        system.debug('reimMonth'+reimMonth);
         if(idOfDriver == 'All Drivers'){
             idOfDriver = '';
         }
@@ -369,7 +209,7 @@ public with sharing class GetDriverData {
             conObj = [SELECT id,Role__c FROM Contact WHERE id =: AdminId LIMIT 1];
         } 
         String query = 'SELECT id,Trip_Date__c,Trip_Destination_State__c,EmployeeReimbursement__r.Mileage_Lock_Date__c,Stay_Time__c,Tag__c,Activity__c,StartTime__c,EndTime__c,EMP_Mileage__c, Driving_Time__c,EmployeeReimbursement__r.Contact_Id_Name__c,ConvertedStartTime__c,ConvertedEndTime__c,EmployeeReimbursement__r.Contact_Id__r.Name,Mileage__c,Trip_Origin__c, Trip_Destination__c,Origin_Name__c, Destination_Name__c,EmployeeReimbursement__r.Contact_Id__c,Day_Of_Week__c,Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c,Notes__c, Tracing_Style__c,From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s,Trip_Id__c,EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,TimeZone__c,EmployeeReimbursement__r.Contact_Id__r.AccountId,Drive_Stay_Time__c FROM Employee_Mileage__c ';
-      
+        
         String whereClause = '';
         if(accountId != null || idOfDriver != null || StartDate != null || EndDate != null || OriginName != null || DestinationName != null || StartMileage != null || EndMileage != null || TripStatus != null || TrackingMethod != null || Tag != null || Notes != null ){
             whereClause = ' WHERE ';
@@ -384,25 +224,23 @@ public with sharing class GetDriverData {
         }
         
         if(StartDate != null){
-           whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(StartDate), '>=', 'Date');
+            whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(StartDate), '>=', 'Date');
         }
         
         if(EndDate != null){
             whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(EndDate), '<=', 'Date');
         }
         if(!String.isBlank(OriginName)){
-         
             whereClause = GenerateWhereClause (whereClause, 'Trip_Origin__c', OriginName, '=', 'String');
         }
         if(!String.isBlank(DestinationName)){
-         
             whereClause = GenerateWhereClause (whereClause, 'Trip_Destination__c', DestinationName, '=', 'String');
         }
         if(!String.isBlank(StartMileage)){
-           whereClause = GenerateWhereClause (whereClause, 'Mileage__c', StartMileage, '>=', 'Number');
+            whereClause = GenerateWhereClause (whereClause, 'Mileage__c', StartMileage, '>=', 'Number');
         }
         if(!String.isBlank(EndMileage)){
-           whereClause = GenerateWhereClause (whereClause, 'Mileage__c', EndMileage, '<=', 'Number');
+            whereClause = GenerateWhereClause (whereClause, 'Mileage__c', EndMileage, '<=', 'Number');
         }
         if(!String.isBlank(TripStatus)){
             whereClause = GenerateWhereClause (whereClause, 'Trip_Status__c', TripStatus, '=', 'String');
@@ -448,7 +286,6 @@ public with sharing class GetDriverData {
         //query += ' WITH SECURITY_ENFORCED ';
         query += ' order by ConvertedStartTime__c asc ';
         query += ' LIMIT 9999';
-        system.debug('query'+query);
         List<Employee_Mileage__c> mileageDetail = new List<Employee_Mileage__c>();
         try {
             mileageDetail = Database.query(query); 
@@ -460,10 +297,6 @@ public with sharing class GetDriverData {
 
     @AuraEnabled
     public static List <Employee_Mileage__c> getMilegesData(Id accountId,String AdminId,String idOfDriver, Date StartDate, Date EndDate, String OriginName, String DestinationName,Boolean ActiveDriver,String StartMileage,String EndMileage,String TripStatus,String TrackingMethod,String Tag,String Notes,String Activity,Integer limitSize, Integer offset,String reimMonth,Boolean highRisk) {
-        system.debug('idOfDriver'+idOfDriver);
-        system.debug('StartDate'+StartDate);
-        system.debug('EndDate'+EndDate);
-        system.debug('reimMonth'+reimMonth);
         if(idOfDriver == 'All Drivers'){
             idOfDriver = '';
         }
@@ -499,26 +332,26 @@ public with sharing class GetDriverData {
         }
         
         if(StartDate != null){
-           whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(StartDate), '>=', 'Date');
+            whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(StartDate), '>=', 'Date');
         }
-       
+    
         if(EndDate != null){
             whereClause = GenerateWhereClause (whereClause, 'Trip_Date__c', String.valueOf(EndDate), '<=', 'Date');
         }
         system.debug('whereClause '+whereClause );
         if(!String.isBlank(OriginName)){
-         
+        
             whereClause = GenerateWhereClause (whereClause, 'Trip_Origin__c', OriginName, '=', 'String');
         }
         if(!String.isBlank(DestinationName)){
-         
+        
             whereClause = GenerateWhereClause (whereClause, 'Trip_Destination__c', DestinationName, '=', 'String');
         }
         if(!String.isBlank(StartMileage)){
-           whereClause = GenerateWhereClause (whereClause, 'Mileage__c', StartMileage, '>=', 'Number');
+            whereClause = GenerateWhereClause (whereClause, 'Mileage__c', StartMileage, '>=', 'Number');
         }
         if(!String.isBlank(EndMileage)){
-           whereClause = GenerateWhereClause (whereClause, 'Mileage__c', EndMileage, '<=', 'Number');
+            whereClause = GenerateWhereClause (whereClause, 'Mileage__c', EndMileage, '<=', 'Number');
         }
         if(!String.isBlank(TripStatus)){
             whereClause = GenerateWhereClause (whereClause, 'Trip_Status__c', TripStatus, '=', 'String');
@@ -571,7 +404,6 @@ public with sharing class GetDriverData {
         } catch(System.QueryException qe) {
             System.debug(qe.getMessage());
         }
-        system.debug('mileageDetail'+mileageDetail.size());
         return mileageDetail;
     }
 
@@ -583,16 +415,13 @@ public with sharing class GetDriverData {
     public static String GenerateWhereClause( String whereClause, String fieldAPI , String fieldValue, String operator, String dateType) {
         
         whereClause = ( whereClause != ' WHERE ' ? whereClause + ' AND ' : whereClause ) + 
-                      fieldAPI + ' ' + operator + ' ' + ( dateType == 'String'? '\'' + fieldValue + '\'' : fieldValue);
+                    fieldAPI + ' ' + operator + ' ' + ( dateType == 'String'? '\'' + fieldValue + '\'' : fieldValue);
         return whereClause;
     }
     
     @AuraEnabled
     public static String approveMileages(Boolean checked,String emailaddress,Boolean sendEmail,Boolean unapprove)
-    { 
-        system.debug('checked'+checked);
-        system.debug('emailaddress'+emailaddress);
-        system.debug('sendEmail'+sendEmail);
+    {
         Map<String,List<String>> approveRejectMileageMap = new Map<String,List<String>>(); 
         List<String> nullList = new List<String>();
         List<String> mileageIds = new List<String>();
@@ -601,7 +430,7 @@ public with sharing class GetDriverData {
         
         for(MileageJsonDeserialize objMileages : emailIdJson) {
             mileageIds.add(objMileages.Id);
-           if(approveRejectMileageMap.size() > 0 && approveRejectMileageMap.containsKey(objMileages.employeeEmailId))
+            if(approveRejectMileageMap.size() > 0 && approveRejectMileageMap.containsKey(objMileages.employeeEmailId))
             {
                 List<String> mileagesEmailList = approveRejectMileageMap.get(objMileages.employeeEmailId);
                 mileagesEmailList.add(String.valueOf(objMileages.id));
@@ -612,7 +441,7 @@ public with sharing class GetDriverData {
                 List<String> mileagesEmailList = new List<String>();
                 mileagesEmailList.add(String.valueOf(objMileages.id));
                 approveRejectMileageMap.put(objMileages.employeeEmailId,mileagesEmailList);
-            }  
+            }
         }
         if(checked == true ) {
             mileagesToApprove = WrapperUtils.UpdateMileages(mileageIds,'Approved');
@@ -633,7 +462,6 @@ public with sharing class GetDriverData {
         }
 
         if(!mileagesToApprove.isEmpty()) {
-            system.debug('mileagesToApprove'+mileagesToApprove);
             update mileagesToApprove;
         }
     
@@ -660,16 +488,15 @@ public with sharing class GetDriverData {
                             }
                             
                         }
-                     
-                    } 
+                    }
                 }
-            }    
+            }
         return 'success';
     }
 
     @AuraEnabled
     public static string deleteMileages(String emailaddress)
-    { 
+    {
         Set<Id> mileagesIds = new Set<Id>();
         List<MileageJsonDeserialize> emailIdJson = MileageJsonDeserialize.parse(emailaddress);
         for(MileageJsonDeserialize objMileages : emailIdJson) {
@@ -683,7 +510,7 @@ public with sharing class GetDriverData {
 
     @AuraEnabled
     public static string updateMileages(String tripId,String tripTag,String activity,String notes,Integer staytime)
-    { 
+    {
         Employee_Mileage__c mil = new Employee_Mileage__c();
         mil.Id = tripId;
         mil.Tag__c = tripTag;
@@ -693,7 +520,7 @@ public with sharing class GetDriverData {
         //update mil;
         
         try{
-             update mil;
+            update mil;
         } catch (System.DmlException  e){
             SYSTEM.DEBUG('==='+e.getDmlMessage(0));
             return e.getDmlMessage(0);
@@ -703,7 +530,7 @@ public with sharing class GetDriverData {
     
     @AuraEnabled
     public static void updateMileagesEmail(String adminId,date tripdate,String conName,String conEmail,String oldActivity,String newActivity,String mileage,String actualMileage,Integer tripId,String accApi)
-    { 
+    {
         if(newActivity != oldActivity){
             if(tripId != null && accApi != null){
                 String MLOGACCOUNT = System.Label.Triplog_New_URL + ',' + System.Label.Triplog_New_URL2;
@@ -730,20 +557,19 @@ public with sharing class GetDriverData {
             
             decimal tripMileage;
             if(newActivity == 'Commute' && decimal.valueof(actualMileage) >= 30){
-             tripMileage = decimal.valueof(actualMileage) - 30;
+            tripMileage = decimal.valueof(actualMileage) - 30;
             } else if(newActivity == 'Commute'){
                 tripMileage = 0;
             } else if (newActivity == 'Business'){
-                 tripMileage = decimal.valueof(actualMileage);
+                tripMileage = decimal.valueof(actualMileage);
             }
-           List<Messaging.MassEmailMessage> mails = new List<Messaging.MassEmailMessage>();
+            List<Messaging.MassEmailMessage> mails = new List<Messaging.MassEmailMessage>();
             OrgWideEmailAddress[] owea = [select Id from OrgWideEmailAddress where Address =:'driverservices@mburse.com'];
-            List<EmailTemplate> temp = new List<EmailTemplate>([SELECT id, Subject, body, HTMLValue FROM EmailTemplate 
-                                                                    WHERE DeveloperName = 'Email_For_Update_Commute_Activity']);
+            List<EmailTemplate> temp = new List<EmailTemplate>([SELECT id, Subject, body, HTMLValue FROM EmailTemplate WHERE DeveloperName = 'Email_For_Update_Commute_Activity']);
             Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
             List<Messaging.SingleEmailMessage> mail_list = new List<Messaging.SingleEmailMessage>();
             if (owea.size() > 0) {
-                    mail.setOrgWideEmailAddressId(owea.get(0).Id);
+                mail.setOrgWideEmailAddressId(owea.get(0).Id);
             }
             String[] sendingTo = new String[]{conEmail};
             mail.setToAddresses(sendingTo );
@@ -765,17 +591,15 @@ public with sharing class GetDriverData {
             
             SendEmail__c  sendEmailObj = SendEmail__c.getValues('GetDriverData');
             if((sendEmailObj!=null) && sendEmailObj.Send_email_from_code__c==true && mail_list.size()>0 && !Test.isRunningTest()) {
-                Messaging.sendEmail(mail_list);  
-            } 
+                Messaging.sendEmail(mail_list);
+            }
         }
         
     }
     @AuraEnabled
     public static string massUpdateActivityEmail(String newActivity,String jsondata)
-    { 
+    {
         List<Employee_Mileage__c> mileageList = new List<Employee_Mileage__c>();
-        system.debug('newActivity'+newActivity);
-        system.debug('jsondata'+jsondata);
         List<ChangeActivityJSON2Apex> tripJson = ChangeActivityJSON2Apex.parse(jsondata);
         for(ChangeActivityJSON2Apex objMileages : tripJson) {
             Employee_Mileage__c mil = new Employee_Mileage__c();
@@ -788,13 +612,9 @@ public with sharing class GetDriverData {
         }
         Database.executeBatch(New ChangeActivityInMlogEmail(newActivity,jsondata),100);
         return 'Success ';
-    } 
+    }
     @AuraEnabled
     public static List<Employee_Mileage__c> mileageListData(String accId,String adminId, date startDate, date endDate){
-        system.debug('accId'+accId);
-        system.debug('adminId'+adminId);
-                system.debug('startDate'+startDate);
-                        system.debug('endDate'+endDate);
         List<Employee_Mileage__c> mileageList = new List<Employee_Mileage__c>();
         List<Contact> conList = new List<Contact>();
         if(adminId != null) {
@@ -803,47 +623,11 @@ public with sharing class GetDriverData {
         
         if(conList[0].Role__c =='Manager' || conList[0].Role__c =='Driver/Manager'){
             if(startDate != null && endDate != null ) {
-                mileageList = [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                                Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                                EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                                Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                                Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                                ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                                Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                                From_Location__Latitude__s, From_Location__Longitude__s,
-                                To_Location__Latitude__s, To_Location__Longitude__s,
-                                Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                                EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,
-                                TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c,
-                                StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c,Trip_Destination_State__c
-                        FROM Employee_Mileage__c where  (Trip_Date__c >=: startDate AND Trip_Date__c<=: endDate)
-                            AND EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                            AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId) 
-                            OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId) 
-                            OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                            OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId) )
-                            order by ConvertedStartTime__c asc
-                            limit 49999]; 
+                mileageList = [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c, StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c,Trip_Destination_State__c FROM Employee_Mileage__c where  (Trip_Date__c >=: startDate AND Trip_Date__c<=: endDate) AND EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId) ) ORDER BY ConvertedStartTime__c ASC LIMIT 49999]; 
             }
         } else {
             if(startDate != null && endDate != null ) {
-                mileageList = [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                                Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                                EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                                Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                                Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                                ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                                Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                                From_Location__Latitude__s, From_Location__Longitude__s,
-                                To_Location__Latitude__s, To_Location__Longitude__s,
-                                Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                                EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,
-                                TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c,
-                                StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c,Trip_Destination_State__c
-                        FROM Employee_Mileage__c where  (Trip_Date__c >=: startDate AND Trip_Date__c<=: endDate)
-                            AND EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                            order by ConvertedStartTime__c asc
-                            limit 49999]; 
+                mileageList = [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,EmployeeReimbursement__r.Mileage_Lock_Date__c, StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c,Trip_Destination_State__c FROM Employee_Mileage__c where  (Trip_Date__c >=: startDate AND Trip_Date__c<=: endDate) AND EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  ORDER BY ConvertedStartTime__c ASC LIMIT 49999];
             }
         }
         return mileageList;
@@ -851,24 +635,18 @@ public with sharing class GetDriverData {
 
     @AuraEnabled
     public static string deleteTrips(String accountId,String month){
-        
-        if(accountId != null){
-            delete [SELECT id 
-                    FROM Employee_Mileage__c 
-                    WHERE Trip_Status__c = 'Not Approved Yet' 
-                        AND EmployeeReimbursement__r.Contact_Id__r.AccountId =: accountId
-                        AND EmployeeReimbursement__r.Month__c =: month
-                        AND EmployeeReimbursement__r.Status__c = 'Pending' AND Trip_Id__c != null];
+    if(accountId != null){
+        delete [SELECT id  FROM Employee_Mileage__c WHERE Trip_Status__c = 'Not Approved Yet'  AND EmployeeReimbursement__r.Contact_Id__r.AccountId =: accountId AND EmployeeReimbursement__r.Month__c =: month AND EmployeeReimbursement__r.Status__c = 'Pending' AND Trip_Id__c != null];
         }
         return 'deleted';
     }
 
     @AuraEnabled
-    public static string MassSyncTrips(String accountId,String startDate,String endDate,String month,String tripStatus,String activityStatus){        
+    public static string MassSyncTrips(String accountId,String startDate,String endDate,String month,String tripStatus,String activityStatus){
         MassSyncTripforCommute obj = new MassSyncTripforCommute(accountId,startDate,endDate,month,tripStatus,false,activityStatus);
         Database.executeBatch (obj,1);
         return 'Success';
-    } 
+    }
     @AuraEnabled
     public static boolean getInsuranceStatus(String conId){
         Contact employee = [SELECT Id,Insurance_Attachment_Id__c FROM Contact WHERE id =: conId];
@@ -886,24 +664,14 @@ public with sharing class GetDriverData {
         Map<Id,String> conMap = new Map<Id,String>();  
         List<contact> driverDataList = new List<contact>();
         if(role=='Admin'){
-            driverDataList = [SELECT id,Name,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,Fixed_Amount__c, 
-                            MailingCity, MailingState, MailingPostalCode,Reimbursement_Frequency__c,Half_Fixed_Amount__c,Accountid 
-                            from Contact 
-                            WHERE Accountid =: accountId AND Role__c != 'Admin' and Role__c != 'Manager'];
+            driverDataList = [SELECT id,Name,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,Fixed_Amount__c,  MailingCity, MailingState, MailingPostalCode,Reimbursement_Frequency__c,Half_Fixed_Amount__c,Accountid  from Contact  WHERE Accountid =: accountId AND Role__c != 'Admin' and Role__c != 'Manager'];
         } else if(role=='Manager'){
-            driverDataList = [SELECT id,Name,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,Fixed_Amount__c, 
-                            MailingCity, MailingState, MailingPostalCode,Reimbursement_Frequency__c,Half_Fixed_Amount__c
-                            from Contact 
-                            WHERE (Manager__c =: managerId 
-                            OR (Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId)
-                            OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId)) AND Role__c != 'Admin' and Role__c != 'Manager' ];
+            driverDataList = [SELECT id,Name,Address__r.Location_Lat_Long__Latitude__s,Address__r.Location_Lat_Long__Longitude__s,Fixed_Amount__c,  MailingCity, MailingState, MailingPostalCode,Reimbursement_Frequency__c,Half_Fixed_Amount__c FROM Contact  WHERE (Manager__c =: managerId  OR (Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__c =: managerId) OR (Manager__r.Manager__r.Manager__r.Manager__r.Manager__c =: managerId)) AND Role__c != 'Admin' and Role__c != 'Manager' ];
         }
         
         for(Contact conList : driverDataList ){
             conMap.put(conList.Id,conList.name);
-        }        
+        }
         return json.serialize(conMap).unescapeHtml4();
     }
 
@@ -920,64 +688,13 @@ public with sharing class GetDriverData {
             conObj = [SELECT id,Role__c FROM Contact WHERE id =: AdminId LIMIT 1];
         }
         if(conObj != null && (conObj.Role__c == StaticValues.ROLE_ADMIN || conObj.Role__c == StaticValues.roleAdminDriver)){
-            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                        Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                        Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                        Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                        ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                        Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                        From_Location__Latitude__s, From_Location__Longitude__s,
-                        To_Location__Latitude__s, To_Location__Longitude__s,EmployeeReimbursement__r.Mileage_Lock_Date__c,
-                        Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,Trip_Destination_State__c,
-                        TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,High_Risk_Mileage__c,
-                        StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c 
-                    FROM Employee_Mileage__c
-                    WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                        AND EmployeeReimbursement__r.Month__c =: lastMonth AND 
-                        EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null AND 
-                        High_Risk_Mileage__c = true
-                        order by ConvertedStartTime__c desc
-                    LIMIT :limitSize];
-                        // OFFSET :offset];
-                       
-        }
-        else {
-            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c,
-                        Stay_Time__c, Driving_Time__c,Trip_Date__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c,
-                        Mileage__c,Trip_Origin__c, Trip_Destination__c,
-                        Origin_Name__c, Destination_Name__c,ConvertedStartTime__c,
-                        ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c,
-                        Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c,
-                        From_Location__Latitude__s, From_Location__Longitude__s,Trip_Destination_State__c,
-                        To_Location__Latitude__s, To_Location__Longitude__s,EmployeeReimbursement__r.Mileage_Lock_Date__c,
-                        Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c,
-                        EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,
-                        TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,High_Risk_Mileage__c,
-                        StartTime__c,EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c  
-                    FROM Employee_Mileage__c
-                    
-                    WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID 
-                        AND EmployeeReimbursement__r.Month__c =: lastMonth
-                        AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                        OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId) 
-                        ) AND 
-                        EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null AND
-                        High_Risk_Mileage__c = true
-                        order by ConvertedStartTime__c desc
-                        LIMIT : limitSize];
-                        // OFFSET :offset];
-                       
+            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s, To_Location__Latitude__s, To_Location__Longitude__s,EmployeeReimbursement__r.Mileage_Lock_Date__c, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c,Trip_Destination_State__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,High_Risk_Mileage__c, StartTime__c, EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c  FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND EmployeeReimbursement__r.Month__c =: lastMonth AND  EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null AND  High_Risk_Mileage__c = true order by ConvertedStartTime__c desc LIMIT :limitSize];
+        }else {
+            return [SELECT id,Name,EmployeeReimbursement__r.Contact_Id_Name__c, Stay_Time__c, Driving_Time__c,Trip_Date__c, EmployeeReimbursement__r.Contact_Id__r.Vehicle_Type__c, Mileage__c,Trip_Origin__c, Trip_Destination__c, Origin_Name__c, Destination_Name__c,ConvertedStartTime__c, ConvertedEndTime__c,Notes__c,Triplog_Map__c,Day_Of_Week__c, Trip_Status__c,EmployeeReimbursement__r.Contact_Id__r.External_Email__c, From_Location__Latitude__s, From_Location__Longitude__s,Trip_Destination_State__c, To_Location__Latitude__s, To_Location__Longitude__s,EmployeeReimbursement__r.Mileage_Lock_Date__c, Tracing_Style__c,Trip_Id__c,Way_Points__c,Tag__c,Activity__c, EmployeeReimbursement__r.Contact_Id__r.Account.Triplog_API__c, TimeZone__c,EmployeeReimbursement__r.Month__c,Drive_Stay_Time__c,High_Risk_Mileage__c, StartTime__c,EndTime__c,EMP_Mileage__c,Original_Origin_Name__c,Original_Destination_Name__c   FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__r.AccountId =: accID  AND EmployeeReimbursement__r.Month__c =: lastMonth AND ((EmployeeReimbursement__r.Contact_Id__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__c =: AdminId)  OR (EmployeeReimbursement__r.Contact_Id__r.Manager__r.Manager__r.Manager__r.Manager__c =: AdminId)  ) AND  EmployeeReimbursement__r.Contact_Id__r.Deactivated_Date__c = null AND High_Risk_Mileage__c = true ORDER BY ConvertedStartTime__c DESC LIMIT : limitSize];
         }
     }
     
     @RemoteAction
     Public static void UpdateTimezonAppVer(String accountId) {
-        //UpdateUserIdandAppVertionBatch bcn = new UpdateUserIdandAppVertionBatch(accountId);
-        //ID batchprocessid = Database.executeBatch(bcn,200);
-    }   
+    }
 }

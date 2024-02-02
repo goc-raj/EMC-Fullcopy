@@ -1,22 +1,17 @@
 public class CSVIterator implements Iterator<CSVToContact>, Iterable<CSVToContact>{
-   private List<CSVToContact> m_lstCon;
+   private List<CSVToContact> mlstCon;
    private Integer currentPosition;
 
    public CSVIterator(List<CSVToContact> lstCon ){  
-      m_lstCon = lstCon; 
+      mlstCon = lstCon; 
       currentPosition = 0;
-      System.debug('inside iterator');
    }
    public Boolean hasNext(){
-      System.debug('m_SCVdata hasnext--'+currentPosition);
-      return currentPosition < m_lstCon.size()  ;
+      return currentPosition < mlstCon.size()  ;
    } 
    public CSVToContact next(){
-      System.debug(' m_CSVData--'+ m_lstCon);
-      
-      
-   if (currentPosition <m_lstCon.size() ) {
-      CSVToContact con = m_lstCon[currentPosition];
+   if (currentPosition <mlstCon.size() ) {
+      CSVToContact con = mlstCon[currentPosition];
       currentPosition++;
       return con;
       }

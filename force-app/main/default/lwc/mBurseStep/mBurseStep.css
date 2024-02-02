@@ -290,6 +290,14 @@
     padding-left: 5px;
     padding-top: 10px;
 }
+
+.body__img img {
+    width: 100%;
+    height: 100%;
+    -o-object-fit: cover;
+    object-fit: cover;
+    margin: auto;
+}
 /* .i-size{
     width: 3088px;
     height: 148px;
@@ -298,3 +306,22 @@
 .opacity{
     opacity: 0.4 !important;
 }
+
+.body__img{
+    height: 120px;
+    margin: 1.5rem 1.2rem 1.5rem 1.2rem;
+    width: 162px;
+}
+
+.skeleton {
+    animation: skeleton-loading 1s linear infinite alternate;
+  }
+  
+  @keyframes skeleton-loading {
+    0% {
+      background-color: hsl(200, 20%, 80%);
+    }
+    100% {
+      background-color: hsl(200, 20%, 95%);
+    }
+  }

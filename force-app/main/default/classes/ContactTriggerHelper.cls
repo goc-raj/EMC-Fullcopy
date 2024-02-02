@@ -933,21 +933,20 @@ New Contact is created at that time we have to update plan parameter section's f
             }
             
             List<Employee_Mileage__c> updateMilList = new List<Employee_Mileage__c>();
-            for(Employee_Mileage__c mil : [SELECT id,EMP_Mileage__c 
-                                           FROM Employee_Mileage__c 
-                                           WHERE EmployeeReimbursement__r.Contact_Id__c =: conIdList
-                                               AND Trip_Status__c = 'Not Approved Yet'
-                                               AND Activity__c = 'Business'
-                                               AND EmployeeReimbursement__r.Status__c = 'Pending' ]){
-                                                mil.EMP_Mileage__c = (mil.EMP_Mileage__c != null) ? mil.EMP_Mileage__c * 1.609129171 :mil.EMP_Mileage__c;
-                                                   updateMilList.add(mil);
-                                           }
+            for(Employee_Mileage__c mil : [SELECT id,EMP_Mileage__c,IsMileageConverted__c FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__c =: conIdList AND Trip_Status__c = 'Not Approved Yet' AND Activity__c = 'Business' AND EmployeeReimbursement__r.Status__c = 'Pending' ]){
+                system.debug('conOldMap==' + conOldMap);
+                if(!mil.IsMileageConverted__c){
+                    mil.EMP_Mileage__c = (mil.EMP_Mileage__c != null) ? mil.EMP_Mileage__c * 1.609129171 :mil.EMP_Mileage__c;
+                    mil.IsMileageConverted__c=true;
+                    updateMilList.add(mil);
+                }
+            }
             system.debug('conOldMap==' + conOldMap);
             if(updateMilList.size() > 0){
                 update updateMilList;
             }
         }
-    } 
+    }
     /*EMC-2227
      * Description :-this method update username and email of the user when the external email is changed on the contact
      *Email field on the contact is changed to trigger this method

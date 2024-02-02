@@ -38,7 +38,46 @@ export default class CanvasChart extends LightningElement {
                     ];
                     let monthList = this.defaultMonth;
                     let listOfChart = this.chartData;
-                    console.log(monthList, listOfChart);
+                    let currentMonth = new Date().getMonth();
+                    let monthHighlighted = this.getMonthName(currentMonth)
+                    let backgroundColorA = [
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)'
+                    ]
+
+                    let borderColorA =  [
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)',
+                        'rgba(217,217,217,1)'
+                    ]
+
+                    monthList.forEach((ymonth, index) => {
+                        var m = ymonth;
+                        if (m === monthHighlighted.substring(0, 3)) {
+                            backgroundColorA[index] = 'rgba(235, 188, 54, 0.8)'
+                            borderColorA[index] = 'rgba(235, 188, 54, 1)'
+                        }
+                    })
+                
                     this.config = {
                         type: 'bar',
                         data: {
@@ -46,35 +85,11 @@ export default class CanvasChart extends LightningElement {
                             datasets: [{
                                 label: listOfChart.labelA,
                                 data: [...listOfChart.dataA],
+                                maxBarThickness: 50,
                                 order: 2,
-                                backgroundColor: [
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)'
-                                ],
-                                borderColor: [
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)',
-                                    'rgba(217,217,217,1)'
-                                ]
+                                backgroundColor: backgroundColorA,
+                                borderColor: borderColorA,
+                                borderWidth: 1
                             }, {
                                 label: listOfChart.labelB,
                                 data: [...listOfChart.dataB],
@@ -203,6 +218,7 @@ export default class CanvasChart extends LightningElement {
                                         display: false
                                     },
                                     ticks: {
+                                        beginAtZero: true,
                                         lineHeight: '1.6',
                                         fontSize: 13,
                                         fontFamily: 'Proxima Nova',
@@ -219,10 +235,7 @@ export default class CanvasChart extends LightningElement {
                                             }
                                         }
                                     }
-                                }],
-                                y: {
-                                    beginAtZero: true
-                                }
+                                }]
                             }
                         }
                     }
@@ -234,7 +247,7 @@ export default class CanvasChart extends LightningElement {
                     ctx.canvas.height = 200;
                     this.refs.chartRef.appendChild(canvas);
                     this.chart = new window.Chart(ctx, this.config);
-                   
+                    console.log("Chart js", this.chart)
                     // const legend = document.createElement('div');
                     // legend.className = 'legend_wrapper';
                     //ctx.canvas.width = 'content-box;'; /*246*/
@@ -250,6 +263,23 @@ export default class CanvasChart extends LightningElement {
             .catch((error) => {
                 this.error = error;
             });
+    }
+
+    getMonthName(monthIndex) {
+        let daymonth = new Array();
+        daymonth[0] = "January";
+        daymonth[1] = "February";
+        daymonth[2] = "March";
+        daymonth[3] = "April";
+        daymonth[4] = "May";
+        daymonth[5] = "June";
+        daymonth[6] = "July";
+        daymonth[7] = "August";
+        daymonth[8] = "September";
+        daymonth[9] = "October";
+        daymonth[10] = "November";
+        daymonth[11] = "December";
+        return daymonth[monthIndex];
     }
 
     updateDataset(e, datasetIndex){

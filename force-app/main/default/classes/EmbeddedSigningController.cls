@@ -35,21 +35,20 @@ public class EmbeddedSigningController {
       Boolean isVoided;
       System.debug('ID'+mySourceId);
       try {
-         //finding envelope status
-         
-          // List<dfsle__EnvelopeStatus__c> SentEnvelopeLst =[Select id ,dfsle__Status__c , dfsle__Contact__r.Name,dfsle__EmailSubject__c,dfsle__DocuSignId__c From dfsle__EnvelopeStatus__c Where dfsle__Status__c = 'Sent' AND dfsle__Contact__c=: mySourceId AND dfsle__EmailSubject__c ='Documents for your DocuSign Signature'  ];
-
-          //finding contact details \
           List<Contact> contactList = [Select id,email,Hello_Sign_Request_Id__c FROM contact WHERE Id =: mySourceId AND Role__c  in ('Driver','Driver/Manager','Driver/Admin') limit 1];
           System.debug('contact list -->'+contactList);
-          dfsle__EnvelopeStatus__c SentEnvelope= new dfsle__EnvelopeStatus__c() ;
+          List<dfsle__EnvelopeStatus__c> SentEnvelopeLst= new List<dfsle__EnvelopeStatus__c>() ;
+          dfsle__EnvelopeStatus__c SentEnvelope =new dfsle__EnvelopeStatus__c();
           if(contactList[0].Hello_Sign_Request_Id__c != null){
-          SentEnvelope =[Select id ,dfsle__Status__c , dfsle__Contact__r.Name,dfsle__EmailSubject__c From dfsle__EnvelopeStatus__c Where dfsle__DocuSignId__c =: contactList[0].Hello_Sign_Request_Id__c limit 1];
-                        
+          
+            SentEnvelopeLst =[Select id ,dfsle__Status__c , dfsle__Contact__r.Name,dfsle__EmailSubject__c From dfsle__EnvelopeStatus__c Where dfsle__DocuSignId__c =: contactList[0].Hello_Sign_Request_Id__c limit 1];
+            if(SentEnvelopeLst.size()>0){
+              SentEnvelope = SentEnvelopeLst[0];
+            }
           }
-          // System.debug('contact list -->'+SentEnvelopeLst);
-          // System.debug('list of envelopes'+SentEnvelopeLst);
-          if(contactList[0].Hello_Sign_Request_Id__c== null||SentEnvelope.dfsle__Status__c!='Sent'||SentEnvelope.dfsle__Status__c!='Delivered'){
+          System.debug('contact list -->'+SentEnvelopeLst);
+          System.debug('list of envelopes'+SentEnvelope);
+          if(contactList[0].Hello_Sign_Request_Id__c== null||SentEnvelope.dfsle__Status__c!='Sent'||SentEnvelope.dfsle__Status__c!='Delivered'||SentEnvelope==null){
           system.debug('inside null id condition and  the docusign envelope status is '+SentEnvelope.dfsle__Status__c);
             return true;
           }
@@ -60,7 +59,7 @@ public class EmbeddedSigningController {
             System.debug('Envelope voided successfully.');
           } else {
             System.debug('Failed to void the envelope.');
-          }          
+          }
           System.debug('voiding result'+isVoided);
           return isVoided;
       }catch (Exception e) {

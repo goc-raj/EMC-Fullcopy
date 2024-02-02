@@ -405,6 +405,7 @@ public with sharing class ReportDetailsController
                     if(checkLimit != null && checkLimit > 0){
                         query += ' limit ' + checkLimit + '';
                     }
+                    System.debug('Query : ' + query);
                     List<Employee_Reimbursement__c> obj_contact_list = Database.query(query);                                        
                     return JSON.serialize(obj_contact_list);
                 }            
@@ -515,6 +516,7 @@ public with sharing class ReportDetailsController
                     if(checkLimit != null && checkLimit > 0){
                         query += ' limit ' + checkLimit + '';
                     }
+                    System.debug('query of Ter_Drivers : ' + query);
                     List<Employee_Reimbursement__c> obj_contact_list = Database.query(query);                                        
                     return JSON.serialize(obj_contact_list);
                 }            
@@ -538,6 +540,7 @@ public with sharing class ReportDetailsController
                     if(checkLimit != null && checkLimit > 0){
                         query += ' limit ' + checkLimit + '';
                     }
+                    System.debug('query of Ter_Drivers : ' + query);
                     List<Employee_Reimbursement__c> obj_contact_list = Database.query(query);                                        
                     return JSON.serialize(obj_contact_list);
                 }
@@ -561,6 +564,7 @@ public with sharing class ReportDetailsController
                     if(checkLimit != null && checkLimit > 0){
                         query += ' limit ' + checkLimit + '';
                     }
+                    System.debug('query of Ter_Drivers : ' + query);
                     List<Employee_Reimbursement__c> obj_contact_list = Database.query(query);                                        
                     return JSON.serialize(obj_contact_list);
                 } 
@@ -574,6 +578,7 @@ public with sharing class ReportDetailsController
                     if(checkLimit != null && checkLimit > 0){
                         query += ' limit ' + checkLimit + '';
                     }
+                    System.debug('query of Ter_Drivers : ' + query);
                     List<Employee_Reimbursement__c> obj_contact_list = Database.query(query);                                        
                     return JSON.serialize(obj_contact_list);
                 }
@@ -859,28 +864,28 @@ public with sharing class ReportDetailsController
             if(reporttype =='BiWeek Reimbursement Start and EndDate') {
                 if(selectedManager == null || selectedManager == '') {
                     if(!query.contains('where')) {
-                        query = query+ ' where Start_Date__c ='+buildDateforBiweek(tripStartDate)+' AND End_Date__c ='+buildDateforBiweek(tripEndDate) + ' AND Contact__r.AccountId=\''+accountid+'\'';                        
+                        query = query+ ' where Start_Date__c >='+buildDateforBiweek(tripStartDate)+' AND End_Date__c <='+buildDateforBiweek(tripEndDate) + ' AND Contact__r.AccountId=\''+accountid+'\'';                        
                    system.debug('query811=='+query); 
                     } else {
-                        query = query + ' AND Start_Date__c ='+buildDateforBiweek(tripStartDate)+' AND End_Date__c ='+buildDateforBiweek(tripEndDate) + ' AND Contact__r.AccountId=\''+accountid+'\''; 
+                        query = query + ' AND Start_Date__c >='+buildDateforBiweek(tripStartDate)+' AND End_Date__c <='+buildDateforBiweek(tripEndDate) + ' AND Contact__r.AccountId=\''+accountid+'\''; 
                     system.debug('query814=='+query);
                     }                   
                 } else {
                     if(driverormanager == 'Manager') {
                         system.debug('query818=='+query);
                         if(!query.contains('where')) {
-                            query = query+ ' where Start_Date__c ='+buildDateforBiweek(tripStartDate)+' AND End_Date__c ='+buildDateforBiweek(tripEndDate)+' AND Contact__r.Manager__c=\''+selectedManager+'\'' + ' AND Contact__r.accountid=\''+accountid+'\'';                    
+                            query = query+ ' where Start_Date__c >='+buildDateforBiweek(tripStartDate)+' AND End_Date__c <='+buildDateforBiweek(tripEndDate)+' AND Contact__r.Manager__c=\''+selectedManager+'\'' + ' AND Contact__r.accountid=\''+accountid+'\'';                    
                         system.debug('query821=='+query);
                         } else {
-                            query = query + ' AND Start_Date__c ='+buildDateforBiweek(tripStartDate)+' AND End_Date__c ='+buildDateforBiweek(tripEndDate)+' AND Contact__r.Manager__c=\''+selectedManager+'\'' + ' AND Contact__r.accountid=\''+accountid+'\''; 
+                            query = query + ' AND Start_Date__c >='+buildDateforBiweek(tripStartDate)+' AND End_Date__c <='+buildDateforBiweek(tripEndDate)+' AND Contact__r.Manager__c=\''+selectedManager+'\'' + ' AND Contact__r.accountid=\''+accountid+'\''; 
                         system.debug('query824=='+query);
                         }
                     } else {
                         if(!query.contains('where')) {
-                            query = query+ ' where Start_Date__c ='+buildDateforBiweek(tripStartDate)+' AND End_Date__c ='+buildDateforBiweek(tripEndDate)+' AND Contact__c=\''+selectedManager+'\'' + ' AND Contact__r.AccountId=\''+accountid+'\'';                    
+                            query = query+ ' where Start_Date__c >='+buildDateforBiweek(tripStartDate)+' AND End_Date__c <='+buildDateforBiweek(tripEndDate)+' AND Contact__c=\''+selectedManager+'\'' + ' AND Contact__r.AccountId=\''+accountid+'\'';                    
                        system.debug('query829=='+query);
                         } else {
-                            query = query + ' AND Start_Date__c ='+buildDateforBiweek(tripStartDate)+' AND End_Date__c ='+buildDateforBiweek(tripEndDate)+' AND Contact__c=\''+selectedManager+'\'' + ' AND Contact__r.AccountId=\''+accountid+'\''; 
+                            query = query + ' AND Start_Date__c >='+buildDateforBiweek(tripStartDate)+' AND End_Date__c <='+buildDateforBiweek(tripEndDate)+' AND Contact__c=\''+selectedManager+'\'' + ' AND Contact__r.AccountId=\''+accountid+'\''; 
                         system.debug('query832=='+query);
                         }
                     }                    

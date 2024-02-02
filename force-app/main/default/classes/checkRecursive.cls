@@ -2,7 +2,17 @@ public Class checkRecursive {
     private static boolean run = true;
 	private static boolean run1 = true;
 	private static boolean latLongAddressFlag = true;
-    public static boolean runOnce() {
+	private static boolean ConvertMileage = true;
+    public static boolean ConvertedFlag() {
+		System.debug('Class checkRecursive::'+ConvertMileage);
+	if(ConvertMileage) {
+		ConvertMileage = false;
+		return true;
+	} else {
+		return ConvertMileage;
+	}
+}
+	public static boolean runOnce() {
             System.debug('Class checkRecursive::'+run);
 	    if(run) {
 			run = false;

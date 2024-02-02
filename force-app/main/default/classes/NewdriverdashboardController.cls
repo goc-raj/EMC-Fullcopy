@@ -16,11 +16,7 @@ global class NewdriverdashboardController {
     global static Map<String,String> mileageMap {get;set;}
     global static List<String> reimList {get; set;}
     
-    /**
-    @author Natavar Ghodasara
-    @date 26th Feb 2019
-    @description NewdriverdashboardController is Default Constructor.
-    */
+    
     global NewdriverdashboardController () {
         contactObj = getContactDetailsClone(getContactid());
         chartData = getChartData(getContactid());
@@ -30,6 +26,7 @@ global class NewdriverdashboardController {
             contactRole = Json.serialize(String.valueOf(conList[0].Role__c));
         }
     }
+    //fetches the account id from header
     public static String getAccountid() {
         if(ApexPages.currentPage().getParameters().containsKey('accid') && String.isNotBlank(ApexPages.currentPage().getParameters().get('accid'))) {
             return ApexPages.currentPage().getParameters().get('accid');
@@ -37,6 +34,7 @@ global class NewdriverdashboardController {
             return '';
         }
     }
+    //gets contact id
     public static String getContactid() {
         if(ApexPages.currentPage().getParameters().containsKey('id') && String.isNotBlank(ApexPages.currentPage().getParameters().get('id'))) {
             return ApexPages.currentPage().getParameters().get('id');
@@ -44,6 +42,7 @@ global class NewdriverdashboardController {
             return '';
         }
     }
+    //redirection link
     public static PageReference getRedirected() {
         if(getContactid()!=''&& getAccountid()!='') {
             return null;
@@ -52,11 +51,11 @@ global class NewdriverdashboardController {
             return null;
         }
     }
-
+    //gets reimbursment list
     global static String getReimbursementsList() {
         return String.escapeSingleQuotes(WrapperUtils.getReimbursementsList(getContactid(),'Approved'));
     }
-    
+    //gets contact details
     @RemoteAction
     global static string getContactDetailsClone(String contactid) {
         Map<Integer,String> monthNameMap=new Map<Integer, String>{01 =>'Jan', 02=>'Feb', 03=>'Mar', 04=>'Apr', 05=>'May', 06=>'Jun', 07=>'Jul', 08=>'Aug', 09=>'Sep',10=>'Oct', 11=>'Nov', 12=>'Dec'};
@@ -116,12 +115,12 @@ global class NewdriverdashboardController {
         gasPrice = WrapperUtils.getDriverGasPrice(contactObj.state,contactObj.city);
         return JSON.serialize(contactObj).unescapeHtml4();
     }
-
+    //gets all the reimbursement
     @RemoteAction
     global Static String getAllReimbursements(String year,String did,String accid) {
         return String.escapeSingleQuotes(WrapperUtils.getAllReimbursements(year,did,accid));
     }
-    
+    //gets charts for the mburse dashboard
     @RemoteAction
     global static String getChartData(String contactid) {
         Map<Integer,String> monthNameMap = new Map<Integer, String>{01 =>'Jan', 02=>'Feb', 03=>'Mar', 04=>'Apr', 05=>'May', 06=>'Jun', 07=>'Jul', 08=>'Aug', 09=>'Sep',10=>'Oct', 11=>'Nov', 12=>'Dec'};
@@ -129,16 +128,16 @@ global class NewdriverdashboardController {
         List<Contact> conList = [SELECT id,Account.Start_Graph_Month__c,Activation_Date__c,Deactivated_Date__c FROM contact WHERE id =:contactid ];
         Integer startMonth;
         integer endMonth;
-        if(conList[0].Deactivated_Date__c != null && conList[0].Deactivated_Date__c.Year() == system.today().year()){
-            endMonth = conList[0].Deactivated_Date__c != null ? conList[0].Deactivated_Date__c.month() : system.today().month();
-        }else {
-            endMonth = System.today().month();
-        }
-        if(conList[0].Activation_Date__c != null && conList[0].Activation_Date__c.Year() == system.today().year()){
-            startMonth = conList[0].Activation_Date__c != null ? conList[0].Activation_Date__c.month() : 1;
-        } else {
-            startMonth = 1;
-        }
+        // if(conList[0].Deactivated_Date__c != null && conList[0].Deactivated_Date__c.Year() == system.today().year()){
+        //     endMonth = conList[0].Deactivated_Date__c != null ? conList[0].Deactivated_Date__c.month() : system.today().month();
+        // }else {
+        //     endMonth = System.today().month();
+        // }
+        // if(conList[0].Activation_Date__c != null && conList[0].Activation_Date__c.Year() == system.today().year()){
+        //     startMonth = conList[0].Activation_Date__c != null ? conList[0].Activation_Date__c.month() : 1;
+        // } else {
+        //     startMonth = 1;
+        // }
         String graphMonth;
         if(conList[0].Account.Start_Graph_Month__c != null){
             graphMonth = conList[0].Account.Start_Graph_Month__c;
@@ -155,31 +154,38 @@ global class NewdriverdashboardController {
                 monthList.add( ( i < 10 ? '0' : '' ) + i + '-' + system.today().year());
             }
         }
-        Map<Integer,Decimal> milMap = new Map<Integer,Decimal>();
-        Map<Integer,Decimal> reimMap = new Map<Integer,Decimal>();
-        for(Employee_Reimbursement__c reim : [SELECT Id,Month__c, Total_Approved_Pending_Mileage__c, Total_Monthly_Reimbursement__c  FROM Employee_Reimbursement__c WHERE Contact_Id__c =: contactid ]) {
-            String m = reim.Month__c;
-            List<String> monthLis = m.split('-');
-            milMap.put(Integer.valueOf(monthLis[0]), reim.Total_Approved_Pending_Mileage__c);
-            reimMap.put(Integer.valueOf(monthLis[0]), reim.Total_Monthly_Reimbursement__c);
+        Map<String,Decimal> milMap = new Map<String,Decimal>();
+        Map<String,Decimal> reimMap = new Map<String,Decimal>();
+        for(Employee_Reimbursement__c reim : [SELECT Id,Month__c, Total_Approved_Pending_Mileage__c, Total_Monthly_Reimbursement__c  FROM Employee_Reimbursement__c WHERE Contact_Id__c =: contactid ORDER BY CreatedDate DESC LIMIT 12 ]) {
+            // String m = reim.Month__c;
+            // List<String> monthLis = m.split('-');
+            milMap.put(reim.Month__c, reim.Total_Approved_Pending_Mileage__c);
+            reimMap.put(reim.Month__c, reim.Total_Monthly_Reimbursement__c);
         }
         Decimal sumMileage = 0;
         Decimal sumReim = 0;
         Map<Integer, Decimal> averageReimMap = new Map<Integer, Decimal>();
-        for(Integer i = startMonth ; i <= endMonth; i++ ){
+        //for(Integer i = startMonth ; i <= endMonth; i++ ){
+        List<String> monthNum= new List<String>();
+        //defines number of month passed in current fiscal year of this chart
+        Integer noOfMonthPassed =1;
+        for(String i :monthList ){
             sumMileage += milMap.containskey(i) ? milMap.get(i) : 0;
             sumReim += reimMap.containskey(i) ? reimMap.get(i) : 0;
             ReibursementWrapper reimWrap = new ReibursementWrapper();
-            reimWrap.month = monthNameMap.get(i);
             reimWrap.mileage = milMap.get(i);
             reimWrap.reimbursement = reimMap.get(i);
-            reimWrap.averageMileage = ( sumMileage / i).setScale(2);
-            reimWrap.averagereimbursement = ( sumReim / i).setScale(2);
+            monthNum = i.split('-');
+            reimWrap.month = monthNameMap.get(Integer.valueOf(monthNum[0]));
+            reimWrap.averageMileage = milMap.containskey(i) ? ( sumMileage / noOfMonthPassed).setScale(2):0;
+            reimWrap.averagereimbursement = milMap.containskey(i) ? ( sumReim / noOfMonthPassed).setScale(2):0;
+            noOfMonthPassed++;
             wrapList.add(reimWrap);
         }
+        System.debug('output'+JSON.serialize(wrapList));
         return JSON.serialize(wrapList);
     }
-
+    //fetches notification message for the account
     @AuraEnabled
     public static String getNotificationMessageList(String conId){
         List<NotificationWrapper> wrapList = new List<NotificationWrapper>();
@@ -194,7 +200,7 @@ global class NewdriverdashboardController {
         }
         return JSON.serialize(wrapList);
     }
-
+    //updating notification message 
     @AuraEnabled
     public static string updateNotificationMessage(String msgId){
         String updatedWrapperJson;
@@ -206,14 +212,14 @@ global class NewdriverdashboardController {
         updatedWrapperJson = getNotificationMessageList(msgVal.Contacts__c);
         return updatedWrapperJson;
     }
-
+    //notification data wrapper class
     public class NotificationWrapper{
         public string id {get; set;}
         public DateTime modifiedDate {get; set;}
         public String notificationMessage {get; set;}
         public Boolean unread {get; set;}
     }
-
+    //reimbursement data wrapper
     public class ReibursementWrapper{
         public string month {get; set;}
         public Decimal mileage {get; set;}

@@ -34,7 +34,6 @@ export default class MBurseMain extends LightningElement {
   cellphoneType;
   _handler;
   @api settings;
-  @api dayLeft;
   getUrlParamValue(url, key) {
     return new URL(url).searchParams.get(key);
   }
@@ -143,7 +142,7 @@ export default class MBurseMain extends LightningElement {
     let embeddedStatus = sessionStorage.getItem("envelopeId")
     if(embeddedStatus !== null && window.performance.getEntriesByType("navigation")[0].type === 'navigate'){
       if(parameter === 'cancel'){
-        return
+        location.href = "/app/secur/logout.jsp";
       }else{
         this.CheckStatusPacket();
       }
@@ -364,7 +363,7 @@ export default class MBurseMain extends LightningElement {
     this.uploadVal = false;
     this.packetSent = false;
     let embeddedStatus = sessionStorage.getItem("envelopeId")
-    if(embeddedStatus === 'Packet send'){
+    if(embeddedStatus !== null){
         this.CheckStatusPacket();
     }
     driverDetails({

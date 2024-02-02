@@ -15,7 +15,12 @@ public class CheckRecursiveTest {
         checkRecursive.setting_run(false);
         System.assertEquals(false, checkRecursive.runOnce());
         checkRecursive.setting_run(true);
-        System.assertEquals(true, checkRecursive.runOnce());
+        checkRecursive.setting_SetLatLondAddressFlag(false);
+        checkRecursive.setting_run(false);
+        checkRecursive.setting_SetLatLondAddressFlag(true);
+        checkRecursive.setting_run(true);
+        System.assertEquals(true, checkRecursive.ConvertedFlag());
+        checkRecursive.ConvertedFlag();
     }
 
     

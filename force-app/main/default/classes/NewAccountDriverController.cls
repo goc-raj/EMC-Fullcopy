@@ -340,7 +340,7 @@ public with sharing class NewAccountDriverController {
             daysBetweenActivation = activationDate != null ? activationDate.daysBetween(currentDate) : null;
             if((daysBetweenActivation != null && daysBetweenActivation <= 30) || Test.isRunningTest()){
                 checkActivationDate = true;
-            } else if(daysBetweenActivation > 30 && contactObj.Packet__c != null && contactObj.Packet__c == 'Driver Signed' && contactObj.Watch_Meeting__c == true){
+            } else if(daysBetweenActivation > 30 && contactObj.Packet__c != null && (contactObj.Packet__c == 'Driver Signed' || contactObj.Packet__c == 'Completed')&& contactObj.Watch_Meeting__c == true){
                 checkActivationDate = true;
             } else {
                 checkActivationDate = false;

@@ -38,17 +38,27 @@ public Class MappingGasPriceTriggerTest{
         Profile profile_1 = [SELECT Id FROM Profile WHERE Name = 'Customer Community Login User' LIMIT 1];
         User admin = [SELECT Id, Username, UserRoleId FROM User WHERE Profile.Name = 'System Administrator' AND UserRoleId = :userRole_1.Id LIMIT 1];
         User user_1;
-        Account acc;
+        Account acc; 
         Contact con;
         Contact con1;
        
         System.runAs(admin) {
-            acc = TestUtilityClass.getTestSingleAccount();
+			acc = new Account();
+            acc.Name = 'Delta';
+            acc.BillingStreet = 'Test Street';
+            acc.BillingCity = 'Test City';
+            acc.BillingState = 'ON';
+            acc.BillingPostalCode = '123';
+            acc.BillingCountry = 'CA';
+            acc.Type='Analyst';
+            acc.isUsingTriplog__c = True;
+            acc.Triplog_API__c= 'a';
+            acc.Enable_Email_For_Managers__c = True;
             acc.Triplog_API__c = 'fde76cdde14449bea46b321225ac8fd1';
             acc.Pay_Period_Start_Date__c = System.today().addDays(-100);
             acc.Pay_Period_Days__c = 13;
             acc.Timezone__c = 'US/Eastern';
-            update acc;
+            insert acc;
             Contact contact_1 = new Contact(AccountId = acc.Id, LastName = 'xgeek',External_Email__c= 'abc@gmail.com', Activation_Date__c = system.today());
             insert contact_1;
 

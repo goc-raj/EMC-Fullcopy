@@ -15,6 +15,8 @@ export default class MBurseWelcomeAccount extends LightningElement {
     renderBtnText = 'Go to step 1';
     @api customSetting;
     @api contactId;
+    @api dayLeft;
+
     @api setStatus(){
         this.template.querySelector('c-m-burse-step').getPacketStatus();
         this.refreshView('Pending');
@@ -60,12 +62,16 @@ export default class MBurseWelcomeAccount extends LightningElement {
     }
 
     enable(){
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function () {
+            window.history.go(1);
+        };
         sessionStorage.removeItem('envelopeId');
         location.reload()
     }
 
     takeMeToDashboard() {
-        if(sessionStorage.getItem("envelopeId") === 'Packet send'){
+        if(sessionStorage.getItem("envelopeId") !== null){
             let contact;
             driverDetails({contactId: this.contactId})
             .then((data) => {
@@ -98,6 +104,10 @@ export default class MBurseWelcomeAccount extends LightningElement {
     }
 
     redirect(){
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function () {
+            window.history.go(1);
+        };
         redirectionURL({
             contactId: this.contactId
         })
@@ -177,7 +187,7 @@ export default class MBurseWelcomeAccount extends LightningElement {
                     this.showWelcomeVideo = true;
                 }
                 this.renderBtnText = (!dataList[0].watchMeetingOnBoarding) ? 'Go to step 1' : (dataList[0].insuranceStatus !== 'Uploaded') ? 'Go to step 2' : (dataList[0].driverPacketStatus !== 'Uploaded')
-                ? 'Go to step 3' : (!dataList[0].mlogApp) ? 'Go to step 4' : this.renderBtnText
+                ? 'Go to step 3' : (!dataList[0].mlogApp) ? 'Go to step 4' : 'Go to dashboard'
             }
         }).catch((error) => {
                 console.log("error driverDetails", JSON.parse(JSON.stringify(error)))

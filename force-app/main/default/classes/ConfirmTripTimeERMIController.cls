@@ -10,7 +10,7 @@ public with sharing class ConfirmTripTimeERMIController {
     public static String contactId;
     public string mileageDetailWrapper {get; set;}
     public OrgWideEmailAddress[] owea;
-    
+    //constructor setting pre required data
     public ConfirmTripTimeERMIController (){
         contactId = ApexPages.currentPage().getParameters().get('id');
         if(contactId != null){
@@ -156,13 +156,14 @@ public with sharing class ConfirmTripTimeERMIController {
             Messaging.SendEmailResult [] result = Messaging.sendEmail(emailist, false);
         }
     }
+    //sends error messages
     @AuraEnabled
     public static void sendErrorEmail (String conEmail,String driverName,String biweekName,Decimal mileage,String driveTime,String stayTime,String totalTime,Integer countError,String driverType){
         if(countError != null ){
             sendConfirmEmail(conEmail,driverName,biweekName,mileage,driveTime,stayTime,totalTime,countError,driverType);
         }
     }
-    
+    //delete trips for ermi account
     @AuraEnabled
     public static String deleteTripsForErmi (String contactId,String startdate,String enddate){
         delete [select id from Employee_Mileage__c where Trip_Date__c >=: Date.parse(startdate) AND Trip_Date__c <=: Date.parse(enddate) AND Trip_Status__c = 'Not Approved Yet' AND EmployeeReimbursement__r.Contact_Id__c =: contactId ];
@@ -249,6 +250,7 @@ public with sharing class ConfirmTripTimeERMIController {
         }
         return 'sucess';
     }
+    //reimbursement mileage fetch
     @AuraEnabled
     public static String reimMileages (String biweekReim){
         List<EmployeeMileages> mileages = new List<EmployeeMileages>();
@@ -258,7 +260,7 @@ public with sharing class ConfirmTripTimeERMIController {
         }
         return JSON.serialize(mileages);
     }
-    
+    //mileage class wrapper
     public class MileageWrapper {
         public string biWeekId { get; set; }
         public string biWeekPayperiod {get; set;}

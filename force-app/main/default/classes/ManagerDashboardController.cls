@@ -6,28 +6,29 @@
  * @Date:  4th june 2019 | Natavar Ghodasara
  *
  */
-public class ManagerDashboardController 
-{
+public class ManagerDashboardController
+{   //These are public static properties used to store information related to the dashboard.
     public static String totalmileages{get;set;}
     public static String totalvariableamount{get;set;}
     public static String nameofEmployee{get;set;}
     public static String emailofEmployee{get;set;}
     public static Boolean showMyTeam {get;set;}
     public static string videoCustom {get;set;}
-    public ManagerDashboardController() 
-    {
+//constructor  setting up required this before execution of any other method these varible will be set on loading of the class
+    public ManagerDashboardController(){
         setEmployeeName();
         NewDashboardVideoLink__c videoCustomSetting = NewDashboardVideoLink__c.getOrgDefaults();
         videoCustom = json.serialize(videoCustomSetting );
     }
-    public static String getAccountid()
-    {
+    //This methods retrieve information from the current page parameters providing account id
+    public static String getAccountid(){
         if(ApexPages.currentPage().getParameters().containsKey('accid') && String.isNotBlank(ApexPages.currentPage().getParameters().get('accid')))        {
             return ApexPages.currentPage().getParameters().get('accid');
         } else {
             return '';
         }
     }
+    //This methods retrieve information from the current page parameters providing Contact id
     public static String getContactid()
     {
         if(ApexPages.currentPage().getParameters().containsKey('id') && String.isNotBlank(ApexPages.currentPage().getParameters().get('id'))) {
@@ -36,6 +37,7 @@ public class ManagerDashboardController
             return '';
         }
     }
+    //This methods will define the checkbox which in tern gives admin access to his contacts
      public static String getShowTeam() {
         if (ApexPages.currentPage().getParameters().containsKey('showteam') && String.isNotBlank(ApexPages.currentPage().getParameters().get('showteam'))) {
             return ApexPages.currentPage().getParameters().get('showteam');
@@ -43,6 +45,7 @@ public class ManagerDashboardController
             return '';
         }
     }
+    //this method return a reference link which will help in redirection
     public static PageReference getRedirected()
     {
         if(getContactid()!=''&& getAccountid()!='' && getShowTeam() != '')        {
@@ -73,10 +76,12 @@ public class ManagerDashboardController
         vehicleValueList = [SELECT id,Vehicle_URL_Mapping__r.vehicle__c,Value__c, Plan_Years__c from Vehicle_Value__c where Account__c =: accountId];
         return JSON.serialize(vehicleValueList ).unescapeHtml4();
     }
+    // Calls a method from a utility class (WrapperUtils) to get chart data.
     public static string getChartData(String did,Boolean showTeam,String accid,String role)
     {
         return WrapperUtils.getChartData(did,showTeam,accid,role);
     }
+    // Sets the employee name, email, and showMyTeam based on the contact ID.
     public static void setEmployeeName() {
         Contact employee= [select Id,Name,showTeamRecord__c,External_Email__c from Contact where id =: getContactid()];
         if(employee!=null) {
@@ -89,6 +94,7 @@ public class ManagerDashboardController
             showMyTeam = false;
         }
     }
+    //this method will update the reimbursement of all the driver with fresh data from the mlog
     @RemoteAction
     public static string getAllDriversLastMonthUpdatedReimbursements(String did,String accid,boolean showTeamRecord,String role)
     {
@@ -98,7 +104,7 @@ public class ManagerDashboardController
             return String.escapeSingleQuotes(WrapperUtils.getLastMonthReimbursements(did,accid,boolean.valueOf(showTeamRecord),role));
         }
     }
-    
+     //this method will get the reimbursement of all the driver with data from the mlog
     @AuraEnabled
     public static string getAllDriversLastMonthReimbursements(String accountId,String contactId,Boolean showTeam,String role)
     {
@@ -108,6 +114,7 @@ public class ManagerDashboardController
             return String.escapeSingleQuotes(WrapperUtils.getLastMonthReimbursements(contactId,accountId,showTeam,role));
         }
     }
+    //this method will get the unapproved trips reimbursement of all the driver with data from the mlog
     public static string getAllDriversLastMonthUpdatedUnapprovedReimburseclone(String did,String accid,boolean showTeamRecord,String role) 
     {
         if(BiWeeklyWrapperUtils.checkBiweekAccount(accid) == true){
@@ -116,7 +123,7 @@ public class ManagerDashboardController
             return String.escapeSingleQuotes(WrapperUtils.getUnapprovedReimbursements(did,accid,showTeamRecord,role));
         }
     }
-    
+    //this method will get the unapproved trip of all the driver from the mlog and update it while overwriting previous data
     @RemoteAction
     public static string getAllDriversLastMonthUpdatedUnapprovedReimburseClone1(String did, String accid,string showTeamRecord,String role) 
     {
@@ -126,6 +133,7 @@ public class ManagerDashboardController
             return String.escapeSingleQuotes(WrapperUtils.getUnapprovedReimbursements(did,accid,boolean.valueOf(showTeamRecord),role));
         }
     }
+    //this method will get the unapproved trip of all the driver from the mlog and update it while overwriting previous data
     @AuraEnabled
     public static string getAllDriversLastMonthUnapprovedReimbursementsclone(String accountId,String contactId,Boolean showTeam,String role)
     {
@@ -135,7 +143,7 @@ public class ManagerDashboardController
             return String.escapeSingleQuotes(WrapperUtils.getUnapprovedReimbursements(contactId,accountId,showTeam,role));
         }
     }
-    
+    //this method will approve the reimbursement for the drivers
     @RemoteAction
     public static AsyncApexJob approveReimbursements(String reimbursements,String did,String accid,String showTeamRecord,String updateThreshold)
     {
@@ -148,6 +156,7 @@ public class ManagerDashboardController
         AsyncApexJob aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors FROM AsyncApexJob WHERE ID =: batchprocessid ];
         return aaj;
     }
+    //Returns a list of updated reimbursements.
     @AuraEnabled
     public static List<String> UpdatedReimList(String did,String accid,String showTeamRecord,String role){
         List<String> updatedlist = new List<String>();
@@ -155,7 +164,7 @@ public class ManagerDashboardController
         updatedlist.add(getAllDriversLastMonthUpdatedUnapprovedReimburseClone(did,accid,boolean.valueOf(showTeamRecord),role));
         return updatedlist;
     }
-    
+    // Checks the status of a batch job.
     @AuraEnabled
     public static String CheckBatchStatus(ID batchprocessid){
         AsyncApexJob aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors FROM AsyncApexJob WHERE ID =: batchprocessid ];
@@ -164,7 +173,7 @@ public class ManagerDashboardController
         }
         return aaj.Status;
     }
-
+    //Initiates the approval of mileages.
     @AuraEnabled
     public static AsyncApexJob approveMileagesClone(String mileages, String did, String accid,String showTeamRecord)
     {
@@ -178,13 +187,13 @@ public class ManagerDashboardController
         }
         return aaj;
 }
-    
+    //Initiates the approval of mileages.
     @AuraEnabled
     public static String approveMileages(String checked,String selected,String unapprove,String name,String emailaddress)
     {
         return WrapperUtils.approveMileagesForAdminDash(checked,selected,unapprove,name,emailaddress);
     }
-
+    //Retrieves unapproved mileages.
     @AuraEnabled
     public static String getUnapprovedMileages(String reimbursementDetails,String accountId)
     {   system.debug('reimbursementDetails'+reimbursementDetails);
@@ -194,14 +203,14 @@ public class ManagerDashboardController
             return String.escapeSingleQuotes(WrapperUtils.getUnapprovedMileages(reimbursementDetails));
         }
     }
-    
+    //Retrieves the total number of drivers for a manager.
     @AuraEnabled(cacheable=true)
     public static object totalNoofDriverforManager(String managerId) {
         AggregateResult[] groupedResults = [select COUNT(id) totalDriver from contact where Deactivated_Date__c = null and Manager__c =:  managerId];
         Object totalNoOfDriver = groupedResults[0].get('totalDriver');
         return totalNoOfDriver;
     }
-    
+    //Retrieve onboarding and insurance-related data.
     @AuraEnabled(cacheable=true)
     public static  string onboardingStatus(String managerId,String accountId,String role) {
         map<String, Decimal>  onBoardingMap = new map<String, Decimal>();
@@ -264,7 +273,7 @@ public class ManagerDashboardController
         }
         return json.serialize(onBoardingMap);
     }
-    
+    //Retrieve onboarding and insurance-related data.
     @AuraEnabled(cacheable=true)
     public Static String insuranceReport(String managerId,String accountId,String role){
         map<String , Integer>  InsuranceMap = new map<String, Integer>();
@@ -314,7 +323,7 @@ public class ManagerDashboardController
         }
         return json.serialize(InsuranceMap);
     }
-
+    //Retrieves details of the manager's team members.
     @AuraEnabled
     public static string myTeamDetails(String managerId, String accountId, Boolean showteam,String role){
         List<ContactWrapper> conWrapList = new List<ContactWrapper >();
@@ -340,7 +349,7 @@ public class ManagerDashboardController
         String wrapjson = JSON.serialize(conWrapList);
         return wrapjson;
     }
-
+    // Retrieves details of high-risk drivers.
     @AuraEnabled
     public static string highRiskDriversDetails(String managerId,String accountId,boolean highMileage, boolean showTeam,String role){
         List<ContactWrapperForMileage> conWrapList = new List<ContactWrapperForMileage >();
@@ -389,22 +398,22 @@ public class ManagerDashboardController
             return 'No Trips Found More than 250 miles for this contact';
         }
     }
-
+    // Methods related to notifications and reimbursements.
     @AuraEnabled
     public static String getNotificationMessageList(String conId,Integer year,String month){
         return LWCWrapperUtils.getNotificationMessageList(conId,year,month);
     }
-    
+    // Methods related to notifications and reimbursements.
     @AuraEnabled
     public static string updateNotificationMessage(String msgId,Integer year,String month){
         return LWCWrapperUtils.updateNotificationMessage(msgId,year,month);
     }
-
+    // identifies the mileages which are high risk and create reimbursement for those mileagse
     @AuraEnabled
     public static string reimbursementForHighMileageOrRisk(String managerId,String accountId,String month,boolean showteam,boolean highMileage,String role){
         return LWCWrapperUtils.reimbursementForHighMileageOrRisk(managerId,accountId,month,showteam,highMileage,role);
     }
-
+    //Retrieves contact data for a manager.
     @AuraEnabled(cacheable=true)
     public static String managerContactData(String managerId,String accountId,String role){
         List<contact> driverDataList = new List<contact>();
@@ -415,34 +424,34 @@ public class ManagerDashboardController
         }
         return JSON.serialize(driverDataList ).unescapeHtml4();
     }
-
+    //methods returns list of months for the specific account
     @AuraEnabled
     public static string accountMonthList(String accountId){
         return LWCWrapperUtils.accountMonthList(accountId);
     }
-
+    //return mileage for the specific month
     @AuraEnabled
     public static String getMileages(String clickedMonth,string clickedYear,String did) {
         return WrapperUtils.getMileages(clickedMonth,clickedYear,did);
     }
-
+    //return list of reimbursement for the given contact
     @AuraEnabled
     public static string contactReimMonthList(String contactId){
         return LWCWrapperUtils.contactReimMonthList(contactId);
     }
-
+    //return the last month reimbursement fir the given contact
     @AuraEnabled
     public static string getLastMonthReimbursements(String accountId,String contactId,Boolean showTeam,String month,String role){
         return LWCWrapperUtils.getLastMonthReimbursements(contactId,accountId,showTeam,role,month);
     }
-
+    //sync trip for the given account
     @AuraEnabled
     public static string MassSyncTrips(String accountId,String startDate,String endDate,String month,String tripStatus,String activityStatus){
         MassSyncTrips  obj = new MassSyncTrips(accountId,startDate,endDate,month,tripStatus,false);
         Database.executeBatch (obj,1);
         return 'Success';
     }
-
+    // sync the trip for the reimbursement passed in the string
     @AuraEnabled
     public static string MassSyncTripsForReimbursements(String reimbursements){
         List<String> reimIds = new List<String>();
@@ -451,7 +460,7 @@ public class ManagerDashboardController
         Database.executeBatch (obj,1);
         return 'Success';
     }
-    
+    //delete the mileage for the reimbursements
     @AuraEnabled
     public static string DeleteMileages(String reimbursements){
         List<String> reimIds = new List<String>();
@@ -466,19 +475,19 @@ public class ManagerDashboardController
         return 'Success';
     }
     
-    
+    //sync trip for the given reimbursement period 
     @AuraEnabled
     public static string MassSyncTripsForBiweek(String biWeek,String accID){
         MassSyncTripforCommute obj = new MassSyncTripforCommute(biWeek,accID);
         Database.executeBatch (obj,1);
         return 'Success';
     }
-    
+    //return the link for the redirection
     @AuraEnabled
     public static String loginRedirection(String contactId){
         return 'success';
     }
-    
+    //Methods related to compliance and onboarding reports.
     @AuraEnabled
     Public Static String complRptDownloadtData (String managerId,String accountId,String role){
         List<Contact> conList = new List<Contact>();
@@ -490,7 +499,7 @@ public class ManagerDashboardController
         string conListJson = JSON.serialize(conList);
         return conListJson;
     }
-    
+    // Methods related to compliance and onboarding reports.
     @AuraEnabled
     Public Static String onboardRptDownloadtData (String managerId,String accountId,String role){
         List<Contact> conList = new List<Contact>();
@@ -502,7 +511,7 @@ public class ManagerDashboardController
         string conListJson = JSON.serialize(conList);
         return conListJson;
     }
-    
+    //batch for getting the unapproved trips for the reimbursement
     @AuraEnabled
     public static String getUnapprovedReim(String reimbursements){
         List<String> reimIds = new List<String>();
@@ -560,4 +569,5 @@ public class ManagerDashboardController
         public String name {get;set;}
         public Decimal mileage{get;set;}
     }
+
 }
