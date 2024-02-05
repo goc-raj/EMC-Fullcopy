@@ -370,6 +370,16 @@ export default class ReportDetail extends LightningElement {
                                     let twodecimalValues = data[i][key].toFixed(2);
                                     valueofkey.push(apifieldstoheader.get(key),twodecimalValues);
                                 }
+                                else if(numericheadertoapifields.has(key))
+                                {
+                                    let numericValues;
+                                    if(data[i][key] % 1 !== 0) {
+                                      numericValues = data[i][key].toFixed(2);
+                                    } else {
+                                      numericValues = data[i][key];
+                                    }
+                                    valueofkey.push(apifieldstoheader.get(key),numericValues);
+                                }
                                 else
                                 {
                                     valueofkey.push(apifieldstoheader.get(key),data[i][key]);
@@ -1314,6 +1324,7 @@ export default class ReportDetail extends LightningElement {
     this.updatebtn = true;
     this.stringifydata = event.detail.list;
     let updData = JSON.parse(event.detail.list);
+    console.log("Befoer Update updData", JSON.stringify(updData));
     this.remId = event.detail.id;
     updData.forEach(row => {
       if (this.remId == row.Id) {
@@ -1322,9 +1333,9 @@ export default class ReportDetail extends LightningElement {
           let key = index.split('-')[0];
           if (row.hasOwnProperty(key)) {
             const value1 = parseFloat(row[key]) || 0; // Convert to float, default to 0 if not a valid number
-            const value2 = parseFloat(row['Variable Amount']) || 0;
+            const value2 = parseFloat(row['Monthly Variable Amount']) || 0;
             this.totalsum = value1 + value2;
-            row['Total Reimbursement'] = this.totalsum.toLocaleString();
+            row['Total Monthly Reimbursement'] = this.totalsum.toLocaleString();
 						this.keyName = key;
             this.keyValue = row[key];
             let finalJson = [];
@@ -1334,7 +1345,7 @@ export default class ReportDetail extends LightningElement {
         })
       }
     })
-    console.log("updData", JSON.stringify(updData))
+    console.log("After Update updData", JSON.stringify(updData));
     if (this.searchdata.length > 0) {
       this.searchdata = updData;
       if (this.isSearch == true) {
@@ -1342,7 +1353,7 @@ export default class ReportDetail extends LightningElement {
           if (this.remId == row.Id) {
             if (row.hasOwnProperty(this.keyName)) {
               row[this.keyName] = this.formatNumberWithCommas(this.keyValue);
-              row['Total Reimbursement'] = this.totalsum.toLocaleString();
+              row['Total Monthly Reimbursement'] = this.totalsum.toLocaleString();
             }
           }
         })
@@ -1356,7 +1367,7 @@ export default class ReportDetail extends LightningElement {
             if (row.hasOwnProperty(this.keyName)) {
               console.log('Key Name : ' + this.keyName);
               row[this.keyName] = this.formatNumberWithCommas(this.keyValue);
-              row['Total Reimbursement'] = this.totalsum.toLocaleString();
+              row['Total Monthly Reimbursement'] = this.totalsum.toLocaleString();
             }
           }
         })
@@ -1405,7 +1416,7 @@ export default class ReportDetail extends LightningElement {
             /* Fixed decimal issue in Fixed Amount field */
             for (let record of this.filterdataSearch) {
               for (let keyField of record.keyFields) {
-                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
+                if (keyField.key === "Monthly Fixed Amount" && keyField.value !== null && keyField.value.endsWith(".")) {
                   keyField.value = keyField.value.slice(0, -1);
                 }
               }
@@ -1420,7 +1431,7 @@ export default class ReportDetail extends LightningElement {
             /* Fixed decimal issue in Fixed Amount field */
             for (let record of this.finaldataSearch) {
               for (let keyField of record.keyFields) {
-                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
+                if (keyField.key === "Monthly Fixed Amount" && keyField.value !== null && keyField.value.endsWith(".")) {
                   keyField.value = keyField.value.slice(0, -1);
                 }
               }
@@ -1440,7 +1451,7 @@ export default class ReportDetail extends LightningElement {
             /* Fixed decimal issue in Fixed Amount field */
             for (let record of this.searchdata) {
               for (let keyField of record.keyFields) {
-                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
+                if (keyField.key === "Monthly Fixed Amount" && keyField.value !== null && keyField.value.endsWith(".")) {
                   keyField.value = keyField.value.slice(0, -1);
                 }
               }
@@ -1454,7 +1465,7 @@ export default class ReportDetail extends LightningElement {
             /* Fixed decimal issue in Fixed Amount field */
             for (let record of this.finaldata) {
               for (let keyField of record.keyFields) {
-                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
+                if (keyField.key === "Monthly Fixed Amount" && keyField.value !== null && keyField.value.endsWith(".")) {
                   keyField.value = keyField.value.slice(0, -1);
                 }
               }
@@ -1750,7 +1761,7 @@ export default class ReportDetail extends LightningElement {
             }
           })
           .catch(error => {
-            console.log("error for dropdown list", JSON.parse(JSON.stringify(error)));
+            console.log("error in dropdown list", JSON.parse(JSON.stringify(error)));
             this.showbuttons = false;
             this.ishow = true;
             // this.recordDisplay = false;
@@ -1771,7 +1782,7 @@ export default class ReportDetail extends LightningElement {
           })
       })
       .catch(error => {
-        console.log("error for report list", JSON.parse(JSON.stringify(error)));
+        console.log("error in report list", JSON.parse(JSON.stringify(error)));
         this.showbuttons = false;
         this.ishow = true;
         // this.recordDisplay = false;

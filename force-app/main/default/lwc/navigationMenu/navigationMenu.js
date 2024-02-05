@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 import {
-    LightningElement, api
+    LightningElement, api, wire, track
 } from 'lwc';
 // import {
 //      openEvents
@@ -8,11 +8,17 @@ import {
 import emcCss from '@salesforce/resourceUrl/EmcCSS';
 import logo from '@salesforce/resourceUrl/mBurseCss';
 import redirectionURL from '@salesforce/apex/NewAccountDriverController.loginRedirectionADMD';
+import { getRecord } from "lightning/uiRecordApi";
+import CONTACT_ROLE_FIELD from "@salesforce/schema/Contact.Role__c";
+const FIELDS = ["Contact.Name"];
+
 export default class NavigationMenu extends LightningElement {
     @api driverMenuItem;
     @api driverName;
     @api driverEmail;
     @api profileId;
+    @api recordId;
+    @track record;
     contactId;
     menuLabel;
     initialized = false;
@@ -29,6 +35,26 @@ export default class NavigationMenu extends LightningElement {
     _driver = 'D';
     _role;
   
+    @wire(getRecord, { recordId: "$recordId", fields: [CONTACT_ROLE_FIELD] })
+    contact({ error, data }){
+        if (data) {
+            this.record = data;
+            if(this.record.fields.Role__c){
+                this.showButtons = (this.record.fields.Role__c.value === 'Driver/Admin' || this.record.fields.Role__c.value === 'Driver/Manager') ? true : false;
+                this._originalAdmin = (this.record.fields.Role__c.value === 'Driver/Manager') ? 'Manager Dashboard' : 'Admin Dashboard';
+                this._admin = (this.record.fields.Role__c.value === 'Driver/Manager') ? 'M' : 'A';
+            }
+           console.log("Record##", data)
+        } else if (error) {
+            this.error = error;
+        }
+    };
+
+
+    get role() {
+        return this.record.fields.Role__c.value;
+    }
+    
     get adminText(){
         return this._admin
     }
@@ -44,13 +70,14 @@ export default class NavigationMenu extends LightningElement {
     set driverText(value){
             this._driver = value;
     }
+
   
     getUrlParamValue(url, key) {
         return new URL(url).searchParams.get(key);
     }
   
     handleRedirect(event) {
-        event.stopPropagation();
+//event.stopPropagation();
         let menu = this.template.querySelectorAll(".tooltipText");
         menu.forEach((item) => item.classList.remove('active'))
         const selectedMenu = (event.currentTarget !== undefined ) ? event.currentTarget.dataset.name : event;
@@ -112,7 +139,7 @@ export default class NavigationMenu extends LightningElement {
         })
         .then((result) => {
             console.log("Result", result);
-            let url = window.location.origin + result;
+            let url = location.origin + result;
             window.open(url, '_self');
         })
         .catch((error) => {
@@ -152,7 +179,7 @@ export default class NavigationMenu extends LightningElement {
     connectedCallback(){
       console.log("Pr--", this.profileId)
       /*Get logged in user id */
-      const idParamValue = this.getUrlParamValue(window.location.href, "id");
+      const idParamValue = this.getUrlParamValue(location.href, "id");
       this.contactId = idParamValue
       if(this.profileId){
           this.showButtons = (this.profileId === '00e31000001FRDXAA4' || this.profileId === '00e31000001FRDZAA4') ? true : false;

@@ -1885,8 +1885,8 @@ export default class NewDatatableComponent extends LightningElement {
         const month = this.getMonthNumber(this.monthfilter);
         const date = new Date();
         if(month !== -1){
-          let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), date.getMonth())
-          let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), date.getMonth())
+          let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), month)
+          let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), month)
           this.StartDate = excelFormatDate(convertFromDate);
           this.EndDate = excelFormatDate(convertToDate);
         }
