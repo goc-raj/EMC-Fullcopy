@@ -891,6 +891,14 @@ export default class DriverUserProfile extends LightningElement {
         }
     }
 
+    @api reflow(){
+        if (this.template.querySelector('c-canvas-chart')) {
+            let canvas = this.template.querySelectorAll('c-canvas-chart');
+            canvas[0].reflowChart();
+            canvas[1].reflowChart();
+        }
+    }
+
     connectedCallback(){
         let currDate = new Date();
         let monthNo = currDate.getMonth();

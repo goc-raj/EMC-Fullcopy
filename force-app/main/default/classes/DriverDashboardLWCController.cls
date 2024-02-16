@@ -253,7 +253,7 @@ global class DriverDashboardLWCController {
         employeeReimbursement.totalFixedAmountCalc = '$' +String.valueOf((totalFixedAmountCount).setScale(2));
         employeeReimbursement.totalMonthlyFixedCalc = '$' +String.valueOf((fixedCount).setScale(2));
         employeeReimbursement.totalAVGCalc = '$' +String.valueOf((avgToDateCount).setScale(2));
-        employeeReimbursement.totalReim = '$' +String.valueOf((reimCount).setScale(2));
+        employeeReimbursement.totalReim = '$' +String.valueOf((reimCount).setScale(2));        
         List<String> lstOfReim = new List<String>();
         lstOfReim.add(responseData);
         lstOfReim.add(Json.serialize(employeeReimbursement));
@@ -269,7 +269,7 @@ global class DriverDashboardLWCController {
         public String totalFixedAmountCalc {get;set;}
         public String totalMonthlyFixedCalc {get;set;}
         public String totalAVGCalc {get;set;}
-        public String totalReim {get;set;}
+        public String totalReim {get;set;}        
     }
 
      // AuraEnabled method to get gas price and rate
@@ -357,6 +357,24 @@ global class DriverDashboardLWCController {
     public static NewDashboardVideoLink__c getCustomSettings(){
         return NewDashboardVideoLink__c.getOrgDefaults();
     }
+    
+     @AuraEnabled
+    public static void postExpenseReimbursement(Id accountId,String empReMonth,String contactEmail,String totalReimburement){
+        UploadConcurQuickExpenseTriplog.postTotalReimbursement(accountId,empReMonth,contactEmail,totalReimburement);
+    }
+    
+    @AuraEnabled
+    public static void TripCallout(Id driverId, String month, String year, String fuel, String maintTyre, Id empReID,String mpg,String status){
+       
+        WrapperUtils.TripCallout(driverId,month,year,fuel,maintTyre,empReID,mpg,status);
+    }
+
+    //method is use for change reimbursement status    
+    @AuraEnabled
+    public static void UpdateReimbursementStatus(Id empReID){
+        WrapperUtils.UpdateReimbursementStatus(empReID);
+    }
+    
     //get planned parameter
     @AuraEnabled
     public static String getPlanParameter (String contactId) {

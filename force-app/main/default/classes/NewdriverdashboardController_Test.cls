@@ -15,7 +15,9 @@ public class NewdriverdashboardController_Test {
         User userObj;
         
         System.runAs(admin) {
-            acc = TestDataFactory.createAccount(True, 'Test Account', true);
+            acc = TestDataFactory.createAccount(False, 'Test Account', true);
+            acc.Start_Graph_Month__c='Jan';
+            insert acc;
             con = TestDataFactory.createDriverContact(true, acc.Id, 'Driver', vehicleType.Name, 'Paras.Patel', 2); 
             userObj = TestDataFactory.createUser(True, profileObj.Id, con[0].Id);
         }        

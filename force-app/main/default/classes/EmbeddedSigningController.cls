@@ -79,19 +79,19 @@ public class EmbeddedSigningController {
 
       List<dfsle.Recipient> recipientList = new List<dfsle.Recipient>() ;
       //merge field for tags to writeback in the salesforce
-      dfsle.Tab.MergeField LicenseMergeField = new dfsle.Tab.MergeField ('Contact.Driver_License_State__c',null,null,true,false);
-      dfsle.Tab.MergeField StateMergeField = new dfsle.Tab.MergeField ('Contact.Driver_License_Number__c',null,null,true,false);
+      dfsle.Tab.MergeField LicenseMergeField = new dfsle.Tab.MergeField ('Contact.Driver_License_Number__c',null,null,true,false);
+      dfsle.Tab.MergeField StateMergeField = new dfsle.Tab.MergeField ('Contact.Driver_License_State__c',null,null,true,false);
       dfsle.Tab.MergeField DOB = new dfsle.Tab.MergeField ('Contact.Birthdate',null,null,true,false);
       
       //setting up tags for the pdf
-      dfsle.Tab DriverLicense = new dfsle.TextTab().withMergeField(LicenseMergeField).withReadOnly(false).withRequired(true).withAnchor(new dfsle.Tab.Anchor('Driver’s License Number',false,false,'right',true, true,'pixels',0, -3)).withDataLabel('Driver License');
-      dfsle.Tab EmployeeLicenceState = new dfsle.TextTab().withMergeField(StateMergeField).withReadOnly(false).withRequired(true).withAnchor(new dfsle.Tab.Anchor('Employee’s License State',false,false,'right',true, true,'pixels',0, -3)).withDataLabel('Driver State');
-      dfsle.Tab DateOfBirth = new dfsle.DateTab().withMergeField(DOB).withReadOnly(false).withRequired(true).withAnchor(new dfsle.Tab.Anchor('Date of Birth',false,false,'right',true, true,'pixels',0, -3)).withDataLabel('BirthDate');
+      dfsle.Tab DriverLicense = new dfsle.TextTab().withMergeField(LicenseMergeField).withReadOnly(false).withRequired(true).withAnchor(new dfsle.Tab.Anchor('Driver’s License Number',false,false,'right',true, true,'pixels',0, -5)).withDataLabel('Driver License');
+      dfsle.Tab EmployeeLicenceState = new dfsle.TextTab().withMergeField(StateMergeField).withReadOnly(false).withRequired(true).withAnchor(new dfsle.Tab.Anchor('Employee’s License State',false,false,'right',true, true,'pixels',0, -5)).withDataLabel('Driver State');
+      dfsle.Tab DateOfBirth = new dfsle.DateTab().withMergeField(DOB).withReadOnly(false).withRequired(true).withAnchor(new dfsle.Tab.Anchor('Date of Birth',false,false,'right',true, true,'pixels',0, -5)).withDataLabel('BirthDate');
       dfsle.Tab employeeSignTab = new dfsle.SignHereTab().withScale(1.0).withRequired(true).withAnchor(new dfsle.Tab.Anchor('Employee’s Signature',false,false,'right',true,true,'pixels',20,0));
-      dfsle.Tab employeeNameTab = new dfsle.FullNameTab().withFormatting(new dfsle.Tab.Formatting('default','default',12,false,false,false,false,false)).withAnchor(new dfsle.Tab.Anchor('Employee Name',false,false,'right',true,true,'pixels',20,0));
-      dfsle.Tab employeeSignedDateTab = new dfsle.DateSignedTab().withFormatting(new dfsle.Tab.Formatting('default','default',12,false,false,false,false,false)).withAnchor(new dfsle.Tab.Anchor('Employee Signed Date',false,false,'right',true,true,'pixels',20,0));
+      dfsle.Tab employeeNameTab = new dfsle.FullNameTab().withFormatting(new dfsle.Tab.Formatting('default','default',12,false,false,false,false,false)).withAnchor(new dfsle.Tab.Anchor('Employee Name',false,false,'right',true,true,'pixels',15,-5));
+      dfsle.Tab employeeSignedDateTab = new dfsle.DateSignedTab().withFormatting(new dfsle.Tab.Formatting('default','default',12,false,false,false,false,false)).withAnchor(new dfsle.Tab.Anchor('Employee Signed Date',false,false,'right',true,true,'pixels',15,-5));
       dfsle.Tab CompanySignTab = new dfsle.SignHereTab().withScale(1.0).withRequired(true).withAnchor(new dfsle.Tab.Anchor('Company Signature',false,false,'right',true,true,'pixels',20,0));
-      dfsle.Tab comapnySignedDateTab = new dfsle.DateSignedTab().withFormatting(new dfsle.Tab.Formatting('default','default',12,false,false,false,false,false)).withAnchor(new dfsle.Tab.Anchor('Company Singed Date',false,false,'right',true,true,'pixels',20,0));
+      dfsle.Tab comapnySignedDateTab = new dfsle.DateSignedTab().withFormatting(new dfsle.Tab.Formatting('default','default',12,false,false,false,false,false)).withAnchor(new dfsle.Tab.Anchor('Company Signed Date',false,false,'right',true,true,'pixels',15,-5));
       
       dfsle.Recipient myRecipient1 = dfsle.Recipient.newEmbeddedSigner().withTabs(new List<dfsle.Tab> {DateOfBirth,DriverLicense,EmployeeLicenceState,employeeSignedDateTab,employeeNameTab,employeeSignTab,DateOfBirth });
       recipientList.add(myRecipient1);
@@ -120,7 +120,7 @@ public class EmbeddedSigningController {
       }
       dsEnvelope = dsEnvelope.withRecipients(recipientList);
       //setting document
-      ContentDocumentLink contentDocLink = [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId  =: mySourceId AND ContentDocument.LatestPublishedVersion.Title =: Constants.driverAgreement limit 1];
+      ContentDocumentLink contentDocLink = [SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId  =: mySourceId AND ContentDocument.LatestPublishedVersion.Title =: Constants.driverAgreement Order BY SystemModstamp  Desc limit 1];
       System.debug('inside SendEnvelope  '+contentDocLink);
       ContentVersion file = [SELECT Title ,VersionData,dfsle__GeneratedFileFormat__c, dfsle__GeneratedFileName__c, dfsle__GeneratedFileSuffix__c, dfsle__Rule__c, FileExtension, FileType,ContentDocumentId FROM ContentVersion WHERE IsLatest = TRUE  and ContentDocumentId=:contentDocLink.ContentDocumentId];
       dfsle.Document myDocument =dfsle.Document.fromFile(file);

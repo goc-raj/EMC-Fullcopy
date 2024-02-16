@@ -276,6 +276,16 @@ export default class UserPreviewTable extends LightningElement {
         return object
     }
 
+    getSingleObject(data, id, key){
+        var object = {};
+        for (let i = 0; i < data.length; i++) {
+            if (data[i][key] === id) {
+                object = data[i];
+            }
+        }
+        return object
+    }
+
     gotoPage(pageNumber, source) {
         var recordStartPosition, recordEndPosition;
         var i, arrayElement; // Loop helpers
@@ -984,6 +994,39 @@ export default class UserPreviewTable extends LightningElement {
         let targetId = event.currentTarget.dataset.id;
         let rowObject = { isChecked: checked, targetId: targetId }
         this.dispatchEvent(new CustomEvent('rowselection', { detail: rowObject }));
+    }
+
+    sendBtnHandler(event){
+        const id = event.currentTarget.dataset.key
+        const name = event.currentTarget.dataset.name
+        const obj = this.getSingleObject(this.modelData, id, 'employeeReimbursementId')
+        if(name === 'Mileage'){
+            let rowObject = {
+                Id : obj.employeeReimbursementId,
+                month : obj.month,
+                fuel : obj.fuel,
+                maintainsAndTyres: obj.maintainsAndTyres,
+                mpg : obj.mpg
+            }
+            this.dispatchEvent(new CustomEvent('rowsync', { detail: rowObject }));
+        }else{
+            let concurObject = {
+                Id : obj.employeeReimbursementId,
+                contactEmail : obj.contactEmail,
+                totalReimbursements : obj.totalReimbursements
+            }
+            this.dispatchEvent(new CustomEvent('concursync', { detail: concurObject }));
+        }
+     
+        console.log("btn handler", event.currentTarget.dataset.name)
+        console.log("employeeReimbursementId" ,obj.employeeReimbursementId)
+        console.log("month" ,obj.month)
+        console.log("fuel" ,obj.fuel)
+        console.log("maintainsAndTyres" ,obj.maintainsAndTyres)
+        console.log("mpg" ,obj.mpg)
+        console.log("contactEmail" ,obj.contactEmail)
+        console.log("totalReimbursements" ,obj.totalReimbursements)
+       
     }
 
     checkboxHandler(event) {

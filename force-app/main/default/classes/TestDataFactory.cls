@@ -447,7 +447,8 @@ public with sharing class TestDataFactory {
             empMileage.Trip_Date__c = system.today();
             empMileage.Bi_Weekly_Reimbursement__c = biweeklyReimList[i].id;
             empMileage.Activity__c =  'Business';
-            empMileage.Mileage__c =  51.20;
+            empMileage.EMP_Mileage__c = Math.random() * 100;
+            empMileage.Trip_Status__c= 'Not Approved Yet';
             empMileage.Fuel_price__c =  3.21;
             empMileage.Day_Of_Week__c = 'Tuesday';
             empMileage.MPG__c =  24.30;

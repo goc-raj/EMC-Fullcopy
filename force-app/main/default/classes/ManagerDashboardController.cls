@@ -175,9 +175,9 @@ public class ManagerDashboardController
     }
     //Initiates the approval of mileages.
     @AuraEnabled
-    public static AsyncApexJob approveMileagesClone(String mileages, String did, String accid,String showTeamRecord)
+    public static String approveMileagesClone(String mileages, String did, String accid,String showTeamRecord)
     {
-        AsyncApexJob aaj;
+        /*AsyncApexJob aaj;
         List<String> updatedlist = new List<String>();
         if(mileages!=null)
         {
@@ -185,7 +185,38 @@ public class ManagerDashboardController
             ID batchprocessid = Database.executeBatch(tripBtc,1);
             aaj = [SELECT Id, Status,ExtendedStatus, JobItemsProcessed, TotalJobItems, NumberOfErrors FROM AsyncApexJob WHERE ID =: batchprocessid ];
         }
-        return aaj;
+        return aaj;*/
+        List<String> employeeReimbursementList = new List<String>();   
+        List<Employee_Mileage__c> mileageUpdatelist = new List<Employee_Mileage__c>();
+  
+        if(mileages != null && mileages != '') {
+            employeeReimbursementList = (List<String>)Json.deserialize(mileages,List<String>.class);          
+        }
+        
+        if(BiWeeklyWrapperUtils.checkBiweekAccount(accid) == true){         
+            for(Employee_Mileage__c empmilege : [SELECT id, name, Trip_Status__c, Rejected__c,
+                                             Bi_Weekly_Reimbursement__c,Bi_Weekly_Reimbursement__r.Status__c,
+                                             Approved_Date__c 
+                                             FROM Employee_Mileage__c 
+                                             WHERE Bi_Weekly_Reimbursement__c IN: employeeReimbursementList
+                                             AND Bi_Weekly_Reimbursement__r.Contact__r.Reimbursement_Frequency__c = 'Bi-Weekly Reimbursement']) {
+                                                empmilege.Approved_Date__c = System.today();  
+                                                empmilege.Trip_Status__c = 'Approved';  
+                                                mileageUpdatelist.add(empmilege);                                               
+                                             }
+        } else {
+            for(Employee_Mileage__c empmilege : [SELECT id, name, Trip_Status__c, Rejected__c, EmployeeReimbursement__c,EmployeeReimbursement__r.Status__c, Approved_Date__c,Trip_Approval_Time__c 
+                                                FROM Employee_Mileage__c WHERE EmployeeReimbursement__c in : employeeReimbursementList]) {
+                                                    
+                                                    empmilege.Approved_Date__c = System.today();  
+                                                    empmilege.Trip_Status__c = 'Approved';
+                                                    mileageUpdatelist.add(empmilege);
+                                                }
+        }
+        if(!mileageUpdatelist.isEmpty()) {
+            update mileageUpdatelist;    
+        } 
+        return 'Success';
 }
     //Initiates the approval of mileages.
     @AuraEnabled
@@ -538,6 +569,23 @@ public class ManagerDashboardController
             wrapList.add(reimWrap);
         }
         return Json.serialize(wrapList);
+    }
+    
+    @AuraEnabled
+    public static void postExpenseReimbursement(Id accountId,String empReMonth,String contactEmail,String totalReimburement){
+        UploadConcurQuickExpenseTriplog.postTotalReimbursement(accountId,empReMonth,contactEmail,totalReimburement);
+    }
+    
+    @AuraEnabled
+    public static void TripCallout(Id driverId, String month, String year, String fuel, String maintTyre, Id empReID,String mpg,String status){
+       
+        WrapperUtils.TripCallout(driverId,month,year,fuel,maintTyre,empReID,mpg,status);
+    }
+
+    //method is use for change reimbursement status    
+    @AuraEnabled
+    public static void UpdateReimbursementStatus(Id empReID){
+        WrapperUtils.UpdateReimbursementStatus(empReID);
     }
     
     Public class ReimbursementWrapper{

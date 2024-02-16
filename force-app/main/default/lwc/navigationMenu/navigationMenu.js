@@ -8,6 +8,7 @@ import {
 import emcCss from '@salesforce/resourceUrl/EmcCSS';
 import logo from '@salesforce/resourceUrl/mBurseCss';
 import redirectionURL from '@salesforce/apex/NewAccountDriverController.loginRedirectionADMD';
+import getRole from '@salesforce/apex/NewAccountDriverController.getRole';
 import { getRecord } from "lightning/uiRecordApi";
 import CONTACT_ROLE_FIELD from "@salesforce/schema/Contact.Role__c";
 const FIELDS = ["Contact.Name"];
@@ -19,6 +20,7 @@ export default class NavigationMenu extends LightningElement {
     @api profileId;
     @api recordId;
     @track record;
+    roleUser;
     contactId;
     menuLabel;
     initialized = false;
@@ -35,7 +37,7 @@ export default class NavigationMenu extends LightningElement {
     _driver = 'D';
     _role;
   
-    @wire(getRecord, { recordId: "$recordId", fields: [CONTACT_ROLE_FIELD] })
+    /*@wire(getRecord, { recordId: "$recordId", fields: [CONTACT_ROLE_FIELD] })
     contact({ error, data }){
         if (data) {
             this.record = data;
@@ -48,7 +50,7 @@ export default class NavigationMenu extends LightningElement {
         } else if (error) {
             this.error = error;
         }
-    };
+    };*/
 
 
     get role() {
@@ -75,9 +77,10 @@ export default class NavigationMenu extends LightningElement {
     getUrlParamValue(url, key) {
         return new URL(url).searchParams.get(key);
     }
+
   
     handleRedirect(event) {
-//event.stopPropagation();
+    //event.stopPropagation();
         let menu = this.template.querySelectorAll(".tooltipText");
         menu.forEach((item) => item.classList.remove('active'))
         const selectedMenu = (event.currentTarget !== undefined ) ? event.currentTarget.dataset.name : event;
@@ -177,39 +180,54 @@ export default class NavigationMenu extends LightningElement {
     // }
   
     connectedCallback(){
-      console.log("Pr--", this.profileId)
+  
       /*Get logged in user id */
       const idParamValue = this.getUrlParamValue(location.href, "id");
+     /* const role = this.getUrlParamValue(location.href, "role")*/
       this.contactId = idParamValue
-      if(this.profileId){
-          this.showButtons = (this.profileId === '00e31000001FRDXAA4' || this.profileId === '00e31000001FRDZAA4') ? true : false;
-          this._originalAdmin = (this.profileId === '00e31000001FRDXAA4') ? 'Manager Dashboard' : 'Admin Dashboard';
-          this._admin = (this.profileId === '00e31000001FRDXAA4') ? 'M' : 'A';
-      }
+      getRole({
+        contactId: this.contactId
+      }).then((result)=>{
+        this.roleUser = result
+        if(this.roleUser){
+            this.showButtons = (this.roleUser === 'Driver/Admin' || this.roleUser === 'Driver/Manager') ? true : false;
+            this._originalAdmin = (this.roleUser === 'Driver/Manager') ? 'Manager Dashboard' : 'Admin Dashboard';
+            this._admin = (this.roleUser === 'Driver/Manager') ? 'M' : 'A';
+        }
+        console.log("roleUser##", result)
+      }).catch((err)=>{
+        console.log("Error from getRole--", err.message)
+      })
+      /*if(this.profileId){
+          this.showButtons = (this.profileId === '00e31000001FRDXAA4' || this.profileId === '00e31000001FRDZAA4') ? true : (role === 'managerdriver') ? true : false;
+          this._originalAdmin = (this.profileId === '00e31000001FRDXAA4' || role === 'managerdriver') ? 'Manager Dashboard' : 'Admin Dashboard';
+          this._admin = (this.profileId === '00e31000001FRDXAA4' || role === 'managerdriver') ? 'M' : 'A';
+      }*/
     }
   
     renderedCallback() {
         const sidebar = this.template.querySelector('.sidebar');
         const menu = this.template.querySelector('.menu-wrapper');
         var tooltips = this.template.querySelectorAll(".tooltip");
-        if(!this.initialized){
-           // console.log("render", this.initialized)
-            this.initialized = true
-            if(this.showButtons){
-                menu.style.maxHeight = 'calc(100% - 198px)';
-                let btn = this.template.querySelector('.admin-btn');
-                let driverBtn = this.template.querySelector('.driver-btn');
-                if(location.pathname === '/app/managerProfileDashboard' || location.pathname === '/app/adminProfileDashboard'){
-                  btn.classList.add('active');
-                  driverBtn.classList.remove('active');
+        //if(!this.initialized){
+            //this.initialized = true
+            if(this.roleUser){
+                if(this.showButtons){
+                    menu.style.maxHeight = 'calc(100% - 198px)';
+                    let btn = this.template.querySelector('.admin-btn');
+                    let driverBtn = this.template.querySelector('.driver-btn');
+                    if(location.pathname === '/app/managerProfileDashboard' || location.pathname === '/app/adminProfileDashboard'){
+                        btn.classList.add('active');
+                        driverBtn.classList.remove('active');
+                    }else{
+                        btn.classList.remove('active');
+                        driverBtn.classList.add('active');
+                    }
                 }else{
-                  btn.classList.remove('active');
-                  driverBtn.classList.add('active');
+                    menu.style.maxHeight = 'calc(100% - 105px)';
                 }
-          }else{
-            menu.style.maxHeight = 'calc(100% - 105px)';
-          }
-        }
+            }
+        //}
   
         sidebar.addEventListener("mousedown", (evt) => {
             let element = evt.target;

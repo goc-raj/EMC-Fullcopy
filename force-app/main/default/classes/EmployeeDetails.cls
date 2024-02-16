@@ -122,6 +122,8 @@ public with sharing class EmployeeDetails
     public boolean isleaveofabsence{get;set;}
     public string finalPayrollAmount {get;set;}
     public string firstPayrollPer {get;set;}
+    /* EMC - 2396 added by Megha below (packet) */
+    public string packet {get;set;}
     /*EMC-260 START 
     This field is used to check that particular driver is monthly or biweekly driver.based on value of checkbox display a data on driver page*/
     public Boolean monthlyReimbursement{ get; set; }

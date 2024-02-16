@@ -46,6 +46,7 @@
 /* Portrait and landscape iPad, iPad mini 2, iPad mini 3, iPad mini 4, iPad 3, iPad 4, iPad Air and iPad Air 2 */
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) {
   .sidebar-open {
+    margin-left: 0px !important;
     margin-top: 140px !important;
   }
 }
@@ -53,6 +54,7 @@
 /* Portrait and landscape Kindle Fire HD 7" */
 @media only screen and (min-device-width: 1024px) and (max-device-width: 1280px) and (-webkit-min-device-pixel-ratio: 1.5) {
   .sidebar-open {
+    margin-left: 0px !important;
     margin-top: 80px !important;
   }
 }

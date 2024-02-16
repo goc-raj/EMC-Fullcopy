@@ -141,8 +141,9 @@
     }
 
     .reimbursement-view{
-        flex: 1 1 38% !important;
+        flex: 1 1 72% !important;
         margin-right: 0 !important;
+        margin-top: 32px  !important;
     }
 
     .parameters-view{
@@ -538,7 +539,7 @@
     text-align: center;
     text-decoration: none;
     color: #7ABB4A !important;
-    padding-bottom: 8px;
+    padding-bottom: 0px;
     float: right;
     font-family: 'Proxima Nova Bold' !important;
 }
@@ -808,6 +809,7 @@
 
 .slds-checkbox_toggle .slds-checkbox_faux::before{
     content: 'USA';
+   /* content: 'U\2eS\2e';*/
     font-size: 14px;
     color: #FFFFFF;
     font-family: 'Proxima Nova' !important;

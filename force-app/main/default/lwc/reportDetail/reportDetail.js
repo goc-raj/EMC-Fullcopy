@@ -101,6 +101,11 @@ export default class ReportDetail extends LightningElement {
   filterdataSearch = [];
   finaldataSearch = [];
   editedCount = 0;
+  cfHeaderlist = [];
+  cfHeaderfields = [];
+  cfReportdatefields = [];
+  cfReportdatetimefields = [];
+
   renderedCallback() {
 
     loadScript(this, jQueryMinified)
@@ -138,17 +143,17 @@ export default class ReportDetail extends LightningElement {
   get lastmonth() {
     var makeDate = new Date();
     console.log("getdate", makeDate.getDate());
-    if (makeDate.getDate() > 25) {
-      let newDate = new Date(makeDate.getFullYear(), makeDate.getMonth() + 1, 1);
+    // if (makeDate.getDate() > 25) {
+      let newDate = new Date(makeDate.getFullYear(), makeDate.getMonth(), 0);
       let lastmonth = newDate.toLocaleString('default', { month: 'long' });
       console.log('Current Month : ' + lastmonth);
       return lastmonth;
-    } else {
-      makeDate.setMonth(makeDate.getMonth());
-      let lastmonth = makeDate.toLocaleString('default', { month: 'long' });
-      console.log('Current Month : ' + lastmonth);
-      return lastmonth;
-    }
+    // } else {
+    //   makeDate.setMonth(makeDate.getMonth());
+    //   let lastmonth = makeDate.toLocaleString('default', { month: 'long' });
+    //   console.log('Current Month : ' + lastmonth);
+    //   return lastmonth;
+    // }
   }
   getUrlParamValue(url, key) {
     return new URL(url).searchParams.get(key);
@@ -182,10 +187,6 @@ export default class ReportDetail extends LightningElement {
         });
   }
 
-  cfHeaderlist = [];
-  cfHeaderfields = [];
-  cfReportdatefields = [];
-  cfReportdatetimefields = [];
   commonFilter(data, object, _self){
     var report, reportname, numericheadertoapifields = new Map(), apifieldstoheader = new Map(), datetimefields = new Map(), booleanfields = new Map(), datefields = new Map(), datetotimefields = new Map(), twodecimalfields = new Map(), numericheaderarray = [], reportdatetimetotimefields = [], reportbooleanfields = [], reporttwodecimalfields = [];
     report = object
@@ -1192,21 +1193,132 @@ export default class ReportDetail extends LightningElement {
         this.filterdata = JSON.parse(result);
         console.log("length1", JSON.stringify(this.filterdata));
         if (this.filterdata.length > 0) {
+          // Previous code before commonFilter
+          if (this.reportName == 'Employee Roster Report') {
+            this.filterdata.forEach(element => {
+              if (element.Activation_Date__c != undefined) {
+                var actdate = element.Activation_Date__c;
+                element.Activation_Date__c = actdate.split('-')[1] + '/' + actdate.split('-')[2] + '/' + actdate.split('-')[0];
+              }
+              if (element.Deactivated_Date__c != undefined) {
+                var dctdate = element.Deactivated_Date__c;
+                element.Deactivated_Date__c = dctdate.split('-')[1] + '/' + (dctdate.split('-')[2]).slice(0, 2) + '/' + dctdate.split('-')[0];
+              }
+            })
+          } else if (this.reportName == 'Onboarding Status Report') {
+            this.filterdata.forEach(element => {
+              if (element.Schedule_Driver_Meeting__c == true) {
+                element.Schedule_Driver_Meeting__c = 'Yes';
+              } else if (element.Schedule_Driver_Meeting__c == false) {
+                element.Schedule_Driver_Meeting__c = 'No';
+              }
+            })
+          } else if (this.reportName == 'Commuter and Actual Mileage Report' || this.reportName == 'Trip Detail Report') {
+            this.filterdata.forEach(element => {
+              if (this.reportName == 'Commuter and Actual Mileage Report') {
+                if (element.Trip_Date__c != undefined) {
+                  var actdate = element.Trip_Date__c;
+                  element.Trip_Date__c = actdate.split('-')[1] + '/' + actdate.split('-')[2] + '/' + actdate.split('-')[0];
+                }
+                if (element.Approved_Date__c != undefined) {
+                  var approvedt = element.Approved_Date__c;
+                  element.Approved_Date__c = approvedt.split('-')[1] + '/' + approvedt.split('-')[2] + '/' + approvedt.split('-')[0];
+                }
+              }
+              if (element.ConvertedStartTime__c != undefined) {
+                var starttime = element.ConvertedStartTime__c;
+                var time = new Date(starttime);
+                var ampm = time.toLocaleString('en-US', { hour: 'numeric', hour12: true })
+                element.ConvertedStartTime__c = (starttime.split('T')[1]).slice(0, 5) + ' ' + ampm.split(' ')[1];
+              }
+              if (element.ConvertedEndTime__c != undefined) {
+                var endtime = element.ConvertedEndTime__c;
+                var time1 = new Date(endtime);
+                var ampm1 = time1.toLocaleString('en-US', { hour: 'numeric', hour12: true })
+                element.ConvertedEndTime__c = (endtime.split('T')[1]).slice(0, 5) + ' ' + ampm1.split(' ')[1];
+              }
+            })
+          }
+          // Prev code End
           this.showbuttons = true;
           this.recordDisplay = true;
 
           // Use commonFIlter to set data dynamically
-          let formatted;
-          try {
-            formatted = this.commonFilter(this.filterdata, this.reportData, this);
-            console.log("this.filterdata", JSON.stringify(formatted))
-          }catch(e) {
-             console.log("Error formatting", e.message)
-          }
+          // let formatted;
+          // try {
+          //   formatted = this.commonFilter(this.filterdata, this.reportData, this);
+          //   console.log("this.filterdata", JSON.stringify(formatted))
+          // }catch(e) {
+          //    console.log("Error formatting", e.message)
+          // }
           // Added by Raj
 
-          this.searchdata = JSON.parse(JSON.stringify(formatted));
-          this.exceldata = JSON.parse(JSON.stringify(formatted));
+          // Previous code before commonFilter
+          this.headerfields = new Map();
+          for (var i = 0; i < this.detailsoql.length; i++) {
+            if (this.detailsoql[i].includes('.')) {
+              this.headerfields.set(this.detailsoql[i].split('.')[1], this.headerdata[i]);
+            } else {
+              this.headerfields.set(this.detailsoql[i], this.headerdata[i]);
+            }
+          }
+          this.headerfields.set('Id', 'Id');
+          this.keyArray = [];
+          for (var i = 0; i < this.filterdata.length; i++) {
+            Object.keys(this.filterdata[i]).forEach((key) => {
+              if (key != "attributes") {
+                if (typeof this.filterdata[i][key] == "object") {
+                  this.nestedJsonRead(this.filterdata[i][key], i);
+                } else {
+                  if (this.headerfields.has(key)) {
+                    this.keyArray.push(i, this.headerfields.get(key), this.filterdata[i][key]);
+                  }
+                }
+              }
+            })
+          }
+          this.keyArray = JSON.parse(JSON.stringify(this.keyArray))
+          console.log("this.keyArray", this.keyArray)
+
+          var temp1 = [];
+
+          for (let k = 0; k < this.keyArray.length; k++) {
+            if (k % 3 == 0) {
+              temp1.push({ [this.keyArray[k + 1]]: this.keyArray[k + 2], index: this.keyArray[k] })
+            }
+          }
+          let temparray1 = JSON.parse(JSON.stringify(temp1));
+
+          const groupedData1 = temparray1.reduce((result, item) => {
+            if (!result[item.index]) {
+              result[item.index] = [];
+            }
+
+            const newItem = { Id: item.Id };
+            Object.keys(item).forEach(key => {
+              if (key !== 'Id') {
+                newItem[key] = item[key];
+              }
+            });
+
+            result[item.index].push(newItem);
+            return result;
+          }, []);
+          // Log or use the grouped data
+          let objarr = JSON.parse(JSON.stringify(groupedData1));
+          console.log("objarr", objarr)
+          for (var h = 0; h < objarr.length; h++) {
+
+            let finalObj1;
+            for (var n = 0; n < objarr[h].length; n++) {
+              finalObj1 = Object.assign({}, ...objarr[h]);
+            }
+            objarr[h] = finalObj1;
+          }
+          // Prev Code ends
+
+          this.searchdata = JSON.parse(JSON.stringify(objarr));
+          this.exceldata = JSON.parse(JSON.stringify(objarr));
           console.log("this.searchdata", this.searchdata)
           this.dynamicBinding(this.searchdata, this.headerdata)
           // this.filterdatanew = this.searchdata;
@@ -1333,9 +1445,9 @@ export default class ReportDetail extends LightningElement {
           let key = index.split('-')[0];
           if (row.hasOwnProperty(key)) {
             const value1 = parseFloat(row[key]) || 0; // Convert to float, default to 0 if not a valid number
-            const value2 = parseFloat(row['Monthly Variable Amount']) || 0;
+            const value2 = parseFloat(row['Variable Amount']) || 0;
             this.totalsum = value1 + value2;
-            row['Total Monthly Reimbursement'] = this.totalsum.toLocaleString();
+            row['Total Reimbursement'] = this.totalsum.toLocaleString();
 						this.keyName = key;
             this.keyValue = row[key];
             let finalJson = [];
@@ -1353,7 +1465,7 @@ export default class ReportDetail extends LightningElement {
           if (this.remId == row.Id) {
             if (row.hasOwnProperty(this.keyName)) {
               row[this.keyName] = this.formatNumberWithCommas(this.keyValue);
-              row['Total Monthly Reimbursement'] = this.totalsum.toLocaleString();
+              row['Total Reimbursement'] = this.totalsum.toLocaleString();
             }
           }
         })
@@ -1367,7 +1479,7 @@ export default class ReportDetail extends LightningElement {
             if (row.hasOwnProperty(this.keyName)) {
               console.log('Key Name : ' + this.keyName);
               row[this.keyName] = this.formatNumberWithCommas(this.keyValue);
-              row['Total Monthly Reimbursement'] = this.totalsum.toLocaleString();
+              row['Total Reimbursement'] = this.totalsum.toLocaleString();
             }
           }
         })
@@ -1416,7 +1528,7 @@ export default class ReportDetail extends LightningElement {
             /* Fixed decimal issue in Fixed Amount field */
             for (let record of this.filterdataSearch) {
               for (let keyField of record.keyFields) {
-                if (keyField.key === "Monthly Fixed Amount" && keyField.value !== null && keyField.value.endsWith(".")) {
+                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
                   keyField.value = keyField.value.slice(0, -1);
                 }
               }
@@ -1431,7 +1543,7 @@ export default class ReportDetail extends LightningElement {
             /* Fixed decimal issue in Fixed Amount field */
             for (let record of this.finaldataSearch) {
               for (let keyField of record.keyFields) {
-                if (keyField.key === "Monthly Fixed Amount" && keyField.value !== null && keyField.value.endsWith(".")) {
+                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
                   keyField.value = keyField.value.slice(0, -1);
                 }
               }
@@ -1447,11 +1559,11 @@ export default class ReportDetail extends LightningElement {
           }
         } else {
           if (this.searchdata.length > 0) {
-            this.dynamicBinding(this.searchdata, this.headerdata);
+            this.dynamicBinding(this.searchdata, this.headerdata)
             /* Fixed decimal issue in Fixed Amount field */
             for (let record of this.searchdata) {
               for (let keyField of record.keyFields) {
-                if (keyField.key === "Monthly Fixed Amount" && keyField.value !== null && keyField.value.endsWith(".")) {
+                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
                   keyField.value = keyField.value.slice(0, -1);
                 }
               }
@@ -1465,7 +1577,7 @@ export default class ReportDetail extends LightningElement {
             /* Fixed decimal issue in Fixed Amount field */
             for (let record of this.finaldata) {
               for (let keyField of record.keyFields) {
-                if (keyField.key === "Monthly Fixed Amount" && keyField.value !== null && keyField.value.endsWith(".")) {
+                if (keyField.key === "Fixed" && keyField.value !== null && keyField.value.endsWith(".")) {
                   keyField.value = keyField.value.slice(0, -1);
                 }
               }
@@ -1553,6 +1665,21 @@ export default class ReportDetail extends LightningElement {
         console.log("resultdata", jsondata)
         this.reportType = resultdata.Report_Type__c;
 
+        // Previous Code before commonFilter
+        if (resultdata.Numeric_Fields__c != undefined) {
+          let numericfield = resultdata.Numeric_Fields__c
+          var headerarry = new Array();
+          headerarry = numericfield.split(",");
+          this.dateArray = JSON.parse(JSON.stringify(headerarry));
+        }
+        if (resultdata.Date_Fields__c != undefined) {
+          let datefield = resultdata.Date_Fields__c
+          var headerarry_date = new Array();
+          headerarry_date = datefield.split(",");
+          this.numberArray = JSON.parse(JSON.stringify(headerarry_date));
+        }
+        // Prev Code End
+
         let showfilter = resultdata.Filter_By__c == undefined ? '' : resultdata.Filter_By__c
         this.reportName = resultdata.Name;
         this.limitOfrecord = resultdata.Limit__c == undefined ? 0 : resultdata.Limit__c;
@@ -1623,72 +1750,71 @@ export default class ReportDetail extends LightningElement {
         this.placeholder = 'Select ' + this.DriverManager;
 
         // Take commonFilter Code for early usage basis
-        let sql = this.reportData.Report_Soql__c.split('from');
-        let fields = sql[0].split('select')[1].trim().split(',');
-        this.detail = fields;
-        if (this.reportData.Report_Header__c != undefined) {
-          if (this.reportData.Report_Header__c.includes(',')) {
-              this.cfHeaderlist = this.reportData.Report_Header__c.split(',');
-          }
-          else {
-              this.cfHeaderlist.push(this.reportData.Report_Header__c);
-          }
-        }
+        // let sql = this.reportData.Report_Soql__c.split('from');
+        // let fields = sql[0].split('select')[1].trim().split(',');
+        // this.detail = fields;
+        // if (this.reportData.Report_Header__c != undefined) {
+        //   if (this.reportData.Report_Header__c.includes(',')) {
+        //       this.cfHeaderlist = this.reportData.Report_Header__c.split(',');
+        //   }
+        //   else {
+        //       this.cfHeaderlist.push(this.reportData.Report_Header__c);
+        //   }
+        // }
         // Set this.headerdata
-        this.headerdata = JSON.parse(JSON.stringify(this.cfHeaderlist));
-        console.log('this.headerdata : ' + this.headerdata);
+        // this.headerdata = JSON.parse(JSON.stringify(this.cfHeaderlist));
+        // console.log('this.headerdata : ' + this.headerdata);
         // Added by Raj
-        if (this.reportData.Numeric_Fields__c != undefined) {
-          if (this.reportData.Numeric_Fields__c.includes(',')) {
-            this.cfHeaderfields = this.reportData.Numeric_Fields__c.split(',');
-          }
-          else {
-            this.cfHeaderfields.push(this.reportData.Numeric_Fields__c.trim());
-          }
-        }
-        if (this.reportData.Date_Time_Fields__c != undefined) {
-          if (this.reportData.Date_Time_Fields__c.includes(',')) {
-            this.cfReportdatetimefields = this.reportData.Date_Time_Fields__c.split(',');
-          }
-          else {
-            this.cfReportdatetimefields.push(this.reportData.Date_Time_Fields__c.trim());
-          }
-        }
-        if (this.reportData.Date_Fields__c != undefined) {
-          if (this.reportData.Date_Fields__c.includes(',')) {
-            this.cfReportdatefields = this.reportData.Date_Fields__c.split(',');
-          }
-          else {
-            this.cfReportdatefields.push(this.reportData.Date_Fields__c.trim());
-          }
-        }
+        // if (this.reportData.Numeric_Fields__c != undefined) {
+        //   if (this.reportData.Numeric_Fields__c.includes(',')) {
+        //     this.cfHeaderfields = this.reportData.Numeric_Fields__c.split(',');
+        //   }
+        //   else {
+        //     this.cfHeaderfields.push(this.reportData.Numeric_Fields__c.trim());
+        //   }
+        // }
+        // if (this.reportData.Date_Time_Fields__c != undefined) {
+        //   if (this.reportData.Date_Time_Fields__c.includes(',')) {
+        //     this.cfReportdatetimefields = this.reportData.Date_Time_Fields__c.split(',');
+        //   }
+        //   else {
+        //     this.cfReportdatetimefields.push(this.reportData.Date_Time_Fields__c.trim());
+        //   }
+        // }
+        // if (this.reportData.Date_Fields__c != undefined) {
+        //   if (this.reportData.Date_Fields__c.includes(',')) {
+        //     this.cfReportdatefields = this.reportData.Date_Fields__c.split(',');
+        //   }
+        //   else {
+        //     this.cfReportdatefields.push(this.reportData.Date_Fields__c.trim());
+        //   }
+        // }
         // Set this.header, columnType, columnName and sortOder
-        var headingData = [];
-        for(let i = 0; i < this.cfHeaderlist.length; i++) {
-          let colType = 'String';
-          if(this.cfHeaderfields.includes(this.detail[i])) {
-            colType = 'Integer';
-          } else if (this.cfReportdatefields.includes(this.detail[i]) || this.cfReportdatetimefields.includes(this.detail[i])) {
-            colType = 'Date';
-          }
-          if(i == 0) {
-            if(this.headerdata.includes('Activation Date')) {
-              this.columnName = "Activation Date";
-              this.columnType = 'Date';
-              this.sortOrder = 'asc';
-            } else {
-              this.columnName = this.headerdata[i];
-              this.columnType = colType;
-              this.sortOrder = 'desc';
-            }
-            headingData.push({ id: i, name: this.cfHeaderlist[i], colName: this.cfHeaderlist[i], colType: colType, arrUp: true, arrDown: false });
-          } else {
-            headingData.push({ id: i, name: this.cfHeaderlist[i], colName: this.cfHeaderlist[i], colType: colType, arrUp: false, arrDown: false });
-          }
-        }
-        this.header = JSON.parse(JSON.stringify(headingData));
-        console.log("this.header", this.header);
-        // Added by Raj
+        // var headingData = [];
+        // for(let i = 0; i < this.cfHeaderlist.length; i++) {
+        //   let colType = 'String';
+        //   if(this.cfHeaderfields.includes(this.detail[i])) {
+        //     colType = 'Integer';
+        //   } else if (this.cfReportdatefields.includes(this.detail[i]) || this.cfReportdatetimefields.includes(this.detail[i])) {
+        //     colType = 'Date';
+        //   }
+        //   if(i == 0) {
+        //     if(this.headerdata.includes('Activation Date')) {
+        //       this.columnName = "Activation Date";
+        //       this.columnType = 'Date';
+        //       this.sortOrder = 'asc';
+        //     } else {
+        //       this.columnName = this.headerdata[i];
+        //       this.columnType = colType;
+        //       this.sortOrder = 'desc';
+        //     }
+        //     headingData.push({ id: i, name: this.cfHeaderlist[i], colName: this.cfHeaderlist[i], colType: colType, arrUp: true, arrDown: false });
+        //   } else {
+        //     headingData.push({ id: i, name: this.cfHeaderlist[i], colName: this.cfHeaderlist[i], colType: colType, arrUp: false, arrDown: false });
+        //   }
+        // }
+        // this.header = JSON.parse(JSON.stringify(headingData));
+        // console.log("this.header", this.header);
         // Added by Raj
 
         getManagerDriverDetails({ accountId: this._accid, role: this.DriverManager })
@@ -1706,13 +1832,69 @@ export default class ReportDetail extends LightningElement {
             console.log("error", error)
           })
 
-        console.log('Before Dropdown');
+          // Previous code before comminFilter
+          var headerstr = resultdata.Report_Header__c;
+          var headerarry = new Array();
+          headerarry = headerstr.split(",");
+          this.headerdata = JSON.parse(JSON.stringify(headerarry));
+
+          var detailstr = resultdata.Report_Soql__c;
+          this.reportsoql = resultdata.Report_Soql__c;
+          var detailarray = new Array();
+          detailarray = detailstr.split(" ");
+          let detaildata = JSON.parse(JSON.stringify(detailarray[1]))
+          var detailarraynew = new Array();
+          detailarraynew = detaildata.split(",");
+          this.detail = detailarraynew;
+          let detaildatanew = JSON.parse(JSON.stringify(detailarraynew))
+          this.detailsoql = JSON.parse(JSON.stringify(detailarraynew));
+
+          var imageList = [];
+          let coltype;
+          for (let i = 0; i < this.headerdata.length; i++) {
+            coltype = 'String';
+            if (this.dateArray.length > 0) {
+              this.dateArray.forEach(col => {
+                if (col == detaildatanew[i]) {
+                  coltype = 'Integer'
+                }
+              })
+            }
+  
+            if(this.headerdata[i] === 'Deactivated Date') {
+              coltype = 'Date';
+            }
+  
+            if (this.numberArray.length > 0) {
+              this.numberArray.forEach(col1 => {
+                console.log("col1 == detaildatanew[i]", col1 + '-----' + detaildatanew[i])
+                if (col1 == detaildatanew[i]) {
+                  coltype = 'Date'
+                }
+              })
+            }
+  
+            if (i == 0) {
+              if (this.reportName == 'Onboarding Status Report' || this.reportName == 'Employee Roster Report') {
+                this.columnName = "Activation Date";
+                this.columnType = 'Date';
+                this.sortOrder = 'asc';
+              } else {
+                this.columnName = this.headerdata[i];
+                this.columnType = coltype;
+                this.sortOrder = 'desc';
+              }
+              imageList.push({ id: i, name: this.headerdata[i], colName: this.headerdata[i], colType: coltype, arrUp: true, arrDown: false });
+            } else {
+              imageList.push({ id: i, name: this.headerdata[i], colName: this.headerdata[i], colType: coltype, arrUp: false, arrDown: false });
+            }
+          }
+          this.header = JSON.parse(JSON.stringify(imageList));
+          // Prev Code Ends
+
         getDriverManagerDropdownList({ accountId: this._accid, contactId: this._adminid, reportId: this.reportId, checkLimit: this.limitOfrecord })
           .then(result => {
             let data = JSON.parse(result);
-            console.log("resultFull : " + JSON.stringify(data));
-            console.log("result : " + JSON.parse(data[1]));
-            console.log("result0 : " + JSON.parse(data[0]));
             if (this.DriverManager == 'Manager') {
               this.detaildata = JSON.parse(JSON.parse(data[1]));
               this.originalData = JSON.parse(JSON.parse(data[1]));
@@ -1728,21 +1910,137 @@ export default class ReportDetail extends LightningElement {
                 this.showEmailbtn = true;
               }
 
+              // Previous code before commonFilter
+              if (this.reportName == 'Employee Roster Report') {
+                this.detaildata.forEach(element => {
+                  if (element.Activation_Date__c != undefined) {
+                    var actdate = element.Activation_Date__c;
+                    element.Activation_Date__c = actdate.split('-')[1] + '/' + actdate.split('-')[2] + '/' + actdate.split('-')[0];
+                  }
+                  if (element.Deactivated_Date__c != undefined) {
+                    var dctdate = element.Deactivated_Date__c;
+                    element.Deactivated_Date__c = dctdate.split('-')[1] + '/' + (dctdate.split('-')[2]).slice(0, 2) + '/' + dctdate.split('-')[0];
+                  }
+                })
+              } else if (this.reportName == 'Final Variable Report for Terminated Drivers') {
+
+              } else if (this.reportName == 'Onboarding Status Report') {
+                this.detaildata.forEach(element => {
+                  if (element.Schedule_Driver_Meeting__c == true) {
+                    element.Schedule_Driver_Meeting__c = 'Yes';
+                  } else if (element.Schedule_Driver_Meeting__c == false) {
+                    element.Schedule_Driver_Meeting__c = 'No';
+                  }
+
+                  // if(element.Activation_Date__c != undefined){
+                  //   var activationdate = element.Activation_Date__c;
+                  //   element.Activation_Date__c = activationdate.split('-')[2]+'-'+activationdate.split('-')[1]+'-'+activationdate.split('-')[0];
+                  // }
+                })
+              } else if (this.reportName == 'Commuter and Actual Mileage Report' || this.reportName == 'Trip Detail Report') {
+                this.detaildata.forEach(element => {
+                  if (this.reportName == 'Commuter and Actual Mileage Report') {
+                    if (element.Trip_Date__c != undefined) {
+                      var actdate = element.Trip_Date__c;
+                      element.Trip_Date__c = actdate.split('-')[1] + '/' + actdate.split('-')[2] + '/' + actdate.split('-')[0];
+                    }
+                    if (element.Approved_Date__c != undefined) {
+                      var approvedt = element.Approved_Date__c;
+                      element.Approved_Date__c = approvedt.split('-')[1] + '/' + approvedt.split('-')[2] + '/' + approvedt.split('-')[0];
+                    }
+                  }
+                  if (element.ConvertedStartTime__c != undefined) {
+                    var starttime = element.ConvertedStartTime__c;
+                    var time = new Date(starttime);
+                    var ampm = time.toLocaleString('en-US', { hour: 'numeric', hour12: true })
+                    element.ConvertedStartTime__c = (starttime.split('T')[1]).slice(0, 5) + ' ' + ampm.split(' ')[1];
+                  }
+                  if (element.ConvertedEndTime__c != undefined) {
+                    var endtime = element.ConvertedEndTime__c;
+                    var time1 = new Date(endtime);
+                    var ampm1 = time1.toLocaleString('en-US', { hour: 'numeric', hour12: true })
+                    element.ConvertedEndTime__c = (endtime.split('T')[1]).slice(0, 5) + ' ' + ampm1.split(' ')[1];
+                  }
+                })
+              }
+              // Prev Code End
+
               this.recordDisplay = true;
 
-              let formatted;
-              if(this.originalData){
-                try{
-                  formatted = this.commonFilter(this.originalData, this.reportData, this);
-                  console.log("this.originalData", JSON.stringify(formatted))
-                 }catch(e){
-                   console.log("Error formatting", e.message)
-                 }
-              }
+              // Use commonFIlter for dynamic purpose
+              // let formatted;
+              // if(this.originalData){
+              //   try{
+              //     formatted = this.commonFilter(this.originalData, this.reportData, this);
+              //     console.log("this.originalData", JSON.stringify(formatted))
+              //    }catch(e){
+              //      console.log("Error formatting", e.message)
+              //    }
+              // }
+              // Added by Megha ma'am
 
-              this.finaldata = JSON.parse(JSON.stringify(formatted));
+              // Previous code Before commonFilter
+              this.headerfields = new Map();
+              for (var i = 0; i < detaildatanew.length; i++) {
+                if (detaildatanew[i].includes('.')) {
+                  this.headerfields.set(detaildatanew[i].split('.')[1], this.headerdata[i]);
+                } else {
+                  this.headerfields.set(detaildatanew[i], this.headerdata[i]);
+                }
+              }
+              this.headerfields.set('Id', 'Id');
+              for (var i = 0; i < this.detaildata.length; i++) {
+                Object.keys(this.detaildata[i]).forEach((key) => {
+                  if (key != "attributes") {
+                    if (typeof this.detaildata[i][key] == "object") {
+                      this.nestedJsonRead(this.detaildata[i][key], i);
+                    } else {
+                      if (this.headerfields.has(key)) {
+                        this.keyArray.push(i, this.headerfields.get(key), this.detaildata[i][key]);
+                      }
+                    }
+                  }
+                })
+              }
+              console.log("keyArray", JSON.parse(JSON.stringify(this.keyArray)))
+              var temp = [];
+
+              for (let k = 0; k < this.keyArray.length; k++) {
+                if (k % 3 == 0) {
+                  temp.push({ [this.keyArray[k + 1]]: this.keyArray[k + 2], index: this.keyArray[k] })
+                }
+              }
+              let temparray = JSON.parse(JSON.stringify(temp));
+
+              let groupedData = [];
+              for (var i = 0; i < temparray.length; i++) {
+                var item = temparray[i];
+                if (!groupedData[item.index]) {
+                  groupedData[item.index] = [];
+                }
+                var m = 0;
+                Object.keys(item).forEach(key => {
+                  m = m + 1;
+                  if (m == 1) {
+                    groupedData[item.index].push({ [key]: item[key] });
+                  }
+                });
+              }
+              // Log or use the grouped data
+              let objarray = JSON.parse(JSON.stringify(groupedData));
+              for (var h = 0; h < objarray.length; h++) {
+
+                let finalObj;
+                for (var n = 0; n < objarray[h].length; n++) {
+                  finalObj = Object.assign({}, ...objarray[h]);
+                }
+                objarray[h] = finalObj;
+              }
+              // Prev Code End
+
+              this.finaldata = JSON.parse(JSON.stringify(objarray));
               console.log("final data : ", JSON.stringify(this.finaldata));
-              this.exceldata = JSON.parse(JSON.stringify(formatted));
+              this.exceldata = JSON.parse(JSON.stringify(objarray));
               this.finaldata = this.finaldata.sort((a, b) => b - a);
               this.dynamicBinding(this.finaldata, this.headerdata)
               this.ishow = true;
@@ -1762,44 +2060,47 @@ export default class ReportDetail extends LightningElement {
           })
           .catch(error => {
             console.log("error in dropdown list", JSON.parse(JSON.stringify(error)));
-            this.showbuttons = false;
-            this.ishow = true;
-            // this.recordDisplay = false;
-            this.finaldata = [];
-            setTimeout(() => {
-              this.dispatchEvent(
-                new CustomEvent("hide", { detail: '' })
-              );
-            }, 2000);
-            this.dispatchEvent(
-              new CustomEvent("toastmessage", {
-                detail: {
-                  errormsg: "error",
-                  message: "System Error: A team member has been notified to identify and address the issue within a working day.If it is urgent, please contact support for a solution."
-                }
-              })
-            )
+            // Show Toast while error
+            // this.showbuttons = false;
+            // this.ishow = true;
+            // this.finaldata = [];
+            // setTimeout(() => {
+            //   this.dispatchEvent(
+            //     new CustomEvent("hide", { detail: '' })
+            //   );
+            // }, 2000);
+            // this.dispatchEvent(
+            //   new CustomEvent("toastmessage", {
+            //     detail: {
+            //       errormsg: "error",
+            //       message: "System Error: A team member has been notified to identify and address the issue within a working day.If it is urgent, please contact support for a solution."
+            //     }
+            //   })
+            // )
+            // Added by Raj
           })
       })
       .catch(error => {
         console.log("error in report list", JSON.parse(JSON.stringify(error)));
-        this.showbuttons = false;
-        this.ishow = true;
-        // this.recordDisplay = false;
-        this.finaldata = [];
-        setTimeout(() => {
-          this.dispatchEvent(
-            new CustomEvent("hide", { detail: '' })
-          );
-        }, 2000);
-        this.dispatchEvent(
-          new CustomEvent("toastmessage", {
-            detail: {
-              errormsg: "error",
-              message: "System Error: A team member has been notified to identify and address the issue within a working day.If it is urgent, please contact support for a solution."
-            }
-          })
-        )
+        // Show Toast while error
+        // this.showbuttons = false;
+        // this.ishow = true;
+        // // this.recordDisplay = false;
+        // this.finaldata = [];
+        // setTimeout(() => {
+        //   this.dispatchEvent(
+        //     new CustomEvent("hide", { detail: '' })
+        //   );
+        // }, 2000);
+        // this.dispatchEvent(
+        //   new CustomEvent("toastmessage", {
+        //     detail: {
+        //       errormsg: "error",
+        //       message: "System Error: A team member has been notified to identify and address the issue within a working day.If it is urgent, please contact support for a solution."
+        //     }
+        //   })
+        // )
+        // Added by Raj
       })
   }
   formatNumberWithCommas(number) {

@@ -415,7 +415,7 @@ export default class UserFlaggingTrip extends LightningElement {
                 item.drivingtime = this.timeConversion(item.drivingtime);
                 item.staytime = this.timeConversion(item.staytime);
                 item.totaltime = this.timeConversion(item.totaltime);
-                mileage.push([item.emailaddress, item.tracingstyle, item.dayofweek, item.tripdate, item.starttime, item.endtime, item.originname, item.destinationname, item.mileage, item.status, item.submitteddate, item.maintTyre, item.fuelRate, item.variablerate, (parseInt(item.variableamount, 10)).toFixed(2), item.drivingtime, item.staytime, item.totaltime, item.notes, item.tag])
+                mileage.push([item.emailaddress, item.tracingstyle, item.dayofweek, item.tripdate, item.starttime, item.endtime, item.originname, item.destinationname, item.mileage, item.status, item.submitteddate, item.maintTyre, item.fuelVariableRate, item.variablerate, (parseInt(item.variableamount, 10)).toFixed(2), item.drivingtime, item.staytime, item.totaltime, item.notes, item.tag])
             })
             this.excelToExport(mileage, fileName, sheetName);
     }

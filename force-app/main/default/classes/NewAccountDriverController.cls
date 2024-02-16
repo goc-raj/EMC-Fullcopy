@@ -188,6 +188,14 @@ public with sharing class NewAccountDriverController {
                                     WHERE id =: contactId];
         return JSON.serialize(driverDataList ).unescapeHtml4();
     }
+    
+    /*Added by megha to return Role of contact*/
+    @AuraEnabled
+    public static String getRole(String contactId) {            
+        List<contact> contactList = new List<contact>();
+        contactList = [SELECT id, Role__c FROM Contact WHERE id =: contactId];
+        return contactList[0].Role__c;
+    }
     /*This method is used to send notification email to driver and it's admin*/
     @AuraEnabled
     public static void sendInsuranceEmail (String id,String name,String email){

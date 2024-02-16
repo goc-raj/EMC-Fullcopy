@@ -1,3 +1,13 @@
+/*
+ * @Author: GetonCRM Solutions LLP 
+ * @Date: 2024-02-12 11:33:18 
+ * @Modification logs
+ * ========================================================================================================================
+ * @Last Modified by: Megha Sachania
+ * @Last Modified time: 2024-02-12 11:34:23
+ * @Description: This report gives complete information for annual tax liability
+ */
+
 import { LightningElement , wire , track ,api} from 'lwc';
 // import getDriverList from '@salesforce/apex/ReportComplianceofDriver.getDriversDetails';
 // import getReportDetail from '@salesforce/apex/ReportComplianceofDriver.getComplianceCalculation';
@@ -10,7 +20,7 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import DRIVER_TAX_REPORT from '@salesforce/resourceUrl/DriverTaxReport';
 
 export default class DriverTaxLiabilityReport extends LightningElement {
-    accounts = [];
+    accounts = []; // account list
     Driver = []; //to store Driver picklist List
     yesrlist = []; //to store Year picklist List
     @api Year =[]; //to store Year picklist List
@@ -150,6 +160,7 @@ export default class DriverTaxLiabilityReport extends LightningElement {
             //To get the detail of Quarter 
             let taxDetail = this.JsonToStringifyData(this.DriverTaxDetail[2]);
             this.QuarterWiseDetail =this.JsonToParseData(taxDetail);
+            console.log('QuarterWiseDetail : ' + JSON.stringify(this.QuarterWiseDetail));
             this.QuarterWiseDetail = this.QuarterWiseDetail.map((accnew)=>
              Object.assign({}, accnew, {msg: null})
              );
@@ -238,11 +249,12 @@ export default class DriverTaxLiabilityReport extends LightningElement {
             jsondata.forEach( detaildata => {
                 detailExcel.push({ DriverName:detaildata.drivername, Email:detaildata.emailid ,  
                                         EmployeeID:detaildata.employeeid ,Month:detaildata.month, Year:detaildata.year,
-                                        TotalReimbursement:'$'+detaildata.totalreim, IRSAllowable:'$'+detaildata.iRSallowable ,
-                                        ImputedIncome:'$'+detaildata.imputedincome});
+                                        TotalReimbursement:'$'+detaildata.totalreim.toFixed(2), IRSAllowable:'$'+detaildata.iRSallowable.toFixed(2) ,
+                                        ImputedIncome:'$'+detaildata.imputedincome.toFixed(2)});
                 return detailExcel;
             })
             this.downloaddetail = this.JsonToStringifyData(detailExcel);
+            console.log('this.downloaddetail : ' + JSON.stringify(this.downloaddetail));
             /************End for Detail Excel**********/
 
             /************Start for Summary Excel**********/

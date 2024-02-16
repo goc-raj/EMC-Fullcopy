@@ -53,7 +53,7 @@ public with sharing class LoginRedirection
                     daysBetweenActivation = activationDate != null ? activationDate.daysBetween(currentDate) : null;
                     if((daysBetweenActivation != null && daysBetweenActivation <= 30) || Test.isRunningTest()){
                         checkActivationDate = true;
-                    } else if(daysBetweenActivation > 30 && u.Contact.Packet__c != null && u.Contact.Packet__c == 'Driver Signed' && u.Contact.Watch_Meeting__c == true){
+                    } else if(daysBetweenActivation > 30 && u.Contact.Packet__c != null && (u.Contact.Packet__c == 'Driver Signed' || u.Contact.Packet__c == 'Completed') && u.Contact.Watch_Meeting__c == true){
                         checkActivationDate = true;
                     } else {
                         checkActivationDate = false;

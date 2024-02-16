@@ -37,6 +37,7 @@ export default class DriverDashboardFrame extends LightningElement {
     @track isAttendance = false;
     notificationViewClicked = false;
     managerRole = false;
+    toggle = false;
     checkAll = false;
     isArchive = false;
     notificationModal = false;
@@ -631,8 +632,11 @@ export default class DriverDashboardFrame extends LightningElement {
         this.contentCss = (event.detail === 'sidebar') ? "slds-align_absolute-center content-flex content-open" : "slds-align_absolute-center content-padding2-close content-flex";
         this.videoCss = (event.detail === 'sidebar') ?   "slds-align_absolute-center video-container video-padding" : "slds-align_absolute-center video-container video-padding-close"
         this.template.querySelector('c-dashboard-profile-header').styleHeader(event.detail);
-        if (this.template.querySelector('c-driver-reimbursement-profile')) {
-            this.template.querySelector('c-driver-reimbursement-profile').styleElement(event.detail);
+        if(!this.toggle){
+            if (this.template.querySelector('c-driver-user-profile')) {
+                this.toggle = true;
+                this.template.querySelector('c-driver-user-profile').reflow();
+            }
         }
     }
 

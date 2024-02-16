@@ -72,6 +72,8 @@ public with sharing class WrapperUtils
         currentEmployeeDetail.glcode = currentContact.GL_Code__c != null ? currentContact.GL_Code__c : '';
         currentEmployeeDetail.territory = currentContact.Territory__c != null ? currentContact.Territory__c : '';
         currentEmployeeDetail.code = currentContact.Code__c != null ? currentContact.Code__c : '';
+        /* Added by below below line no. 76*/
+        currentEmployeeDetail.packet = currentContact.Packet__c != null ? currentContact.Packet__c : '';
         currentEmployeeDetail.district = currentContact.District__c != null ? currentContact.District__c : '';
         currentEmployeeDetail.totalreimbursement = String.valueOf(avgReim);
         currentEmployeeDetail.am = currentContact.AM__c != null ? currentContact.AM__c : '';
@@ -751,12 +753,14 @@ Modified By : Sanket Goswami */
         Decimal sumdivide = sumTotalReim / count;
         employeeReimbursement.avgToDate = String.valueOf((sumdivide ).setScale(2));        
     }
-    if(currentEmployeeReimbursement.Mileage_Lock_Date__c!= null){
-        employeeReimbursement.lockDate = currentEmployeeReimbursement.Mileage_Lock_Date__c;
+    if(currentEmployeeReimbursement.Reimbursement_Lock_Time__c != null){
+        employeeReimbursement.lockDate = date.valueOf(currentEmployeeReimbursement.Reimbursement_Lock_Time__c);
     }
     if(currentEmployeeReimbursement.Lock_Date_User__c!= null){
         employeeReimbursement.lockDateUserName = currentEmployeeReimbursement.Lock_Date_User__c;
     }
+    employeeReimbursement.syncMileageBtn = true;
+    employeeReimbursement.concurBtn = true;
     return employeeReimbursement;
 }
     
@@ -1549,14 +1553,14 @@ public Static String getAllReimbursements(String year,String did,String accid) {
                                            AND Driver_Type__c != 'Driver - Part Time' AND Driver_Type__c != 'Driver - Salary'  AND Account.Bi_Weekly_Pay_Period__c = false))];
         if((monthList.size() > 0 && conList.isEmpty()) || (monthList.size() > 0 && !conList.isEmpty() && System.today().Month() == 1) || (monthList.size() > 0 && !conList.isEmpty() && Integer.valueOf(year) != System.today().year())) {
             editedquery = setQueryParameters(monthList);
-            query = 'Select id,Reimbursement_Month__c,Mileage_Lock_Date__c,Lock_Date_User__c,Contact_Email__c,Total_Monthly_Reimbursement_BiWeek__c,Contact_Id__r.Driver_Type__c,Contact_Id__r.Reimbursement_Frequency__c,Contact_Id__r.Reimbursement_Type__c,Total_Approved__c,Monthly_Fixed_Amount__c,Number_of_Pay_Period__c,Half_Fixed_Amount__c,Month__c,Total_Variable_Rate__c,Fuel_Price__c,Total_Mileage__c,Fixed_Amount__c,Variable_Rate__c,Total_Monthly_Reimbursement__c,Contact_Id__c,Approved_Date__c,Status__c,Total_Pending__c,Monthly_Variable_Amount__c,Total_Monthly_Approved_Variable__c,MPG__c,Maintenance_and_Tires__c from Employee_Reimbursement__c where Contact_Id__c=\''+did+'\' and Month__c IN '+ editedquery+'Order by Reimbursement_Month__c asc';
+            query = 'Select id,Reimbursement_Month__c,Mileage_Lock_Date__c,Reimbursement_Lock_Time__c,Lock_Date_User__c,Contact_Email__c,Total_Monthly_Reimbursement_BiWeek__c,Contact_Id__r.Driver_Type__c,Contact_Id__r.Reimbursement_Frequency__c,Contact_Id__r.Reimbursement_Type__c,Total_Approved__c,Monthly_Fixed_Amount__c,Number_of_Pay_Period__c,Half_Fixed_Amount__c,Month__c,Total_Variable_Rate__c,Fuel_Price__c,Total_Mileage__c,Fixed_Amount__c,Variable_Rate__c,Total_Monthly_Reimbursement__c,Contact_Id__c,Approved_Date__c,Status__c,Total_Pending__c,Monthly_Variable_Amount__c,Total_Monthly_Approved_Variable__c,MPG__c,Maintenance_and_Tires__c from Employee_Reimbursement__c where Contact_Id__c=\''+did+'\' and Month__c IN '+ editedquery+'Order by Reimbursement_Month__c asc';
         } 
         else if(monthList.size() > 0 && !conList.isEmpty() ) {
             monthlist.remove(monthList.size()-1);
             editedquery = setQueryParameters(monthList);
-            query = 'Select id,Reimbursement_Month__c,Mileage_Lock_Date__c,Lock_Date_User__c,Contact_Email__c,Contact_Id__r.Driver_Type__c,Total_Monthly_Reimbursement_BiWeek__c,Contact_Id__r.Reimbursement_Frequency__c,Contact_Id__r.Reimbursement_Type__c,Total_Approved__c,Monthly_Fixed_Amount__c,Number_of_Pay_Period__c,Half_Fixed_Amount__c,Month__c,Total_Variable_Rate__c,Fuel_Price__c,Total_Mileage__c,Fixed_Amount__c,Variable_Rate__c,Total_Monthly_Reimbursement__c,Contact_Id__c,Approved_Date__c,Status__c,Total_Pending__c,Monthly_Variable_Amount__c,Total_Monthly_Approved_Variable__c,MPG__c,Maintenance_and_Tires__c from Employee_Reimbursement__c where Contact_Id__c=\''+did+'\' and Month__c IN '+ editedquery+'Order by Reimbursement_Month__c asc';
+            query = 'Select id,Reimbursement_Month__c,Mileage_Lock_Date__c,Reimbursement_Lock_Time__c,Lock_Date_User__c,Contact_Email__c,Contact_Id__r.Driver_Type__c,Total_Monthly_Reimbursement_BiWeek__c,Contact_Id__r.Reimbursement_Frequency__c,Contact_Id__r.Reimbursement_Type__c,Total_Approved__c,Monthly_Fixed_Amount__c,Number_of_Pay_Period__c,Half_Fixed_Amount__c,Month__c,Total_Variable_Rate__c,Fuel_Price__c,Total_Mileage__c,Fixed_Amount__c,Variable_Rate__c,Total_Monthly_Reimbursement__c,Contact_Id__c,Approved_Date__c,Status__c,Total_Pending__c,Monthly_Variable_Amount__c,Total_Monthly_Approved_Variable__c,MPG__c,Maintenance_and_Tires__c from Employee_Reimbursement__c where Contact_Id__c=\''+did+'\' and Month__c IN '+ editedquery+'Order by Reimbursement_Month__c asc';
         } else {
-            query = 'Select id,Reimbursement_Month__c,Mileage_Lock_Date__c,Lock_Date_User__c,Month__c,Total_Monthly_Reimbursement_BiWeek__c,Contact_Id__r.Reimbursement_Frequency__c,Contact_Id__r.Reimbursement_Type__c,Contact_Id__r.Driver_Type__c,Total_Approved__c,Monthly_Fixed_Amount__c,Number_of_Pay_Period__c,Half_Fixed_Amount__c,Contact_Email__c,Total_Variable_Rate__c,Fuel_Price__c,Total_Mileage__c,Fixed_Amount__c,Variable_Rate__c,Total_Monthly_Reimbursement__c,Contact_Id__c,Approved_Date__c,Status__c,Total_Pending__c,Monthly_Variable_Amount__c,Total_Monthly_Approved_Variable__c,MPG__c,Maintenance_and_Tires__c from Employee_Reimbursement__c where Contact_Id__c=\''+did+'\''+'Order by Reimbursement_Month__c asc';
+            query = 'Select id,Reimbursement_Month__c,Mileage_Lock_Date__c,Reimbursement_Lock_Time__c,Lock_Date_User__c,Month__c,Total_Monthly_Reimbursement_BiWeek__c,Contact_Id__r.Reimbursement_Frequency__c,Contact_Id__r.Reimbursement_Type__c,Contact_Id__r.Driver_Type__c,Total_Approved__c,Monthly_Fixed_Amount__c,Number_of_Pay_Period__c,Half_Fixed_Amount__c,Contact_Email__c,Total_Variable_Rate__c,Fuel_Price__c,Total_Mileage__c,Fixed_Amount__c,Variable_Rate__c,Total_Monthly_Reimbursement__c,Contact_Id__c,Approved_Date__c,Status__c,Total_Pending__c,Monthly_Variable_Amount__c,Total_Monthly_Approved_Variable__c,MPG__c,Maintenance_and_Tires__c from Employee_Reimbursement__c where Contact_Id__c=\''+did+'\''+'Order by Reimbursement_Month__c asc';
         }              
         
         List<EmployeeReimbursements> reimbursementList =  new List<EmployeeReimbursements>();
@@ -2183,11 +2187,13 @@ public Static String getAllReimbursements(String year,String did,String accid) {
         String lastMonth = Utils.fetchMonths(1, 0)[0];
         if(accountId != null){
             List<Employee_Reimbursement__c> reimbursementList = new List<Employee_Reimbursement__c>();
-            for(Employee_Reimbursement__c objReimb : [SELECT ID,Mileage_Lock_Date__c, Status__c,Reimbursement_Lock_Time__c 
+            for(Employee_Reimbursement__c objReimb : [SELECT ID,Mileage_Lock_Date__c,Reimbursement_Lock_Time__c,Status__c,Approved_Date__c 
                                                       FROM Employee_Reimbursement__c 
                                                       WHERE Contact_Id__r.AccountId =: accountId 
                                                       AND Contact_Id__r.Deactivated_Date__c = null
                                                       AND Month__c =: lastMonth]){
+                                                          objReimb.Status__c = 'Approved';
+                                                          objReimb.Approved_Date__c = System.today();
                                                           objReimb.Mileage_Lock_Date__c = System.today();
                                                           objReimb.Reimbursement_Lock_Time__c = DateTime.now();
                                                           reimbursementList.add(objReimb);

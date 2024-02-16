@@ -11,6 +11,9 @@ import getAllMileages  from '@salesforce/apex/DriverDashboardLWCController.getAl
 import biweeklyMileage from "@salesforce/apex/DriverDashboardLWCController.biweeklyMileage";
 import TimeAttendance from "@salesforce/apex/DriverDashboardLWCController.TimeAttendance";
 import getMileagesBasedTandAtt from "@salesforce/apex/DriverDashboardLWCController.getMileagesBasedTandAtt";
+import UpdateReimbursementStatus from "@salesforce/apex/DriverDashboardLWCController.UpdateReimbursementStatus";
+import TripCallout from "@salesforce/apex/DriverDashboardLWCController.TripCallout";
+
 import {
   events, toastEvents
 } from 'c/utils';
@@ -138,7 +141,7 @@ export default class AccordionView extends LightningElement {
           singleValue.key = key;
           singleValue.value = (element[key] === "null" || element[key] === null) ? "" : (key === "variableRate" || key === "varibleAmount" || key === 'fixed1' || key === 'fixed2' ||
             key === 'fixed3' ||
-            key === 'totalFixedAmount' || key === "totalReimbursements") ? element[key].replace(/\$/g, "").replace(/\s/g, "") : element[key];
+            key === 'totalFixedAmount' || key === "totalReimbursements") ? element[key].replace(/\$/g, "").replace(/\s/g, "") : (key === 'syncMileageBtn') ? 'Mileage' : (key === 'concurBtn') ? 'Concur' : element[key];
           singleValue.icon = (!this.isTandA) ? (key === "month" || key === "startDate") ? true : false : false;
           singleValue.bold = (key === "totalReimbursements" || key === "totalReim") ? true : false;
           singleValue.twoDecimal = (key === "mileage" || key === "totalMileage") ? true : false;
@@ -174,6 +177,8 @@ export default class AccordionView extends LightningElement {
                 }
               }
             }
+            singleValue.functional = (key === "syncMileageBtn" || key === "concurBtn") ? true : false
+            singleValue.className = (key === "syncMileageBtn" || key === "concurBtn") ? 'slds-btn slds-btn-primary slds-btn-sm waves-effect bc-outline--background waves-light mleft-0 btn-outline-green sync-mileage-btn' : ''
           model.push(singleValue);
         }
         //use key and value here
@@ -198,6 +203,37 @@ export default class AccordionView extends LightningElement {
         }
       })
       return object
+  }
+
+  syncMileage(event){
+    let data = event.detail
+    if(data){
+      UpdateReimbursementStatus({
+        empReID: data?.Id
+      })
+      .then(result=>{
+        console.log("Result", result)
+        if(result){
+          TripCallout({
+            driverId: this.contactId,
+            month: data?.month,
+            year: this.defaultYear,
+            fuel: data?.fuel,
+            maintTyre: data?.maintainsAndTyres,
+            empReID: data?.Id,
+            mpg: data?.mpg,
+            status: 'U'
+          })
+          .then()
+          .catch((err)=>{
+            console.log("Error---", err.message)
+          })
+        }
+      })
+      .catch((error)=>{
+        console.log("Error---", error.message)
+      })
+    }
   }
 
   getBiweekReimbursement(viewList, yearTo) {
@@ -433,7 +469,9 @@ export default class AccordionView extends LightningElement {
           "mileage",
           "variableRate",
           "varibleAmount",
-          "totalReimbursements"
+          "totalReimbursements",
+          "syncMileageBtn",
+          "concurBtn"
         ];
         this._Rcolumn = [
           {
@@ -460,6 +498,16 @@ export default class AccordionView extends LightningElement {
             id: 5,
             name: "Total",
             colName: "totalReimbursements"
+          },
+          {
+            id: 6,
+            name: "",
+            colName: "syncMileageBtn"
+          },
+          {
+            id: 7,
+            name: "",
+            colName: "concurBtn"
           }
         ];
 

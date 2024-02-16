@@ -217,7 +217,7 @@ export default class MBurseMain extends LightningElement {
     } else if (event.detail === 'Next mLog Preview') {
       this.nextmLogPreview = true;
     } else if (event.detail === 'Next mburse meeting') {
-      this.nextBurseMeeting = true;
+      this.takeMeToDashboard();
     }
   }
 

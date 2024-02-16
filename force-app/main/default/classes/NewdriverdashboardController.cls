@@ -129,14 +129,14 @@ global class NewdriverdashboardController {
         Integer startMonth;
         integer endMonth;
         // if(conList[0].Deactivated_Date__c != null && conList[0].Deactivated_Date__c.Year() == system.today().year()){
-        //     endMonth = conList[0].Deactivated_Date__c != null ? conList[0].Deactivated_Date__c.month() : system.today().month();
+            //     endMonth = conList[0].Deactivated_Date__c != null ? conList[0].Deactivated_Date__c.month() : system.today().month();
         // }else {
-        //     endMonth = System.today().month();
+            //     endMonth = System.today().month();
         // }
         // if(conList[0].Activation_Date__c != null && conList[0].Activation_Date__c.Year() == system.today().year()){
-        //     startMonth = conList[0].Activation_Date__c != null ? conList[0].Activation_Date__c.month() : 1;
+            //     startMonth = conList[0].Activation_Date__c != null ? conList[0].Activation_Date__c.month() : 1;
         // } else {
-        //     startMonth = 1;
+            //     startMonth = 1;
         // }
         String graphMonth;
         if(conList[0].Account.Start_Graph_Month__c != null){
@@ -179,10 +179,11 @@ global class NewdriverdashboardController {
             reimWrap.month = monthNameMap.get(Integer.valueOf(monthNum[0]));
             reimWrap.averageMileage = milMap.containskey(i) ? ( sumMileage / noOfMonthPassed).setScale(2):0;
             reimWrap.averagereimbursement = milMap.containskey(i) ? ( sumReim / noOfMonthPassed).setScale(2):0;
+            reimWrap.ActivationDate =conList[0].Activation_Date__c;
             noOfMonthPassed++;
             wrapList.add(reimWrap);
         }
-        System.debug('output'+JSON.serialize(wrapList));
+    System.debug('output'+JSON.serialize(wrapList));
         return JSON.serialize(wrapList);
     }
     //fetches notification message for the account
@@ -226,6 +227,7 @@ global class NewdriverdashboardController {
         public Decimal averageMileage {get; set;}
         public Decimal reimbursement {get; set;}
         public Decimal averagereimbursement {get; set;}
+        public Date ActivationDate{get; set;}
     }
     
 }

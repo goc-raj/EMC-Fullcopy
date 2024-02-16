@@ -1123,7 +1123,7 @@ export default class UserMileageGrid extends LightningElement {
   
 
   approvalProcess() {
-    var toastMessage, message;
+    var toastMessage, message, toast;
     this.islockdate = false;
     this.modalOpen = true;
     this.headerModalText = "Processing Mileage Approvals";
@@ -1134,6 +1134,8 @@ export default class UserMileageGrid extends LightningElement {
     this.styleHeader = "slds-modal__container slds-m-top_medium";
     this.styleClosebtn = "close-notify";
     this.contentMessage = "Updating Reimbursements";
+    this.msg = "";
+    this.msg = "Mileage has been approved.";
     this.dispatchEvent(
       new CustomEvent("show", {
         detail: "spinner"
@@ -1147,16 +1149,74 @@ export default class UserMileageGrid extends LightningElement {
     })
       .then((result) => {
         if (result != null) {
-          this.dispatchEvent(
-            new CustomEvent("hide", {
-              detail: "spinner"
+          if(result === 'Success'){
+            /*this.dispatchEvent(
+              new CustomEvent("hide", {
+                detail: "spinner"
+              })
+            );*/
+            console.log("approveMileagesClone Result", result);
+            // if (this.template.querySelector("c-user-profile-modal")) {
+            //   this.template.querySelector("c-user-profile-modal").show();
+            // }
+           // this.CheckStatus(result);
+           UpdatedReimList({
+            did: this.contactId,
+            accid: this.accountId,
+            showTeamRecord: this.showTeam,
+            role: this.role
+           })
+            .then((a) => {
+              if (a != null && a !== "") {
+                this.dispatchEvent(
+                  new CustomEvent("hide", {
+                    detail: "spinner"
+                  })
+                );
+                toast = { type: "success", message: this.msg };
+                toastEvents(this, toast);
+                console.log("UpdatedReimList", a);
+                console.log("UpdatedReimList", a);
+                this.endProcess = false;
+                /* Bad Escaped */
+                let escapedData = a[1].replace(/\'/g,"\\")
+                let reimList = JSON.parse(escapedData);
+                this.resetViewList(reimList);
+              }
+              /*this.dispatchEvent(
+                new CustomEvent("hide", {
+                  detail: "spinner"
+                })
+              );
+              if (this.modalOpen) {
+                if (this.template.querySelector("c-user-profile-modal")) {
+                  this.template.querySelector("c-user-profile-modal").hide();
+                  this.modalOpen = false;
+                }
+              }*/
+              // setTimeout(()=>{
+              //     location.reload()
+              // }, 2000);
             })
-          );
-          console.log("approveMileagesClone Result", result);
-          if (this.template.querySelector("c-user-profile-modal")) {
-            this.template.querySelector("c-user-profile-modal").show();
+            .catch((error) => {
+              console.log(error.message, error.body);
+              if (error.body !== undefined) {
+                if (Array.isArray(error.body)) {
+                  message = error.body.map((e) => e.message).join(", ");
+                } else if (typeof error.body.message === "string") {
+                  message = error.body.message;
+                }
+                toast = { type: "error", message: message };
+                toastEvents(this, toast);
+              }
+            });
+          }else{
+            this.dispatchEvent(
+              new CustomEvent("hide", {
+                detail: "spinner"
+              })
+            );
           }
-          this.CheckStatus(result);
         }
       })
       .catch((error) => {

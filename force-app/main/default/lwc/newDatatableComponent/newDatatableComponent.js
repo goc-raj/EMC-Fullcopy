@@ -1919,13 +1919,21 @@ export default class NewDatatableComponent extends LightningElement {
       this.highrisk = false;
       var makeDate = new Date();
       if(this.StartDate == null){
-        let monthNumber = makeDate.getMonth()+1;
+       /* let monthNumber = makeDate.getMonth()+1;
         var year = new Date().toLocaleDateString('en', {year: '2-digit'})
         var lastDate = this.getLastDateOfMonth(monthNumber)
         let convertFromDate = monthNumber +'/01/'+ year
         let convertToDate = monthNumber +'/'+lastDate+'/'+ year
         this.StartDate = excelFormatDate(convertFromDate);
-        this.EndDate = excelFormatDate(convertToDate);
+        this.EndDate = excelFormatDate(convertToDate);*/
+        const month = this.getMonthNumber(this.remmonth);
+        const date = new Date();
+        if(month !== -1){
+         let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), month)
+         let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), month)
+         this.StartDate = excelFormatDate(convertFromDate);
+         this.EndDate = excelFormatDate(convertToDate);
+        }
       }
       
       makeDate.setMonth(makeDate.getMonth()+1);
@@ -1949,13 +1957,21 @@ export default class NewDatatableComponent extends LightningElement {
       this.highrisk = true;
       var makeDate = new Date();
       if(this.StartDate == null){
-        let monthNumber = makeDate.getMonth();
+        /*let monthNumber = makeDate.getMonth();
         var year = new Date().toLocaleDateString('en', {year: '2-digit'})
         var lastDate = this.getLastDateOfMonth(monthNumber)
         let convertFromDate = monthNumber +'/01/'+ year
         let convertToDate = monthNumber +'/'+lastDate+'/'+ year
         this.StartDate = excelFormatDate(convertFromDate);
-        this.EndDate = excelFormatDate(convertToDate);
+        this.EndDate = excelFormatDate(convertToDate);*/
+        const month = this.getMonthNumber(this.remmonth);
+        const date = new Date();
+       if(month !== -1){
+         let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), month)
+         let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), month)
+         this.StartDate = excelFormatDate(convertFromDate);
+         this.EndDate = excelFormatDate(convertToDate);
+       }
       }
       
       makeDate.setMonth(makeDate.getMonth()-1);
@@ -2057,8 +2073,8 @@ export default class NewDatatableComponent extends LightningElement {
        const month = this.getMonthNumber(this.remmonth);
        const date = new Date();
        if(month !== -1){
-         let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), date.getMonth())
-         let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), date.getMonth())
+         let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), month)
+         let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), month)
          this.StartDate = excelFormatDate(convertFromDate);
          this.EndDate = excelFormatDate(convertToDate);
        }
@@ -2126,8 +2142,8 @@ export default class NewDatatableComponent extends LightningElement {
          const month = this.getMonthNumber(this.remmonth);
          const date = new Date();
          if(month !== -1){
-           let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), date.getMonth())
-           let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), date.getMonth())
+           let convertFromDate = (month === 11 && date.getMonth() === 0) ? this.getFirstDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getFirstDayOfMonth(date.getFullYear(), month)
+           let convertToDate = (month === 11 && date.getMonth() === 0) ? this.getLastDayOfMonth(date.getFullYear(), date.getMonth() -1) : this.getLastDayOfMonth(date.getFullYear(), month)
            this.StartDate = excelFormatDate(convertFromDate);
            this.EndDate = excelFormatDate(convertToDate);
          }

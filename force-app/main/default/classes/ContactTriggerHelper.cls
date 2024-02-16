@@ -921,32 +921,21 @@ New Contact is created at that time we have to update plan parameter section's f
      * Author :- PARAS DHANANI
      * Created Date :-18/09/2023 
      */ 
-    public static void updtcanadianmil(List<Contact> conList, Map<Id, contact> conOldMap){
-        system.debug('conList==' + conList);
-        system.debug('conOldMap==' + conOldMap);
-        set<Id> conIdList = new set<Id>();
-        for(contact con: conList){
-            if(con.Role__c != 'Admin' || con.Role__c != 'Manager'){
-                if(conOldMap.get(con.ID).Map_Country__c != 'CANADA' && con.Map_Country__c ==  'CANADA'){
-                    conIdList.add(con.Id);
-                }
-            }
-            
+   public static void updtcanadianmil(Set<Id> conIdList){
             List<Employee_Mileage__c> updateMilList = new List<Employee_Mileage__c>();
             for(Employee_Mileage__c mil : [SELECT id,EMP_Mileage__c,IsMileageConverted__c FROM Employee_Mileage__c WHERE EmployeeReimbursement__r.Contact_Id__c =: conIdList AND Trip_Status__c = 'Not Approved Yet' AND Activity__c = 'Business' AND EmployeeReimbursement__r.Status__c = 'Pending' ]){
-                system.debug('conOldMap==' + conOldMap);
+                
                 if(!mil.IsMileageConverted__c){
                     mil.EMP_Mileage__c = (mil.EMP_Mileage__c != null) ? mil.EMP_Mileage__c * 1.609129171 :mil.EMP_Mileage__c;
                     mil.IsMileageConverted__c=true;
                     updateMilList.add(mil);
                 }
             }
-            system.debug('conOldMap==' + conOldMap);
             if(updateMilList.size() > 0){
                 update updateMilList;
             }
         }
-    }
+    
     /*EMC-2227
      * Description :-this method update username and email of the user when the external email is changed on the contact
      *Email field on the contact is changed to trigger this method

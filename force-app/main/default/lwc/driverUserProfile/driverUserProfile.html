@@ -440,14 +440,14 @@
             </div>
         </div>
 
-        <div class="last-section" style="display: flex">
+        <div class="last-section" style="display: flex;">
             <!-- height : 352px -->
-            <div class="slds-m-right_medium mileage-view">
+            <div class="slds-m-right_medium slds-m-top_small mileage-view">
                 <div class="slds-col slds-p-left_large slds-p-top_small slds-p-bottom_medium">
                     <h2 style="font-family: 'Proxima Nova Bold' !important;
                     font-size: 20px;color: #7ABB4A;">Mileage</h2>
                 </div>
-                <div class="grid-block slds-p-left_large slds-p-top_xx-small slds-p-bottom_medium">
+                <div class="grid-block slds-p-left_large slds-p-top_xx-small slds-p-bottom_x-small">
                     <div class="">
                         <div class="bold-sub-text">YTD Mileage:</div>
                     </div>
@@ -479,7 +479,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="slds-p-top_xx-small slds-p-bottom_small slds-p-horizontal_medium">
+                <div class="slds-p-top_xx-small slds-p-bottom_medium slds-p-horizontal_medium">
                     <c-canvas-chart chart-data={chartList.Mileagechart} default-month={chartList.monthName}
                         chart-component="Mileage">
                     </c-canvas-chart>
@@ -489,12 +489,12 @@
                 </div>
             </div>
 
-            <div class="slds-m-right_medium reimbursement-view">
+            <div class="slds-m-right_medium slds-m-top_small reimbursement-view">
                 <div class="slds-col slds-p-left_large slds-p-top_small slds-p-bottom_medium">
                     <h2 style="font-family: 'Proxima Nova Bold' !important;
                     font-size: 20px;color: #7ABB4A;">Reimbursement</h2>
                 </div>
-                <div class="slds-grid slds-wrap slds-p-left_large slds-p-top_xx-small slds-p-bottom_medium">
+                <div class="slds-grid slds-wrap slds-p-left_large slds-p-top_xx-small slds-p-bottom_x-small">
                     <div class="slds-p-right_medium">
                         <div class="bold-sub-text">YTD Reimbursement:
                         </div>
@@ -505,7 +505,7 @@
                                 maximum-fraction-digits="2"></lightning-formatted-number></div>
                     </div>
                 </div>
-                <div class="slds-p-top_xx-small slds-p-bottom_small slds-p-horizontal_medium">
+                <div class="slds-p-top_xx-small slds-p-bottom_medium slds-p-horizontal_medium">
                     <c-canvas-chart chart-data={chartList.Reimbursementchart} default-month={chartList.monthName}
                         chart-component="Reimbursement">
                     </c-canvas-chart>
@@ -515,7 +515,7 @@
                 </div>
             </div>
 
-            <div class="parameters-view" style="
+            <div class="parameters-view slds-m-top_small" style="
                         border: 1px solid #D7D7D7;
                         flex: 30%;
                         height: auto;

@@ -1,6 +1,15 @@
 /* eslint-disable @lwc/lwc/no-document-query */
 /* eslint-disable no-else-return */
 /* eslint-disable vars-on-top */
+/*
+ * @Author: GetonCRM Solutions LLP - Megha Sachania 
+ * @Date: 2024-02-13 17:22:23 
+ * @Modification logs
+ * ========================================================================================================================
+ * @Last Modified by: Megha Sachania
+ * @Last Modified time: 2024-02-15 19:37:03
+ * @Description: This component shows combination of bar and line graph from Highcharts
+ */
 import {
     LightningElement,
     api
@@ -9,262 +18,303 @@ import {
     loadScript,
     loadStyle
 } from 'lightning/platformResourceLoader';
-import Chart from '@salesforce/resourceUrl/chartJs';
+import highchartsResource from '@salesforce/resourceUrl/HighChart';
+// import Chart from '@salesforce/resourceUrl/chartJs';
 export default class CanvasChart extends LightningElement {
     error;
     chart;
+    chartV;
     chartJsInitialized = false;
     @api chartComponent;
     @api chartData;
     @api defaultMonth;
     config;
-    /* fires after every render of the component. */
 
+    /**
+     * @author: Megha Sachania
+     * @method: reflowChart
+     * @description: This method is used to call from parent component when toggle of sidebar so that the chart becomes responsive
+     */
+    @api reflowChart() {
+        var _self = this
+        setTimeout(function() {
+            _self.chartV.setSize(
+                _self.refs.chartRef.offsetWidth - 20,
+                _self.refs.chartRef.offsetHeight - 20,
+                true
+            );
+            _self.chartV.reflow();
+        }, 200);
+    }
+
+    /**
+     * @author: Megha Sachania
+     * @method: runHighcharts
+     * @description: This method is used to load chart once Highchart Scripts has been loaded
+     */
+    runHighcharts(){
+        var  options, chartView, containerChart, _self = this, monthHighlighted, monthTo;
+        containerChart = this.refs.chartRef
+        if (this.chartData !== undefined) {
+            let listOfChart = this.chartData;
+            let currentMonth = new Date().getMonth();
+            let monthList = this.defaultMonth;
+            monthHighlighted = this.getMonthName(currentMonth)
+            let backgroundColorA = [
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)',
+                'rgba(217,217,217,1)'
+            ]
+
+            if(containerChart){
+                options = {
+                    chart: {
+                        zoomType: 'xy',
+                        events: {
+                            load: function() {
+                                let chart = this, x, fx;
+                                chart.series[0].points.forEach(p => {
+                                if (p.category === monthHighlighted.substring(0, 3)) {
+                                    x = p.x;
+                                    fx = (x === 11) ? 0 : x + 1
+                                    if(p.graphic){
+                                        p.graphic.element.style.fill = 'rgba(235, 188, 54, 0.8)'
+                                    }
+                                }else{
+                                    console.log(p.x, p.y)
+                                   // if(p.x > x){
+                                       // p.graphic.element.style.fill = 'rgba(217,217,217,0.5)'
+                                        if(p.x !== fx){
+                                            if(p.y === null){
+                                                chart.xAxis[0].ticks[p.x].label.element.style.fill = 'rgba(217,217,217,0.5)'
+                                            }
+                                        }
+                                    //}
+                                  }
+                                })
+
+                               if(fx){
+                                    chart.xAxis[0].ticks[fx].label.element.style.fill = 'rgb(153, 153, 153)'
+                                }
+
+                            }
+                        }
+                    },
+                    title: {
+                        text: '',
+                    },
+                    exporting: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    xAxis: [{
+                        categories: listOfChart.chartLabel,
+                        labels:{
+                            style:{
+                                color: "#000000",
+                                fontFamily: 'Proxima Nova Bold'
+                            },
+                            
+                        },
+                        // crosshair: true,
+                        lineWidth: 0, 
+                        gridLineWidth: 0
+                    }],
+                    yAxis: [{
+                        min: 0,
+                        title: {
+                            text: null
+                        },labels:{
+                            style:{
+                                color: "#000000",
+                                fontFamily: 'Proxima Nova'
+                            },
+                            formatter: function () {
+                                const label = this.axis.defaultLabelFormatter.call(this);
+                                
+                                // Use thousands separator for four-digit numbers too
+                                 // Convert the number to a string and splite the string every 3 charaters from the end
+                                 this.value = this.value.toString();
+                                 this.value = this.value.split(/(?=(?:...)*$)/);
+                                 this.value = this.value.join(',');
+                                 if (_self.chartComponent === 'Reimbursement') {
+                                     return '$' + this.value;
+                                 }else{
+                                     return this.value;
+                                 }
+                               /* if (/^[0-9]{4}$/.test(label)) {
+                                    return Highcharts.numberFormat(this.value, 0);
+                                }
+                                return label;*/
+                            }
+                        },
+                        gridLineWidth: 0
+                   }],
+                    tooltip: {
+                        shared: true
+                    },
+                    responsive:{
+                        rules:[{
+                            condition:{
+                                maxWidth: 500
+                            }
+                        }]
+                    },
+                    legend: {
+                        reversed: true,
+                        itemMarginTop: 5,
+                        itemMarginBottom: 5,
+                        itemStyle: {
+                            fontFamily: "Proxima Nova Bold",
+                            fontWeight: "normal"
+                        },
+                        backgroundColor:
+                            Highcharts.defaultOptions.legend.backgroundColor || // theme
+                            'rgba(255,255,255,0.25)'
+                    },
+                    plotOptions: {
+                        series: {
+                            events: {
+                                legendItemClick: function(e) {
+                                    // console.log("This--", this, e)
+                                    // var visibility = this.visible ? 'visible' : 'hidden';
+                                    // console.log("This--", visibility)
+                                    return false; 
+                                }
+                            },
+                            cursor: 'pointer',
+                            pointWidth: 20,
+                           // groupPadding: 0.25,
+                            maxPointWidth: 50,
+                            point: {
+                                events: {
+                                  mouseOver() {
+                                    const point = this, x = currentMonth === 11 ? 0 : currentMonth + 1;
+                                    console.log("Point", point.x, point.y)
+                                    if (point.index > x) // specific condition for point
+                                      return false;
+                                  }
+                                }
+                            },
+                            marker: {
+                                enabled: false,
+                                states: {
+                                    hover: {
+                                        enabled: false
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    tooltip: {
+                        useHTML: true,
+                        padding: 10,
+                        formatter: function () {
+                                const monthData = ["January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"
+                                ];                               
+                                const title = _self.getFullMonth(this.x, monthData)
+                                const stringA = (_self.chartComponent === 'Reimbursement') ? ': $' : ': '
+                                return this.points.reduce(function (s, point) {
+                                    return s + '<br/><b>' + point.series.name  + '</b>' + stringA +
+                                        (point.y).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") ;
+                                }, '<b style="color: #7abb4a; font-size: 12px">' + title + '</b><div style="border-bottom: 1px solid; padding: 2px 0 2px 0"></div>');
+                        },
+                        shared: true,
+                        style: {
+                            color: "#1d1d1d",
+                            fontFamily: "Proxima Nova",
+                        },
+                        borderColor: "#7abb4a",
+                    },
+            
+                    series: [{
+                        name: listOfChart.labelA,
+                        type: 'column',
+                        color: 'rgba(217,217,217,1)',
+                        yAxis: 0,
+                        data: [...listOfChart.dataA],
+                    }, {
+                        name: listOfChart.labelB,
+                        type: 'line',
+                        color:  'rgba(122, 187, 74, 1)',
+                        yAxis:0,
+                        data: [...listOfChart.dataB]
+                    }]
+                }
+                chartView = Highcharts.chart(containerChart, options);
+                this.chartV = chartView;
+            }
+        }
+    }
+
+    /**
+     * @author: Megha Sachania
+     * @method: renderedCallback
+     * @description: called after a component has finished the rendering phase.
+     */
     renderedCallback() {
         var _self = this;
         if (this.chartJsInitialized) {
             return;
         }
         /* Load Static Resource For Script*/
-        Promise.all([
-                loadScript(this, Chart + '/Chart.min.js'),
-                loadStyle(this, Chart + '/Chart.min.css')
-            ]).then(() => {
-                this.chartJsInitialized = true;
-                // disable Chart.js CSS injection
-                if (_self.chartData !== undefined) {
-                    let monthData = ["January", "February", "March", "April", "May", "June",
-                        "July", "August", "September", "October", "November", "December"
-                    ];
-                    let monthList = this.defaultMonth;
-                    let listOfChart = this.chartData;
-                    let currentMonth = new Date().getMonth();
-                    let monthHighlighted = this.getMonthName(currentMonth)
-                    let backgroundColorA = [
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)'
-                    ]
+        loadScript(this, highchartsResource + "/highcharts.js")
+        .then(() => {
+               console.log("SUCCESS: highcharts.js");
 
-                    let borderColorA =  [
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)',
-                        'rgba(217,217,217,1)'
-                    ]
+                loadScript(this, highchartsResource + "/export-data.js")
 
-                    monthList.forEach((ymonth, index) => {
-                        var m = ymonth;
-                        if (m === monthHighlighted.substring(0, 3)) {
-                            backgroundColorA[index] = 'rgba(235, 188, 54, 0.8)'
-                            borderColorA[index] = 'rgba(235, 188, 54, 1)'
+                    .then(() => {
+                        try {
+                        console.log("SUCCESS: export-data.js");
+                        this.runHighcharts();
+                        }catch(e){
+                            console.log("Excep", e.message)
                         }
+
                     })
-                
-                    this.config = {
-                        type: 'bar',
-                        data: {
-                            labels: listOfChart.chartLabel,
-                            datasets: [{
-                                label: listOfChart.labelA,
-                                data: [...listOfChart.dataA],
-                                maxBarThickness: 50,
-                                order: 2,
-                                backgroundColor: backgroundColorA,
-                                borderColor: borderColorA,
-                                borderWidth: 1
-                            }, {
-                                label: listOfChart.labelB,
-                                data: [...listOfChart.dataB],
-                                backgroundColor: [
-                                    'rgb(255,255,255, 0)'
-                                ],
-                                borderColor: [
-                                    'rgba(122, 187, 74, 1)'
-                                ],
-                                type: 'line',
-                                pointStyle: 'line',
-                                order: 1,
-                                borderCapStyle: 'round',
-                                options: {
-                                    legend: {
-                                        labels: {
-                                            usePointStyle: true
-                                        }
-                                    }
-                                }
-                            }]
-                        },
-                        options: {
-                            legend: {
-                                labels: {
-                                        usePointStyle: true,
-                                        padding: 15,
-                                        fontSize: 14,
-                                        fontColor: '#1D1D1D',
-                                        fontFamily: 'Proxima Nova',
-                                        fontWeight: '800'
-                                },
-                                position: 'right',
-                                align: 'end'
-                            },
-                            // legendCallback: function(chart){
-                            //     var text = [];
-                            //     text.push('<div class="_legend' + chart.id + '">');
-                            //    for (var i = 0; i < chart.data.datasets.length; i++) {
-                            //       console.log(chart.data.labels , chart.data.labels.length)
-                            //      text.push(`<div><div class="legendValue"><span class='symbol-${chart.data.datasets[i].label}' style="background-color:${chart.data.datasets[i].backgroundColor[0]}">&nbsp;&nbsp;&nbsp;&nbsp;</span>`);
-                                  
-                            //       if (chart.data.datasets[i].label) {
-                            //        text.push('<span class="label">' + chart.data.datasets[i].label + '</span>');
-                            //      }
-                          
-                            //      text.push('</div></div><div class="clear"></div>');
-                            //    }
-                          
-                            //    text.push('</div>');
-                          
-                            //    return text.join('');
-                            // },
-                            tooltips: {
-                                backgroundColor: 'rgba(0, 128, 0, 0.7)',
-                                bodyFontFamily: 'Proxima Nova',
-                                titleFontFamily: 'Proxima Nova',
-                                mode: 'label',
-                                titleFontSize: 16,
-                                cornerRadius: 0,
-                                titleFontColor: '#FFF',
-                                bodyFontColor: '#FFF',
-                                displayColors: false,
-                                borderColor: 'rgba(0, 150, 0)',
-                                xPadding: 8,
-                                yPadding: 8,
-                                usePointStyle: true,
-                                callbacks: {
-                                    labelColor: function(tooltipItem, chart) {
-                                        var dataset = chart.config.data.datasets[tooltipItem.datasetIndex]
-                                        return {
-                                            borderColor: dataset.borderColor,
-                                            backgroundColor: dataset.backgroundColor
-                                        };
-                                    },
-                                
-                                    title: function (tooltipItem, data) {
-                                        var tooltipTitle;
-                                        var titleInitial = data.labels[tooltipItem[0].index];
-                                        var titleIndex = tooltipItem[0].index;
-                                        monthData.forEach((element) => {
-                                            monthList.forEach((ymonth, index) => {
-                                                var m = ymonth;
-                                                var charString = m.charAt(0);
-                                                if (charString === titleInitial) {
-                                                    if (titleIndex === index) {
-                                                        if (m === element.substring(0, 3)) {
-                                                            tooltipTitle = element;
-                                                        }
-                                                    }
-                                                }
-                                            })
-                                        })
-                                        return tooltipTitle;
-                                    },
-                                    label: function (tooltipItem, data) {
-                                        console.log("label", data.datasets[tooltipItem.datasetIndex].label, tooltipItem)
-                                        //tooltipItem.yLabel = tooltipItem.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                                        if (_self.chartComponent === 'Reimbursement') {
-                                            return data.datasets[tooltipItem.datasetIndex].label + ': $' + tooltipItem.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                                        } else {
-                                            return data.datasets[tooltipItem.datasetIndex].label + ': ' + tooltipItem.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                                        }
 
-                                    }
-                                }
-                            },
-                            maintainAspectRatio: false,
-                            responsive: true,
-                            scales: {
-                                xAxes: [{
-                                    gridLines: {
-                                        display: false
-                                    },
-                                    ticks: {
-                                        autoSkip: false,
-                                        maxRotation: 0,
-                                        minRotation: 0,
-                                        fontSize: 13,
-                                        fontFamily: 'Proxima Nova',
-                                        fontColor: '#1D1D1D'
-                                    }
-                                }],
-                                yAxes: [{
-                                    gridLines: {
-                                        display: false
-                                    },
-                                    ticks: {
-                                        beginAtZero: true,
-                                        lineHeight: '1.6',
-                                        fontSize: 13,
-                                        fontFamily: 'Proxima Nova',
-                                        fontColor: '#1D1D1D',
-                                        userCallback: function(value) {
-                                            // Convert the number to a string and splite the string every 3 charaters from the end
-                                            value = value.toString();
-                                            value = value.split(/(?=(?:...)*$)/);
-                                            value = value.join(',');
-                                            if (_self.chartComponent === 'Reimbursement') {
-                                                return '$' + value;
-                                            }else{
-                                                return value;
-                                            }
-                                        }
-                                    }
-                                }]
-                            }
-                        }
-                    }
-                
-               // window.Chart.platform.disableCSSInjection = true;
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    ctx.canvas.width = 'auto';
-                    ctx.canvas.height = 200;
-                    this.refs.chartRef.appendChild(canvas);
-                    this.chart = new window.Chart(ctx, this.config);
-                    console.log("Chart js", this.chart)
-                    // const legend = document.createElement('div');
-                    // legend.className = 'legend_wrapper';
-                    //ctx.canvas.width = 'content-box;'; /*246*/
-                   // ctx.canvas.height = 200;
-                    // this.refs.chartRef.appendChild(canvas);
-                    // canvas.prepend(legend);
-                  
-                    // window.document.querySelector('.legend_wrapper').innerHTML = this.chart.generateLegend();
-                    //console.log("Chart js ", this.chart, window.document.querySelector('.legend_wrapper'))
-                   // legend.innerHTML = this.chart.generateLegend();
-                }
-            })
-            .catch((error) => {
-                this.error = error;
-            });
+                    .catch(error => console.log("ERROR: export-data.js", error.message));
+
+        })
+
+        .catch(error => console.log("ERROR: highcharts.js", error.message))
     }
 
+     /**
+     * @author: Megha Sachania
+     * @method: getFullMonth
+     * @description: Used to get full month name based on first 3 character.
+     * @returns: For example if params = 'Feb' then returns 'February'
+     */
+    getFullMonth(params, list){
+        let month = ''
+        list.forEach((element) => {
+            if (params === element.substring(0, 3)) {
+                month = element
+            }
+        })
+        return month
+    }
+
+     /**
+     * @author: Megha Sachania
+     * @method: getMonthName
+     * @description: Used to get full month name based on month index.
+     * @returns: For example if monthIndex = '0' then returns 'January'
+     */
     getMonthName(monthIndex) {
         let daymonth = new Array();
         daymonth[0] = "January";
@@ -280,29 +330,6 @@ export default class CanvasChart extends LightningElement {
         daymonth[10] = "November";
         daymonth[11] = "December";
         return daymonth[monthIndex];
-    }
-
-    updateDataset(e, datasetIndex){
-        var defaultLegendClickHandler = window.Chart.defaults.global.legend.onClick;
-        var index = datasetIndex;
-        console.log("Chart js method ", e, datasetIndex, index)
-        if (index > 1) {
-            defaultLegendClickHandler(e, datasetIndex);
-        }else{
-            var ci = this.chart;
-            var meta = ci.getDatasetMeta(0);    
-            var result= (meta.data[datasetIndex].hidden === true) ? false : true;
-            if(result === true)
-            {
-                meta.data[datasetIndex].hidden = true;
-                e.target.parentNode.querySelector(e.path[0].id).style.textDecoration = "line-through";
-            }else{
-                e.target.parentNode.querySelector(e.path[0].id).style.textDecoration = "";
-                meta.data[datasetIndex].hidden = false;
-            }
-            
-            ci.update();   
-        }
     }
 
 }

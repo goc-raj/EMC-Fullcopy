@@ -924,8 +924,8 @@ public with sharing class ReportDetailsController
             }
             data = getAllReportSoql1(obj_current_report.Report_Soql__c,obj_current_report.Report_Type__c,'',paydateSplitted[0],paydateSplitted[1],contactId,accountId,reportId,'Driver','',obj_current_report.Limit__c); 
         } else {
-            //String lastMonth = Utils.fetchMonths(1, 0)[0]; 
-            String lastMonth = Utils.fetchMonths(1, -1)[0];          
+            String lastMonth = Utils.fetchMonths(1, 0)[0]; 
+            //String lastMonth = Utils.fetchMonths(1, -1)[0];          
             data = getAllReportSoql1(obj_current_report.Report_Soql__c,obj_current_report.Report_Type__c,'',String.valueOf((System.today().addMonths(-1).toStartOfMonth()).format()), String.valueOf(system.today().addMonths(0).toStartofMonth().addDays(-1).format()),contactId,accountId,reportId,'Driver',lastMonth,obj_current_report.Limit__c); 
         }
         return data;        
@@ -959,8 +959,8 @@ public with sharing class ReportDetailsController
             }
             data = getAllReportSoql1(obj_current_report.Report_Soql__c,obj_current_report.Report_Type__c,'',paydateSplitted[0],paydateSplitted[1],contactId,accountId,reportId,'Driver','',obj_current_report.Limit__c); 
         } else {
-            //String lastMonth = Utils.fetchMonths(1, 0)[0];
-            String lastMonth = Utils.fetchMonths(1, -1)[0];
+            String lastMonth = Utils.fetchMonths(1, 0)[0];
+            //String lastMonth = Utils.fetchMonths(1, -1)[0];
             data = getAllReportSoql1(obj_current_report.Report_Soql__c,obj_current_report.Report_Type__c,'',String.valueOf((System.today().addMonths(-1).toStartOfMonth()).format()),String.valueOf((System.today().toStartOfMonth()).format()),contactId,accountId,reportId,'Manager',lastMonth,obj_current_report.Limit__c); 
         }
         return data;         
@@ -1253,7 +1253,7 @@ public with sharing class ReportDetailsController
         Account acc = [Select id, name, CreatedDate from Account where id =: accountId ];
         Integer monthVal = acc.CreatedDate.month();
         Integer yearVal = acc.CreatedDate.year();
-       	Integer currentMonth = System.today().month();
+        Integer currentMonth = System.today().month();
         
         List<Integer> monthLst = new List<Integer>();
         List<String> monthStringLst = new List<String>();

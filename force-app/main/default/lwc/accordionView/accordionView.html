@@ -39,7 +39,7 @@
                                         sort-th="sort-container p-top-v1" show-footer="true" contact-info={name}
                                         row-download={isRowDn} scrollable={isScrollable} is-paginate={paginated}
                                         model-data={accordionList} columns={accordionListColumn}
-                                        options={accordionKeyFields} onnavigate={getTrips} norecord-message={noMessage} onopen={downloadTrips}
+                                        options={accordionKeyFields} onnavigate={getTrips} norecord-message={noMessage} onrowsync={syncMileage} onopen={downloadTrips}
                                         is-biweek={isPayperiod} is-sortable={sortable}></c-user-preview-table>
                                 </div>
                             </template>
@@ -51,7 +51,7 @@
                                         sort-th="sort-container p-top-v1" contact-info={name} row-download={isRowDn}
                                         scrollable={isScrollable} is-paginate={paginated} norecord-message={noMessage} model-data={accordionList}
                                         columns={accordionListColumn} options={accordionKeyFields} onnavigate={getTrips}
-                                        onopen={downloadTrips} is-biweek={isPayperiod}
+                                        onopen={downloadTrips} onrowsync={syncMileage} is-biweek={isPayperiod}
                                         is-sortable={sortable}></c-user-preview-table>
                                 </div>
                             </template>

@@ -95,6 +95,8 @@ public with sharing class EmployeeReimbursements
     //@description If Lock date should be available then Lock date user should be display
     public date lockDate {get;set;}
     public String lockDateUserName {get; set;}
+    public Boolean syncMileageBtn {get;set;}
+    public Boolean concurBtn {get;set;}
     /**
     @author Natavar Ghodasara
     @date 26th Feb 2019
